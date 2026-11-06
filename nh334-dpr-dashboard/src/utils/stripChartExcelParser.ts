@@ -218,6 +218,8 @@ export async function fetchOrLoadStripChartDataset(): Promise<StripChartDataset>
 
   try {
     const urlsToTry = [
+      '/data/final_sheet.xlsx',
+      '/data/Final_sheet.xlsx',
       '/data/MH Project Strip Chart KM wise - Format.xlsx',
       '/data/MH Project Strip chart KM wise  - Format.xlsx',
     ];

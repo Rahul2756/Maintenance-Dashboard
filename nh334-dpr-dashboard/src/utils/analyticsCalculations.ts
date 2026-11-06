@@ -1,4 +1,5 @@
 import { ActualDPRRow, ProjectBaseline, ActivityType, HighwaySide } from '../types/dpr';
+import { calculateUniqueLinearLength } from './excelParser';
 
 export type MetricMode = 'quantity' | 'linear';
 
@@ -50,35 +51,35 @@ const BASELINE_TARGETS = {
     totalQty: 681284.0,
     unit: 'Sqm',
     totalLen: 91176,
-    lhsQty: 334999.5,
-    rhsQty: 346284.5,
+    lhsQty: 253249.5,
+    rhsQty: 262048.5,
     lhsLen: 43758,
     rhsLen: 47418
   },
   Tackcoat: {
-    totalQty: 1848271.0,
+    totalQty: 1848270.0,
     unit: 'Sqm',
     totalLen: 103286,
-    lhsQty: 871827.0,
-    rhsQty: 976444.0,
+    lhsQty: 715181.75,
+    rhsQty: 779403.25,
     lhsLen: 49358,
     rhsLen: 53928
   },
   DBM: {
-    totalQty: 37026.0,
+    totalQty: 37026.246,
     unit: 'Cum',
     totalLen: 91176,
-    lhsQty: 18388.0,
-    rhsQty: 18638.0,
+    lhsQty: 14108.658,
+    rhsQty: 14297.588,
     lhsLen: 43758,
     rhsLen: 47418
   },
   BC: {
-    totalQty: 39171.48, // In Cum (from MCW -BC (BHS) Qty. (Cum))
+    totalQty: 46679.48, // In Cum from Work Program
     unit: 'Cum',
     totalLen: 103286,
-    lhsQty: 18477.29, // Section 1 (9327.7) + Section 2 (9149.6)
-    rhsQty: 20694.19, // Section 1 (9712.0) + Section 2 (10982.2)
+    lhsQty: 18477.29,
+    rhsQty: 20694.19,
     lhsLen: 49358,
     rhsLen: 53928
   }
@@ -140,6 +141,11 @@ export function computeActivityProgressMetrics(
         rhsTargetQuantity = baseline.rhs.dbmTargetCum || base.rhsQty;
         lhsTargetLengthM = baseline.lhs.dbmLengthM || base.lhsLen;
         rhsTargetLengthM = baseline.rhs.dbmLengthM || base.rhsLen;
+      } else if (activity === 'BC') {
+        lhsTargetQuantity = baseline.lhs.bcTargetCum || base.lhsQty;
+        rhsTargetQuantity = baseline.rhs.bcTargetCum || base.rhsQty;
+        lhsTargetLengthM = baseline.lhs.bcLengthM || base.lhsLen;
+        rhsTargetLengthM = baseline.rhs.bcLengthM || base.rhsLen;
       }
     }
 
@@ -156,11 +162,8 @@ export function computeActivityProgressMetrics(
     const activityRows = rows.filter(r => r.activity === activity);
 
     let achievedQuantity = 0;
-    let achievedLengthM = 0;
     let lhsAchievedQuantity = 0;
     let rhsAchievedQuantity = 0;
-    let lhsAchievedLengthM = 0;
-    let rhsAchievedLengthM = 0;
 
     activityRows.forEach(r => {
       let q = r.achievedToday || 0;
@@ -179,21 +182,21 @@ export function computeActivityProgressMetrics(
         }
       }
 
-      const len = r.lengthM || 0;
-
       // Overall achieved (filtered according to sideFilter in rows)
       achievedQuantity += q;
-      achievedLengthM += len;
 
       // Side breakdown
       if (r.side === 'LHS') {
         lhsAchievedQuantity += q;
-        lhsAchievedLengthM += len;
       } else if (r.side === 'RHS') {
         rhsAchievedQuantity += q;
-        rhsAchievedLengthM += len;
       }
     });
+
+    // Unique non-overlapping linear physical length calculation
+    const achievedLengthM = calculateUniqueLinearLength(activityRows, activity, sideFilter).meters;
+    const lhsAchievedLengthM = calculateUniqueLinearLength(activityRows, activity, 'LHS').meters;
+    const rhsAchievedLengthM = calculateUniqueLinearLength(activityRows, activity, 'RHS').meters;
 
     // Quantity calculations
     const remainingQuantity = Math.max(0, targetQuantity - achievedQuantity);

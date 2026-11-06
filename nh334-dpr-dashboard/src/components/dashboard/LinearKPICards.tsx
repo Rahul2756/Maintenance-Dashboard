@@ -12,23 +12,33 @@ import {
   Navigation,
   Compass
 } from 'lucide-react';
-import { ActualDPRRow, ProjectBaseline, ActivityType } from '../../types/dpr';
+import { ActualDPRRow, ProjectBaseline, ActivityType, BOQCardMetric } from '../../types/dpr';
 import { Card, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { MiniTripleBarChart } from '../ui/MiniTripleBarChart';
+import { calculateUniqueLinearLength } from '../../utils/excelParser';
 
 interface LinearKPICardsProps {
   actualRows: ActualDPRRow[];
   baseline: ProjectBaseline;
   selectedActivities?: ActivityType[];
   side?: 'LHS' | 'RHS' | 'Both';
+  selectedDate?: string;
+  boqMetrics?: {
+    milling: BOQCardMetric;
+    tackcoat: BOQCardMetric;
+    dbm: BOQCardMetric;
+    bc: BOQCardMetric;
+  };
 }
 
 export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
   actualRows,
   baseline,
   selectedActivities,
-  side
+  side,
+  selectedDate,
+  boqMetrics
 }) => {
   // Format numbers with comma and optional decimal places
   const fmt = (num: number, decimals: number = 0) =>
@@ -59,58 +69,135 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
     dbmPlannedLengthM = baseline.rhs.dbmLengthM;
   }
 
-  // Compute Linear distances achieved from actual DPR rows
+  // Compute Linear distances achieved using non-overlapping merged chainage intervals
   const linearMetrics = useMemo(() => {
-    let millingM = 0;
-    let tackM = 0;
-    let dbmM = 0;
+    if (boqMetrics) {
+      const millingM = boqMetrics.milling.cumulativeCompletedLengthM;
+      const millingKm = boqMetrics.milling.cumulativeCompletedLengthKm;
+      const millingDailyM = boqMetrics.milling.dailyCompletedLengthM;
+      const millingDailyKm = boqMetrics.milling.dailyCompletedLengthKm;
+      const millingPercent = boqMetrics.milling.linearProgressPercent;
+      const millingRemainingM = boqMetrics.milling.balanceLengthM;
 
-    actualRows.forEach(r => {
-      const len = r.lengthM || 0;
-      if (r.activity === 'Milling') millingM += len;
-      else if (r.activity === 'Tackcoat') tackM += len;
-      else if (r.activity === 'DBM') dbmM += len;
-    });
+      const tackM = boqMetrics.tackcoat.cumulativeCompletedLengthM;
+      const tackKm = boqMetrics.tackcoat.cumulativeCompletedLengthKm;
+      const tackDailyM = boqMetrics.tackcoat.dailyCompletedLengthM;
+      const tackDailyKm = boqMetrics.tackcoat.dailyCompletedLengthKm;
+      const tackPercent = boqMetrics.tackcoat.linearProgressPercent;
+      const tackRemainingM = boqMetrics.tackcoat.balanceLengthM;
 
-    const millingKm = millingM / 1000;
-    const tackKm = tackM / 1000;
-    const dbmKm = dbmM / 1000;
+      const dbmM = boqMetrics.dbm.cumulativeCompletedLengthM;
+      const dbmKm = boqMetrics.dbm.cumulativeCompletedLengthKm;
+      const dbmDailyM = boqMetrics.dbm.dailyCompletedLengthM;
+      const dbmDailyKm = boqMetrics.dbm.dailyCompletedLengthKm;
+      const dbmPercent = boqMetrics.dbm.linearProgressPercent;
+      const dbmRemainingM = boqMetrics.dbm.balanceLengthM;
+
+      const bcM = boqMetrics.bc.cumulativeCompletedLengthM;
+      const bcKm = boqMetrics.bc.cumulativeCompletedLengthKm;
+      const bcDailyM = boqMetrics.bc.dailyCompletedLengthM;
+      const bcDailyKm = boqMetrics.bc.dailyCompletedLengthKm;
+      const bcPercent = boqMetrics.bc.linearProgressPercent;
+      const bcRemainingM = boqMetrics.bc.balanceLengthM;
+
+      const tackSync = millingM > 0 ? (tackM / millingM) * 100 : 0;
+      const dbmSync = millingM > 0 ? (dbmM / millingM) * 100 : 0;
+      const exposedGapM = Math.max(0, millingM - dbmM);
+      const exposedGapKm = exposedGapM / 1000;
+
+      return {
+        millingM,
+        millingKm,
+        millingDailyM,
+        millingDailyKm,
+        millingPercent,
+        millingRemainingM,
+        tackM,
+        tackKm,
+        tackDailyM,
+        tackDailyKm,
+        tackPercent,
+        tackRemainingM,
+        tackSync,
+        dbmM,
+        dbmKm,
+        dbmDailyM,
+        dbmDailyKm,
+        dbmPercent,
+        dbmRemainingM,
+        dbmSync,
+        bcM,
+        bcKm,
+        bcDailyM,
+        bcDailyKm,
+        bcPercent,
+        bcRemainingM,
+        exposedGapM,
+        exposedGapKm
+      };
+    }
+
+    // Fallback: merge intervals from actualRows
+    const mLen = calculateUniqueLinearLength(actualRows, 'Milling', side);
+    const tLen = calculateUniqueLinearLength(actualRows, 'Tackcoat', side);
+    const dLen = calculateUniqueLinearLength(actualRows, 'DBM', side);
+    const bLen = calculateUniqueLinearLength(actualRows, 'BC', side);
+
+    const millingM = mLen.meters;
+    const millingKm = mLen.km;
+    const tackM = tLen.meters;
+    const tackKm = tLen.km;
+    const dbmM = dLen.meters;
+    const dbmKm = dLen.km;
+    const bcM = bLen.meters;
+    const bcKm = bLen.km;
 
     const millingPercent = millingPlannedLengthM > 0 ? (millingM / millingPlannedLengthM) * 100 : 0;
     const tackPercent = tackPlannedLengthM > 0 ? (tackM / tackPlannedLengthM) * 100 : 0;
     const dbmPercent = dbmPlannedLengthM > 0 ? (dbmM / dbmPlannedLengthM) * 100 : 0;
+    const bcPercent = 103286 > 0 ? (bcM / 103286) * 100 : 0;
 
     const millingRemainingM = Math.max(0, millingPlannedLengthM - millingM);
     const tackRemainingM = Math.max(0, tackPlannedLengthM - tackM);
     const dbmRemainingM = Math.max(0, dbmPlannedLengthM - dbmM);
+    const bcRemainingM = Math.max(0, 103286 - bcM);
 
-    // Sync with milling: Tack & DBM coverage relative to Milled length
     const tackSync = millingM > 0 ? (tackM / millingM) * 100 : 0;
     const dbmSync = millingM > 0 ? (dbmM / millingM) * 100 : 0;
-
-    // Exposed milled gap (Safety Risk): Unpaved milled lane waiting for DBM
     const exposedGapM = Math.max(0, millingM - dbmM);
     const exposedGapKm = exposedGapM / 1000;
 
     return {
       millingM,
       millingKm,
+      millingDailyM: 0,
+      millingDailyKm: 0,
       millingPercent,
       millingRemainingM,
       tackM,
       tackKm,
+      tackDailyM: 0,
+      tackDailyKm: 0,
       tackPercent,
       tackRemainingM,
       tackSync,
       dbmM,
       dbmKm,
+      dbmDailyM: 0,
+      dbmDailyKm: 0,
       dbmPercent,
       dbmRemainingM,
       dbmSync,
+      bcM,
+      bcKm,
+      bcDailyM: 0,
+      bcDailyKm: 0,
+      bcPercent,
+      bcRemainingM,
       exposedGapM,
       exposedGapKm
     };
-  }, [actualRows, millingPlannedLengthM, tackPlannedLengthM, dbmPlannedLengthM]);
+  }, [boqMetrics, actualRows, millingPlannedLengthM, tackPlannedLengthM, dbmPlannedLengthM, side]);
 
   return (
     <div className="space-y-2.5 mb-4">
@@ -222,6 +309,14 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                     {fmt(millingPlannedLengthM)} m ({(millingPlannedLengthM / 1000).toFixed(2)} km)
                   </span>
                 </div>
+                {linearMetrics.millingDailyM > 0 && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-amber-300 mt-0.5 font-medium">
+                    <span className="text-slate-400">Today:</span>
+                    <span className="font-mono font-bold">
+                      +{fmt(linearMetrics.millingDailyM)} m ({linearMetrics.millingDailyKm.toFixed(2)} km)
+                    </span>
+                  </div>
+                )}
               </div>
 
               {isMillingSelected && (
@@ -350,6 +445,14 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                     {fmt(tackPlannedLengthM)} m ({(tackPlannedLengthM / 1000).toFixed(2)} km)
                   </span>
                 </div>
+                {linearMetrics.tackDailyM > 0 && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-cyan-300 mt-0.5 font-medium">
+                    <span className="text-slate-400">Today:</span>
+                    <span className="font-mono font-bold">
+                      +{fmt(linearMetrics.tackDailyM)} m ({linearMetrics.tackDailyKm.toFixed(2)} km)
+                    </span>
+                  </div>
+                )}
               </div>
 
               {isTackSelected && (
@@ -478,6 +581,14 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                     {fmt(dbmPlannedLengthM)} m ({(dbmPlannedLengthM / 1000).toFixed(2)} km)
                   </span>
                 </div>
+                {linearMetrics.dbmDailyM > 0 && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-300 mt-0.5 font-medium">
+                    <span className="text-slate-400">Today:</span>
+                    <span className="font-mono font-bold">
+                      +{fmt(linearMetrics.dbmDailyM)} m ({linearMetrics.dbmDailyKm.toFixed(2)} km)
+                    </span>
+                  </div>
+                )}
               </div>
 
               {isDbmSelected && (
@@ -598,6 +709,17 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                     {fmt(linearMetrics.dbmM)} m
                   </span>
                 </div>
+                {linearMetrics.bcM > 0 && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-teal-300 mt-0.5 font-medium">
+                    <span className="text-slate-400">BC Laid:</span>
+                    <span className="font-mono font-bold">
+                      {fmt(linearMetrics.bcM)} m ({linearMetrics.bcKm.toFixed(2)} km)
+                    </span>
+                    {linearMetrics.bcDailyM > 0 && (
+                      <span className="text-slate-400 font-mono">(+{fmt(linearMetrics.bcDailyM)} m today)</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="hidden sm:block">

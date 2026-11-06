@@ -81,18 +81,24 @@ export interface ProjectBaseline {
     dbmTargetMT: number;
     dbmTargetCum: number;
     tackcoatTargetSqm: number;
+    bcTargetCum?: number;
+    bcTargetMT?: number;
     millingLengthM: number;
     dbmLengthM: number;
     tackcoatLengthM: number;
+    bcLengthM?: number;
   };
   rhs?: {
     millingTargetSqm: number;
     dbmTargetMT: number;
     dbmTargetCum: number;
     tackcoatTargetSqm: number;
+    bcTargetCum?: number;
+    bcTargetMT?: number;
     millingLengthM: number;
     dbmLengthM: number;
     tackcoatLengthM: number;
+    bcLengthM?: number;
   };
 }
 
@@ -101,6 +107,7 @@ export type AnomalyCategory = 'excess_qty' | 'milling_excess_depth' | 'offset' |
 export interface ActualDPRRow {
   id: string;
   date: string; // Normalized DD.MM.YYYY e.g. "18.10.2026"
+  isoDate?: string; // Standard ISO YYYY-MM-DD e.g. "2026-10-18"
   rawFromChainage: number; // Raw integer (189230)
   rawToChainage: number;   // Raw integer (189600)
   fromChainage: number;    // Normalized (189.230)
@@ -161,38 +168,107 @@ export interface DashboardFilters {
   searchQuery: string;
 }
 
+export interface BOQCardMetric {
+  activity: ActivityType;
+  unit: string;
+  targetQuantity: number;
+  achievedToday: number;
+  cumulativeAchieved: number;
+  balanceQuantity: number;
+  progressPercent: number;
+  isOverachieved: boolean;
+  overachievementPercent: number;
+  dailyCompletedLengthM: number;
+  dailyCompletedLengthKm: number;
+  cumulativeCompletedLengthM: number;
+  cumulativeCompletedLengthKm: number;
+  balanceLengthM: number;
+  balanceLengthKm: number;
+  linearProgressPercent: number;
+}
+
 export interface KPIAggregates {
+  selectedDate?: string;
+
+  // Milling metrics
   millingAchieved: number;
+  millingAchievedToday?: number;
+  millingCumulative?: number;
   millingTarget: number;
+  millingBalance?: number;
   millingVariance: number;
   millingPercent: number;
+  millingUnit?: string;
   millingSparkline: number[];
+  isMillingOverachieved?: boolean;
 
+  // Tackcoat metrics
   tackcoatAchieved: number;
+  tackcoatAchievedToday?: number;
+  tackcoatCumulative?: number;
   tackcoatTarget: number;
+  tackcoatBalance?: number;
   tackcoatVariance: number;
   tackcoatPercent: number;
+  tackcoatUnit?: string;
   tackcoatSparkline: number[];
+  isTackcoatOverachieved?: boolean;
 
+  // DBM metrics
   dbmAchieved: number; // In MT
   dbmAchievedCum?: number; // In Cum
+  dbmAchievedTodayCum?: number;
+  dbmCumulativeCum?: number;
   dbmTarget: number; // In MT
   dbmTargetCum?: number; // In Cum
+  dbmBalanceCum?: number;
   dbmVariance: number;
   dbmPercent: number;
+  dbmUnit?: string;
   dbmSparkline: number[];
+  isDbmOverachieved?: boolean;
 
+  // BC metrics
   bcAchieved: number;
+  bcAchievedCum?: number;
+  bcAchievedTodayCum?: number;
+  bcCumulativeCum?: number;
   bcTarget: number;
+  bcTargetCum?: number;
+  bcBalanceCum?: number;
   bcVariance: number;
   bcPercent: number;
+  bcUnit?: string;
   bcSparkline: number[];
+  isBcOverachieved?: boolean;
+
+  // Linear length metrics (meters & km)
+  millingDailyLengthM?: number;
+  millingDailyLengthKm?: number;
+  millingCumulativeLengthM?: number;
+  millingCumulativeLengthKm?: number;
+
+  tackcoatDailyLengthM?: number;
+  tackcoatDailyLengthKm?: number;
+  tackcoatCumulativeLengthM?: number;
+  tackcoatCumulativeLengthKm?: number;
+
+  dbmDailyLengthM?: number;
+  dbmDailyLengthKm?: number;
+  dbmCumulativeLengthM?: number;
+  dbmCumulativeLengthKm?: number;
+
+  bcDailyLengthM?: number;
+  bcDailyLengthKm?: number;
+  bcCumulativeLengthM?: number;
+  bcCumulativeLengthKm?: number;
 
   overallAdherence: number;
   totalAnomaliesCount: number;
   excessQtyCount: number;
   excessDepthCount: number;
   offsetCount: number;
+  dataQualityWarnings?: string[];
 }
 
 export interface DailyProgressComparison {
@@ -204,6 +280,8 @@ export interface DailyProgressComparison {
   tackcoatAchieved: number;
   dbmPlanned: number;
   dbmAchieved: number;
+  bcPlanned?: number;
+  bcAchieved?: number;
   totalPlannedWeighted: number;
   totalAchievedWeighted: number;
   adherenceRate: number;

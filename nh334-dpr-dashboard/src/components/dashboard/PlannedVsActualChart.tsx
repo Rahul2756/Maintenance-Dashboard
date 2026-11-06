@@ -43,8 +43,8 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
     achievedValues = data.map(d => d.dbmAchieved);
     unit = 'Cum';
   } else if (metricView === 'BC') {
-    plannedValues = data.map(() => 0);
-    achievedValues = data.map(() => 0);
+    plannedValues = data.map(d => d.bcPlanned || 0);
+    achievedValues = data.map(d => d.bcAchieved || 0);
     unit = 'Cum';
   } else {
     // Combined production pace vs phased daily target (MT)

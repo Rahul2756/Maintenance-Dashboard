@@ -22,7 +22,7 @@ import {
 import { HighwaySide, ActivityType, DPRMetadata } from '../../types/dpr';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import { formatChainagePlus } from '../../utils/excelParser';
+import { formatChainagePlus, isoToDisplayDate, serialToIsoDate } from '../../utils/excelParser';
 import { useFilters, CHAINAGE_PRESETS, ModuleTab } from '../../context/FilterContext';
 
 interface HeaderFilterBarProps {
@@ -387,48 +387,26 @@ export const HeaderFilterBar: React.FC<HeaderFilterBarProps> = ({
             </div>
           </div>
 
-          {/* Date Range Selector */}
+          {/* As-Of Report Date Selector */}
           <div className="flex items-center gap-1.5 bg-[#1A1D24] px-2.5 py-1 rounded-xl border border-white/10 text-slate-300 font-mono">
             <Calendar className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <span className="text-[11px] text-slate-400 font-sans font-medium">As of:</span>
             <select
-              value={filters.dateRange.start}
-              onChange={e => setDateRange({ ...filters.dateRange, start: e.target.value })}
-              className="bg-transparent border-none text-slate-200 focus:outline-none cursor-pointer text-xs font-mono"
+              value={filters.selectedSingleDate || (availableDates[availableDates.length - 1] || '01.11.2026')}
+              onChange={e => setSelectedSingleDate(e.target.value)}
+              className="bg-transparent border-none text-cyan-300 font-bold focus:outline-none cursor-pointer text-xs font-mono"
             >
-              {availableDates.map(d => (
-                <option key={`start-${d}`} value={d} className="bg-[#1A1D24] text-slate-200">
-                  {d}
-                </option>
-              ))}
-            </select>
-            <span className="text-slate-500">to</span>
-            <select
-              value={filters.dateRange.end}
-              onChange={e => setDateRange({ ...filters.dateRange, end: e.target.value })}
-              className="bg-transparent border-none text-slate-200 focus:outline-none cursor-pointer text-xs font-mono"
-            >
-              {availableDates.map(d => (
-                <option key={`end-${d}`} value={d} className="bg-[#1A1D24] text-slate-200">
-                  {d}
-                </option>
-              ))}
+              {[...availableDates].reverse().map(d => {
+                const isLatest = d === availableDates[availableDates.length - 1];
+                const display = isoToDisplayDate(serialToIsoDate(d));
+                return (
+                  <option key={`hdr-date-${d}`} value={d} className="bg-[#1A1D24] text-slate-200">
+                    {display} ({d}){isLatest ? ' ★ LATEST' : ''}
+                  </option>
+                );
+              })}
             </select>
           </div>
-
-          {/* Single Focused Date Pill with Clear */}
-          {filters.selectedSingleDate && (
-            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-mono font-bold animate-pulse">
-              <Clock className="w-3 h-3 text-amber-400" />
-              <span>Day: {filters.selectedSingleDate}</span>
-              <button
-                onClick={() => setSelectedSingleDate(null)}
-                title="Clear single date focus and show full date range"
-                className="ml-1 text-amber-400 hover:text-white p-0.5 rounded cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Anomaly Toggle & Reset Action */}
