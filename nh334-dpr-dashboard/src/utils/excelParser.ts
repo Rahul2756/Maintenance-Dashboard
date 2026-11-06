@@ -13,7 +13,8 @@ import type {
   ScheduleMilestones,
   SectionQuantityScope,
   ConsolidatedQuantityScope,
-  CumulativeAchievedQuantities
+  CumulativeAchievedQuantities,
+  BOQCardMetric
 } from '../types/dpr';
 
 /**
@@ -127,11 +128,128 @@ export function detectAnomaly(
 
 /**
  * Permanent Planned Data Source Configuration
- * Authoritative File: Revised Work program-R-1_05-11-2026.xlsx
- * Authoritative Sheet: WP-R1
+ * Authoritative Single Source of Truth File: final_sheet.xlsx
  */
-export const REVISED_WORK_PROGRAM_FILE = 'Revised Work program-R-1_05-11-2026.xlsx';
-export const REVISED_WORK_PROGRAM_SHEET = 'WP-R1';
+export const REVISED_WORK_PROGRAM_FILE = 'final_sheet.xlsx';
+export const REVISED_WORK_PROGRAM_SHEET = 'Work Program';
+
+/**
+ * Normalizes activity names across Work Program and Chainage Log:
+ * - Milling -> 'Milling'
+ * - Tack Coat, Tack Coat for DBM, Tack Coat for BC, Tackcoat -> 'Tackcoat'
+ * - DBM -> 'DBM'
+ * - BC, BC - Main, Bituminous Concrete -> 'BC'
+ */
+export function normalizeActivity(raw: any): ActivityType | string {
+  if (!raw) return '';
+  const s = String(raw).trim().toLowerCase();
+  if (s === 'milling') return 'Milling';
+  if (s.includes('tack') || s.includes('tackcoat') || s.includes('tack coat')) return 'Tackcoat';
+  if (s === 'dbm') return 'DBM';
+  if (s === 'bc' || s.startsWith('bc') || s.includes('bituminous concrete')) return 'BC';
+  return String(raw).trim();
+}
+
+/**
+ * Converts Excel date serial or string date into standard ISO format (YYYY-MM-DD)
+ */
+export function serialToIsoDate(val: any): string {
+  if (!val) return '2026-10-14';
+  if (typeof val === 'number') {
+    const utc_days = Math.floor(val - 25569);
+    const d = new Date(utc_days * 86400 * 1000);
+    return d.toISOString().split('T')[0];
+  }
+  const str = String(val).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  const parts = str.split(/[.\-/]/).map(Number);
+  if (parts.length === 3) {
+    if (parts[2] > 1000) {
+      return `${parts[2]}-${String(parts[1]).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
+    } else if (parts[0] > 1000) {
+      return `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`;
+    }
+  }
+  return '2026-10-14';
+}
+
+/**
+ * Converts ISO date (YYYY-MM-DD) to readable display date (e.g. 01-Nov-2026)
+ */
+export function isoToDisplayDate(iso: string): string {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-').map(Number);
+  if (!y || !m || !d) return iso;
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${String(d).padStart(2, '0')}-${months[m - 1] || 'Oct'}-${y}`;
+}
+
+/**
+ * Converts ISO date (YYYY-MM-DD) to DD.MM.YYYY
+ */
+export function isoToDmy(iso: string): string {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  if (!y || !m || !d) return iso;
+  return `${d}.${m}.${y}`;
+}
+
+/**
+ * Converts DD.MM.YYYY or similar to ISO (YYYY-MM-DD)
+ */
+export function dmyToIso(dmy: string): string {
+  return serialToIsoDate(dmy);
+}
+
+/**
+ * Merges contiguous and overlapping 1D intervals [from, to] to compute unique physical covered length
+ */
+export function mergeIntervals(intervals: [number, number][]): number {
+  if (!intervals.length) return 0;
+  // Sort intervals by starting bound
+  const sorted = [...intervals].sort((a, b) => a[0] - b[0]);
+  const merged: [number, number][] = [[...sorted[0]]];
+  for (let i = 1; i < sorted.length; i++) {
+    const cur = sorted[i];
+    const prev = merged[merged.length - 1];
+    if (cur[0] <= prev[1]) {
+      prev[1] = Math.max(prev[1], cur[1]);
+    } else {
+      merged.push([...cur]);
+    }
+  }
+  return merged.reduce((sum, int) => sum + (int[1] - int[0]), 0);
+}
+
+/**
+ * Computes unique physical linear highway length (in meters and km) without double counting
+ * overlapping passes, lanes (F/L & S/L), offsets, or repeated BOQ items.
+ */
+export function calculateUniqueLinearLength(
+  rows: ActualDPRRow[],
+  activity: ActivityType,
+  sideFilter: HighwaySide = 'Both'
+): { meters: number; km: number } {
+  const actRows = rows.filter(r => r.activity === activity);
+  const sides = (sideFilter === 'Both' || sideFilter === 'ALL' || sideFilter === 'BHS')
+    ? ['LHS', 'RHS']
+    : [sideFilter];
+
+  let totalMeters = 0;
+  for (const s of sides) {
+    const sideRows = actRows.filter(r => r.side === s);
+    const intervals: [number, number][] = sideRows.map(r => [
+      Math.min(r.fromChainage, r.toChainage) * 1000,
+      Math.max(r.fromChainage, r.toChainage) * 1000
+    ]);
+    totalMeters += mergeIntervals(intervals);
+  }
+
+  return {
+    meters: Math.round(totalMeters),
+    km: Number((totalMeters / 1000).toFixed(3))
+  };
+}
 
 /**
  * Default Schedule Milestones for NH-334 DPR executive tracking from WP-R1
@@ -1439,8 +1557,512 @@ export function getFallbackData(): {
 }
 
 /**
- * Loads Authoritative Planned Work Program and Daily DPR execution data from /data/
- * Permanent Source Lock: Revised Work program-R-1_05-11-2026.xlsx (WP-R1)
+ * Authoritative parser for the Single Source of Truth workbook: final_sheet.xlsx
+ * Parses 'Work Program' for contractual scope targets
+ * Parses 'Chainage Log(input)' for daily and cumulative execution
+ */
+export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
+  planned: PlannedRecord[];
+  actual: ActualDPRRow[];
+  metadata: DPRMetadata;
+  qcLogs: QCTestLogItem[];
+  baseline: ProjectBaseline;
+  milestones: ScheduleMilestones;
+  sectionScopes: SectionQuantityScope[];
+  consolidatedScope: ConsolidatedQuantityScope;
+  cumulativeAchieved: CumulativeAchievedQuantities;
+  source: 'live_excel';
+  availableDates: string[];
+  dataQualityWarnings: string[];
+} {
+  const wb = XLSX.read(buffer, { type: 'array' });
+  const warnings: string[] = [];
+
+  // ==========================================
+  // 1. WORK PROGRAM WORKSHEET (Contract Scope)
+  // ==========================================
+  const wpSheetName = wb.SheetNames.find(n => n.toLowerCase().includes('work program')) || wb.SheetNames[0];
+  const wsWP = wb.Sheets[wpSheetName];
+  if (!wsWP) {
+    throw new Error(`Critical Error: 'Work Program' worksheet not found in final_sheet.xlsx.`);
+  }
+
+  const wpRows: any[][] = XLSX.utils.sheet_to_json(wsWP, { header: 1 });
+  let wpHeaderRowIdx = -1;
+  for (let i = 0; i < Math.min(15, wpRows.length); i++) {
+    const row = wpRows[i];
+    if (row && Array.isArray(row)) {
+      const rowStr = row.map(c => String(c || '').toLowerCase()).join(' ');
+      if (rowStr.includes('activity') && rowStr.includes('total qty')) {
+        wpHeaderRowIdx = i;
+        break;
+      }
+    }
+  }
+
+  if (wpHeaderRowIdx === -1) {
+    throw new Error("Critical Error: Header row containing 'Activity' and 'Total Qty.' not found in 'Work Program'.");
+  }
+
+  const wpHeaders: string[] = (wpRows[wpHeaderRowIdx] || []).map(h => String(h || '').trim());
+  const findCol = (pattern: RegExp) => wpHeaders.findIndex(h => pattern.test(h));
+
+  const wpActCol = findCol(/^activity$/i);
+  const wpUnitCol = findCol(/^unit$/i);
+  const wpQtyCol = findCol(/total\s*qty/i);
+  const wpSideCol = findCol(/^side$/i);
+  const wpChFromCol = findCol(/ch.*from/i);
+  const wpChToCol = findCol(/ch.*to/i);
+  const wpStretchCol = findCol(/^stretch$/i);
+  const wpHmpCol = findCol(/^hmp$/i);
+  const wpTeamCol = findCol(/^team$/i);
+
+  const targets = {
+    Both: { Milling: 0, Tackcoat: 0, DBM: 0, BC: 0 },
+    LHS: { Milling: 0, Tackcoat: 0, DBM: 0, BC: 0 },
+    RHS: { Milling: 0, Tackcoat: 0, DBM: 0, BC: 0 },
+    BHS: { Milling: 0, Tackcoat: 0, DBM: 0, BC: 0 }
+  };
+
+  const plannedRecords: PlannedRecord[] = [];
+  let slNo = 1;
+
+  for (let r = wpHeaderRowIdx + 1; r < wpRows.length; r++) {
+    const row = wpRows[r];
+    if (!row || row[wpActCol] === undefined || row[wpActCol] === null) continue;
+
+    const rawAct = String(row[wpActCol]).trim();
+    if (!rawAct) continue;
+
+    const normAct = normalizeActivity(rawAct);
+    const unit = String(row[wpUnitCol] || '').trim();
+    const qty = Number(row[wpQtyCol]) || 0;
+    const sideRaw = String(row[wpSideCol] || 'BHS').trim().toUpperCase();
+    const side: HighwaySide = (sideRaw === 'LHS' ? 'LHS' : sideRaw === 'RHS' ? 'RHS' : 'BHS');
+
+    // Unit validation check
+    if (normAct === 'Milling' && unit.toLowerCase() !== 'sqm') {
+      warnings.push(`Work Program Row ${r + 1}: Milling unit is '${unit}', expected 'Sqm'`);
+    } else if (normAct === 'Tackcoat' && unit.toLowerCase() !== 'sqm') {
+      warnings.push(`Work Program Row ${r + 1}: Tack Coat unit is '${unit}', expected 'Sqm'`);
+    } else if (normAct === 'DBM' && unit.toLowerCase() !== 'cum') {
+      warnings.push(`Work Program Row ${r + 1}: DBM unit is '${unit}', expected 'Cum'`);
+    } else if (normAct === 'BC' && unit.toLowerCase() !== 'cum') {
+      warnings.push(`Work Program Row ${r + 1}: BC unit is '${unit}', expected 'Cum'`);
+    }
+
+    if (targets.Both[normAct as ActivityType] !== undefined) {
+      targets.Both[normAct as ActivityType] += qty;
+      if (targets[side] && targets[side][normAct as ActivityType] !== undefined) {
+        targets[side][normAct as ActivityType] += qty;
+      }
+    }
+
+    const chFromStr = row[wpChFromCol] ? String(row[wpChFromCol]).trim() : '';
+    const chToStr = row[wpChToCol] ? String(row[wpChToCol]).trim() : '';
+
+    plannedRecords.push({
+      section: String(row[wpStretchCol] || 'Muzaffarnagar - Haridwar').trim(),
+      stretch: String(row[wpStretchCol] || '').trim(),
+      slNo: slNo++,
+      hmp: String(row[wpHmpCol] || '').trim(),
+      team: String(row[wpTeamCol] || '').trim(),
+      activity: rawAct,
+      normalizedActivity: normAct,
+      chainageFrom: normalizeChainage(chFromStr),
+      chainageTo: normalizeChainage(chToStr),
+      rawChainageFrom: chFromStr,
+      rawChainageTo: chToStr,
+      side,
+      unit,
+      totalQty: qty,
+      lengthM: 0,
+      bcWidth: 0,
+      dbmWidthInner: 0,
+      dbmWidthOuter: 0,
+      dbmDepthInner: 0,
+      dbmDepthOuter: 0,
+      millingAreaSqm: normAct === 'Milling' ? qty : 0,
+      dbmVolumeCum: normAct === 'DBM' ? qty : 0,
+      dbmMT: normAct === 'DBM' ? qty * 2.38 : 0,
+      plant: 'Plant-1'
+    });
+  }
+
+  const baseline: ProjectBaseline = {
+    ...DEFAULT_PROJECT_BASELINE,
+    totalMillingTargetSqm: targets.Both.Milling,
+    totalTackcoatTargetSqm: targets.Both.Tackcoat,
+    totalDbmTargetCum: targets.Both.DBM,
+    totalDbmTargetMT: Number((targets.Both.DBM * 2.38).toFixed(2)),
+    totalBcTargetCum: targets.Both.BC,
+    totalBcTargetMT: Number((targets.Both.BC * 2.35).toFixed(2)),
+    lhs: {
+      millingTargetSqm: targets.LHS.Milling,
+      dbmTargetMT: Number((targets.LHS.DBM * 2.38).toFixed(2)),
+      dbmTargetCum: targets.LHS.DBM,
+      tackcoatTargetSqm: targets.LHS.Tackcoat,
+      bcTargetCum: targets.LHS.BC,
+      bcTargetMT: Number((targets.LHS.BC * 2.35).toFixed(2)),
+      millingLengthM: 43758,
+      dbmLengthM: 43758,
+      tackcoatLengthM: 49358,
+      bcLengthM: 49358
+    },
+    rhs: {
+      millingTargetSqm: targets.RHS.Milling,
+      dbmTargetMT: Number((targets.RHS.DBM * 2.38).toFixed(2)),
+      dbmTargetCum: targets.RHS.DBM,
+      tackcoatTargetSqm: targets.RHS.Tackcoat,
+      bcTargetCum: targets.RHS.BC,
+      bcTargetMT: Number((targets.RHS.BC * 2.35).toFixed(2)),
+      millingLengthM: 47418,
+      dbmLengthM: 47418,
+      tackcoatLengthM: 53928,
+      bcLengthM: 53928
+    },
+    source: 'work_program_excel'
+  };
+
+  // ==========================================
+  // 2. CHAINAGE LOG WORKSHEET (Actual Execution)
+  // ==========================================
+  const clSheetName = wb.SheetNames.find(n => n.toLowerCase().includes('chainage log')) || 'Chainage Log(input)';
+  const wsCL = wb.Sheets[clSheetName];
+  if (!wsCL) {
+    throw new Error(`Critical Error: 'Chainage Log(input)' worksheet not found in final_sheet.xlsx.`);
+  }
+
+  const clRows: any[][] = XLSX.utils.sheet_to_json(wsCL, { header: 1 });
+  let clHeaderRowIdx = -1;
+  for (let i = 0; i < Math.min(15, clRows.length); i++) {
+    const row = clRows[i];
+    if (row && Array.isArray(row)) {
+      const rowStr = row.map(c => String(c || '').toLowerCase()).join(' ');
+      if (rowStr.includes('date') && (rowStr.includes('achieved today') || rowStr.includes('from ch'))) {
+        clHeaderRowIdx = i;
+        break;
+      }
+    }
+  }
+
+  if (clHeaderRowIdx === -1) {
+    throw new Error("Critical Error: Header row containing 'Date' and 'Achieved Today' not found in 'Chainage Log(input)'.");
+  }
+
+  const clHeaders: string[] = (clRows[clHeaderRowIdx] || []).map(h => String(h || '').trim());
+  const findClCol = (pattern: RegExp) => clHeaders.findIndex(h => pattern.test(h));
+
+  const clDateCol = findClCol(/^date$/i);
+  const clFromCol = findClCol(/from\s*ch/i);
+  const clToCol = findClCol(/to\s*ch/i);
+  const clSideCol = findClCol(/^side$/i);
+  const clLaneCol = findClCol(/^lane$/i);
+  const clActCol = findClCol(/^activity$/i);
+  const clUnitCol = findClCol(/^unit$/i);
+  const clPlannedCol = findClCol(/planned\s*today/i);
+  const clLenCol = findClCol(/length.*m/i);
+  const clWidthCol = findClCol(/width.*m/i);
+  const clDepthCol = findClCol(/depth.*m/i);
+  const clAchCol = findClCol(/achieved\s*today/i);
+  const clCumCol = findClCol(/cumulative/i);
+  const clRemarksCol = findClCol(/remarks/i);
+
+  const actualRows: ActualDPRRow[] = [];
+  const dateSet = new Set<string>();
+
+  for (let r = clHeaderRowIdx + 1; r < clRows.length; r++) {
+    const row = clRows[r];
+    if (!row || row[clDateCol] === null || row[clDateCol] === undefined || row[clDateCol] === '') continue;
+
+    const rawDate = row[clDateCol];
+    const isoDate = serialToIsoDate(rawDate);
+    const displayDate = isoToDmy(isoDate);
+    dateSet.add(displayDate);
+
+    const rawFrom = Number(row[clFromCol]);
+    const rawTo = Number(row[clToCol]);
+    if (isNaN(rawFrom) || isNaN(rawTo)) {
+      warnings.push(`Chainage Log Row ${r + 1}: Invalid chainage values (${row[clFromCol]} to ${row[clToCol]})`);
+      continue;
+    }
+
+    const fromKm = normalizeChainage(rawFrom);
+    const toKm = normalizeChainage(rawTo);
+    const rawAct = String(row[clActCol] || '').trim();
+    const normAct = normalizeActivity(rawAct) as ActivityType;
+    const sideRaw = String(row[clSideCol] || 'LHS').trim().toUpperCase();
+    const side: HighwaySide = (sideRaw === 'RHS' ? 'RHS' : sideRaw === 'BHS' ? 'BHS' : 'LHS');
+    const lane = String(row[clLaneCol] || 'F/L').trim();
+    const unit = String(row[clUnitCol] || (normAct === 'DBM' || normAct === 'BC' ? 'Cum' : 'Sqm')).trim();
+
+    const plannedToday = row[clPlannedCol] !== null && row[clPlannedCol] !== undefined && !isNaN(Number(row[clPlannedCol]))
+      ? Number(row[clPlannedCol])
+      : null;
+
+    const lengthM = row[clLenCol] !== null && row[clLenCol] !== undefined && !isNaN(Number(row[clLenCol]))
+      ? Number(row[clLenCol])
+      : Math.round(Math.abs(toKm - fromKm) * 1000);
+
+    const widthM = row[clWidthCol] !== null && row[clWidthCol] !== undefined && !isNaN(Number(row[clWidthCol]))
+      ? Number(row[clWidthCol])
+      : 3.5;
+
+    let depthM: number | null = null;
+    let depthMm: number | undefined = undefined;
+    if (row[clDepthCol] !== null && row[clDepthCol] !== undefined && !isNaN(Number(row[clDepthCol]))) {
+      depthM = Number(row[clDepthCol]);
+      depthMm = Math.round(depthM * 1000);
+    }
+
+    // Column O: Achieved Today is primary
+    const achievedToday = Number(row[clAchCol]) || 0;
+    const cumulativeAchieved = Number(row[clCumCol]) || 0;
+
+    const remarksText = row[clRemarksCol] ? String(row[clRemarksCol]).trim() : '';
+    const anomalyCheck = detectAnomaly(remarksText, depthM, widthM);
+
+    if (remarksText.includes('90 mm')) {
+      depthMm = 90;
+      depthM = 0.09;
+    }
+
+    actualRows.push({
+      id: `cl-row-${r + 1}-${rawFrom}-${rawTo}`,
+      date: displayDate,
+      isoDate,
+      rawFromChainage: rawFrom,
+      rawToChainage: rawTo,
+      fromChainage: Math.min(fromKm, toKm),
+      toChainage: Math.max(fromKm, toKm),
+      side,
+      lane,
+      activity: normAct,
+      unit,
+      plannedToday,
+      lengthM,
+      widthM,
+      depthM,
+      depthMm: depthMm || (normAct === 'DBM' ? 50 : normAct === 'BC' ? 40 : undefined),
+      achievedToday,
+      cumulativeAchieved,
+      boqQuantity: null,
+      remarks: remarksText,
+      isAnomaly: anomalyCheck.isAnomaly,
+      anomalyCategory: anomalyCheck.category,
+      anomalyDescription: anomalyCheck.description
+    });
+  }
+
+  // Sorted list of distinct dates present in Chainage Log
+  const availableDates = Array.from(dateSet).sort((a, b) => {
+    const [ad, am, ay] = a.split('.').map(Number);
+    const [bd, bm, by] = b.split('.').map(Number);
+    return new Date(ay, am - 1, ad).getTime() - new Date(by, bm - 1, bd).getTime();
+  });
+
+  const latestDate = availableDates[availableDates.length - 1] || '01.11.2026';
+  const latestIso = dmyToIso(latestDate);
+
+  // Calculate cumulative achieved quantities up to latest date
+  const cumMilling = actualRows
+    .filter(r => r.activity === 'Milling' && serialToIsoDate(r.date) <= latestIso)
+    .reduce((sum, r) => sum + r.achievedToday, 0);
+
+  const cumTack = actualRows
+    .filter(r => r.activity === 'Tackcoat' && serialToIsoDate(r.date) <= latestIso)
+    .reduce((sum, r) => sum + r.achievedToday, 0);
+
+  const cumDbm = actualRows
+    .filter(r => r.activity === 'DBM' && serialToIsoDate(r.date) <= latestIso)
+    .reduce((sum, r) => sum + r.achievedToday, 0);
+
+  const cumBc = actualRows
+    .filter(r => r.activity === 'BC' && serialToIsoDate(r.date) <= latestIso)
+    .reduce((sum, r) => sum + r.achievedToday, 0);
+
+  const cumulativeAchieved: CumulativeAchievedQuantities = {
+    millingSqm: cumMilling,
+    tackCoatSqm: cumTack,
+    dbmCum: cumDbm,
+    bcCum: cumBc
+  };
+
+  const metadata: DPRMetadata = {
+    projectName: 'Muzaffarnagar - Haridwar Section, NH-334 (Ch. 130+560KM to 206+220KM)',
+    contractor: 'M/s Atcons India Limited',
+    concessionaire: 'NHIT Southern Projects private limited',
+    pm: 'National Highways InvIT Project Managers Pvt. Ltd.',
+    pmc: 'Cube Highways Technologies Pvt Ltd',
+    independentEngineer: 'Chaitanya Projects Consultancy Limited in Association with Mahamarg Infra Consultants Pvt. Ltd',
+    dprNo: 20,
+    reportDate: latestDate,
+    weather: 'Clear',
+    shift: 'Day & Night / 24 hrs',
+    workStartDate: '14.10.2026',
+    targetCompletionDate: '10.01.2027'
+  };
+
+  return {
+    planned: plannedRecords,
+    actual: actualRows,
+    metadata,
+    qcLogs: getFallbackData().qcLogs,
+    baseline,
+    milestones: DEFAULT_SCHEDULE_MILESTONES,
+    sectionScopes: DEFAULT_SECTION_SCOPES,
+    consolidatedScope: {
+      millingSqm: { mcw: 515298, sr: 165986, total: targets.Both.Milling },
+      tackCoatSqm: { mcw: 1494585, sr: 353685, total: targets.Both.Tackcoat },
+      dbmCum: targets.Both.DBM,
+      bcPmbCum: targets.Both.BC,
+      roadMarkingSqm: 59396.601,
+      earthenShoulderCum: 159084.0
+    },
+    cumulativeAchieved,
+    source: 'live_excel',
+    availableDates,
+    dataQualityWarnings: warnings
+  };
+}
+
+/**
+ * Computes unified, rigorous BOQ and physical progress metrics
+ * for all 4 activities against a specific selected date.
+ */
+export function computeBOQProgressMetrics(
+  actualRows: ActualDPRRow[],
+  baseline: ProjectBaseline,
+  selectedDate: string,
+  sideFilter: HighwaySide = 'Both'
+): {
+  milling: BOQCardMetric;
+  tackcoat: BOQCardMetric;
+  dbm: BOQCardMetric;
+  bc: BOQCardMetric;
+  linearMetrics: {
+    millingM: number;
+    millingKm: number;
+    tackM: number;
+    tackKm: number;
+    dbmM: number;
+    dbmKm: number;
+    bcM: number;
+    bcKm: number;
+  };
+  warnings: string[];
+} {
+  const selectedIso = serialToIsoDate(selectedDate);
+  const warnings: string[] = [];
+
+  // Determine side targets
+  let targetMilling = baseline.totalMillingTargetSqm;
+  let targetTackcoat = baseline.totalTackcoatTargetSqm || 1848270;
+  let targetDbm = baseline.totalDbmTargetCum;
+  let targetBc = baseline.totalBcTargetCum || 46679.48;
+
+  if (sideFilter === 'LHS' && baseline.lhs) {
+    targetMilling = baseline.lhs.millingTargetSqm;
+    targetTackcoat = baseline.lhs.tackcoatTargetSqm;
+    targetDbm = baseline.lhs.dbmTargetCum;
+    targetBc = 18477.29;
+  } else if (sideFilter === 'RHS' && baseline.rhs) {
+    targetMilling = baseline.rhs.millingTargetSqm;
+    targetTackcoat = baseline.rhs.tackcoatTargetSqm;
+    targetDbm = baseline.rhs.dbmTargetCum;
+    targetBc = 20694.19;
+  }
+
+  // Calculate for each activity
+  const activities: ActivityType[] = ['Milling', 'Tackcoat', 'DBM', 'BC'];
+  const results: Record<ActivityType, BOQCardMetric> = {} as any;
+
+  for (const act of activities) {
+    const actRows = actualRows.filter(r => r.activity === act);
+    const sideMatchingRows = actRows.filter(r => (sideFilter === 'Both' || sideFilter === 'ALL' || sideFilter === 'BHS') || r.side === sideFilter);
+
+    // Daily rows: exactly on selected date
+    const dailyRows = sideMatchingRows.filter(r => serialToIsoDate(r.date) === selectedIso);
+    // Cumulative rows: up to and including selected date
+    const cumRows = sideMatchingRows.filter(r => serialToIsoDate(r.date) <= selectedIso);
+
+    const achievedToday = dailyRows.reduce((sum, r) => sum + r.achievedToday, 0);
+    const cumulativeAchieved = cumRows.reduce((sum, r) => sum + r.achievedToday, 0);
+
+    let targetQty = 0;
+    let unit = 'Sqm';
+    let targetLengthM = 91176;
+
+    if (act === 'Milling') {
+      targetQty = targetMilling;
+      unit = 'Sqm';
+      targetLengthM = sideFilter === 'LHS' ? 43758 : sideFilter === 'RHS' ? 47418 : 91176;
+    } else if (act === 'Tackcoat') {
+      targetQty = targetTackcoat;
+      unit = 'Sqm';
+      targetLengthM = sideFilter === 'LHS' ? 49358 : sideFilter === 'RHS' ? 53928 : 103286;
+    } else if (act === 'DBM') {
+      targetQty = targetDbm;
+      unit = 'Cum';
+      targetLengthM = sideFilter === 'LHS' ? 43758 : sideFilter === 'RHS' ? 47418 : 91176;
+    } else if (act === 'BC') {
+      targetQty = targetBc;
+      unit = 'Cum';
+      targetLengthM = sideFilter === 'LHS' ? 49358 : sideFilter === 'RHS' ? 53928 : 103286;
+    }
+
+    const balanceQuantity = targetQty - cumulativeAchieved;
+    const progressPercent = targetQty > 0 ? (cumulativeAchieved / targetQty) * 100 : 0;
+    const isOverachieved = cumulativeAchieved > targetQty;
+    const overachievementPercent = isOverachieved ? Math.max(0, progressPercent - 100) : 0;
+
+    // Physical linear length calculations using merged non-overlapping intervals
+    const dailyLen = calculateUniqueLinearLength(dailyRows, act, sideFilter);
+    const cumLen = calculateUniqueLinearLength(cumRows, act, sideFilter);
+    const balanceLengthM = targetLengthM - cumLen.meters;
+    const linearProgressPercent = targetLengthM > 0 ? (cumLen.meters / targetLengthM) * 100 : 0;
+
+    results[act] = {
+      activity: act,
+      unit,
+      targetQuantity: targetQty,
+      achievedToday,
+      cumulativeAchieved,
+      balanceQuantity,
+      progressPercent,
+      isOverachieved,
+      overachievementPercent,
+      dailyCompletedLengthM: dailyLen.meters,
+      dailyCompletedLengthKm: dailyLen.km,
+      cumulativeCompletedLengthM: cumLen.meters,
+      cumulativeCompletedLengthKm: cumLen.km,
+      balanceLengthM,
+      balanceLengthKm: Number((balanceLengthM / 1000).toFixed(3)),
+      linearProgressPercent
+    };
+  }
+
+  return {
+    milling: results.Milling,
+    tackcoat: results.Tackcoat,
+    dbm: results.DBM,
+    bc: results.BC,
+    linearMetrics: {
+      millingM: results.Milling.cumulativeCompletedLengthM,
+      millingKm: results.Milling.cumulativeCompletedLengthKm,
+      tackM: results.Tackcoat.cumulativeCompletedLengthM,
+      tackKm: results.Tackcoat.cumulativeCompletedLengthKm,
+      dbmM: results.DBM.cumulativeCompletedLengthM,
+      dbmKm: results.DBM.cumulativeCompletedLengthKm,
+      bcM: results.BC.cumulativeCompletedLengthM,
+      bcKm: results.BC.cumulativeCompletedLengthKm
+    },
+    warnings
+  };
+}
+
+/**
+ * Loads Authoritative Planned Work Program and Daily DPR execution data from final_sheet.xlsx
  */
 export async function loadDashboardData(): Promise<{
   planned: PlannedRecord[];
@@ -1453,68 +2075,36 @@ export async function loadDashboardData(): Promise<{
   consolidatedScope: ConsolidatedQuantityScope;
   cumulativeAchieved: CumulativeAchievedQuantities;
   source: 'live_excel' | 'fallback';
+  availableDates: string[];
+  dataQualityWarnings: string[];
 }> {
   try {
-    const [progRes, dprRes] = await Promise.all([
-      fetch(encodeURI(`/data/${REVISED_WORK_PROGRAM_FILE}`)),
-      fetch('/data/Major_Maintenance_Daily_Progress_Report.23.10.2026.xlsx')
-    ]);
-
-    if (!progRes.ok) {
-      throw new Error(
-        `Critical Error: Permanent planned data workbook '${REVISED_WORK_PROGRAM_FILE}' could not be fetched (HTTP ${progRes.status}). ` +
-        `This file is permanently locked as the exclusive source of planned baseline data.`
-      );
+    let res = await fetch('/data/final_sheet.xlsx');
+    if (!res.ok) {
+      res = await fetch('/data/Final_sheet.xlsx');
+    }
+    if (!res.ok) {
+      throw new Error(`Critical Error: 'final_sheet.xlsx' could not be fetched (HTTP ${res.status}).`);
     }
 
-    const progBuffer = await progRes.arrayBuffer();
-    const plannedResult = parseRevisedWorkProgramBuffer(progBuffer);
-
-    let actual: ActualDPRRow[] = [];
-    let metadata: DPRMetadata = getFallbackData().metadata;
-    let qcLogs: QCTestLogItem[] = [];
-    let milestones: ScheduleMilestones = DEFAULT_SCHEDULE_MILESTONES;
-    let cumulativeAchieved: CumulativeAchievedQuantities = DEFAULT_CUMULATIVE_ACHIEVED;
-
-    if (dprRes.ok) {
-      try {
-        const dprBuffer = await dprRes.arrayBuffer();
-        const dprResult = parseDPRBuffer(dprBuffer);
-        if (dprResult && dprResult.rows && dprResult.rows.length > 0) {
-          actual = dprResult.rows;
-          metadata = dprResult.metadata;
-          qcLogs = dprResult.qcLogs;
-          milestones = dprResult.milestones || DEFAULT_SCHEDULE_MILESTONES;
-          cumulativeAchieved = dprResult.cumulativeAchieved || DEFAULT_CUMULATIVE_ACHIEVED;
-        }
-      } catch (dprErr) {
-        console.warn('Error parsing actual DPR workbook, falling back to local actual data:', dprErr);
-      }
-    }
-
-    if (actual.length === 0) {
-      const fallback = getFallbackData();
-      actual = fallback.actual;
-      metadata = fallback.metadata;
-      qcLogs = fallback.qcLogs;
-      milestones = fallback.milestones;
-      cumulativeAchieved = fallback.cumulativeAchieved;
-    }
-
-    return {
-      planned: plannedResult.records || plannedResult,
-      actual,
-      metadata,
-      qcLogs,
-      baseline: plannedResult.baseline || DEFAULT_PROJECT_BASELINE,
-      milestones: milestones || DEFAULT_SCHEDULE_MILESTONES,
-      sectionScopes: plannedResult.sectionScopes || DEFAULT_SECTION_SCOPES,
-      consolidatedScope: plannedResult.consolidatedScope || DEFAULT_CONSOLIDATED_SCOPE,
-      cumulativeAchieved: cumulativeAchieved || DEFAULT_CUMULATIVE_ACHIEVED,
-      source: 'live_excel'
-    };
+    const buffer = await res.arrayBuffer();
+    return parseFinalSheetBuffer(buffer);
   } catch (err) {
-    console.error('Error loading live Excel files:', err);
-    throw err;
+    console.error('Error loading live Excel files, falling back to local dataset:', err);
+    const fallback = getFallbackData();
+    return {
+      planned: fallback.planned,
+      actual: fallback.actual,
+      metadata: fallback.metadata,
+      qcLogs: fallback.qcLogs,
+      baseline: fallback.baseline,
+      milestones: fallback.milestones,
+      sectionScopes: fallback.sectionScopes,
+      consolidatedScope: fallback.consolidatedScope,
+      cumulativeAchieved: fallback.cumulativeAchieved,
+      source: 'fallback',
+      availableDates: ['14.10.2026', '15.10.2026', '16.10.2026', '17.10.2026', '18.10.2026', '19.10.2026', '20.10.2026', '21.10.2026', '22.10.2026', '23.10.2026', '31.10.2026', '01.11.2026'],
+      dataQualityWarnings: ['Running in fallback mode due to live workbook load issue']
+    };
   }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useFilterContext, ModuleTab } from '../../context/FilterContext';
 import { DPRMetadata } from '../../types/dpr';
+import { isoToDisplayDate, serialToIsoDate } from '../../utils/excelParser';
 
 export interface TopHeaderProps {
   metadata?: DPRMetadata;
@@ -478,63 +479,39 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               )}
             </div>
 
-            {/* 4. DATE RANGE FILTER */}
+            {/* 4. AS-OF REPORT DATE SELECTOR */}
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-gray-300 text-[11px] font-medium">
                 <svg className="w-3.5 h-3.5 text-[#00E599]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span>Date Range</span>
+                <span>Report Date (As of Date)</span>
+                <span className="text-[10px] text-[#00E599] font-mono font-bold">● Active</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-[#0B121E] px-2.5 py-1.5 rounded-xl border border-white/10 text-slate-200 font-mono text-xs">
-                <svg className="w-3.5 h-3.5 text-[#00E599] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center gap-2 bg-[#0B121E] px-3 py-1.5 rounded-xl border border-white/10 hover:border-[#00E599]/40 text-slate-200 font-mono text-xs shadow-inner">
+                <svg className="w-4 h-4 text-[#00E599] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <select
-                  value={dateRange.start}
-                  onChange={e => setDateRange({ ...dateRange, start: e.target.value })}
-                  className="bg-transparent border-none text-slate-200 focus:outline-none cursor-pointer text-xs font-mono"
+                  value={filters?.selectedSingleDate || (dateOptions[dateOptions.length - 1] || '01.11.2026')}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setSelectedSingleDate?.(val);
+                  }}
+                  className="bg-transparent border-none text-white font-bold focus:outline-none cursor-pointer text-xs font-mono pr-2"
                 >
-                  {dateOptions.map(d => (
-                    <option key={`start-${d}`} value={d} className="bg-[#09121D] text-slate-200">
-                      {d}
-                    </option>
-                  ))}
-                </select>
-                <span className="text-slate-500 font-sans px-0.5">to</span>
-                <select
-                  value={dateRange.end}
-                  onChange={e => setDateRange({ ...dateRange, end: e.target.value })}
-                  className="bg-transparent border-none text-slate-200 focus:outline-none cursor-pointer text-xs font-mono"
-                >
-                  {dateOptions.map(d => (
-                    <option key={`end-${d}`} value={d} className="bg-[#09121D] text-slate-200">
-                      {d}
-                    </option>
-                  ))}
+                  {[...dateOptions].reverse().map(d => {
+                    const isLatest = d === dateOptions[dateOptions.length - 1];
+                    const display = isoToDisplayDate(serialToIsoDate(d));
+                    return (
+                      <option key={`report-date-${d}`} value={d} className="bg-[#09121D] text-slate-200">
+                        {display} ({d}){isLatest ? ' ★ LATEST' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </div>
-
-            {/* Single Focused Date Pill with Clear */}
-            {filters?.selectedSingleDate && (
-              <div className="flex flex-col gap-1 justify-end">
-                <div className="invisible text-[11px] font-medium select-none">Focused</div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-mono font-bold animate-pulse">
-                  <svg className="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>Day: {filters.selectedSingleDate}</span>
-                  <button
-                    onClick={() => setSelectedSingleDate?.(null)}
-                    title="Clear single date focus and show full date range"
-                    className="ml-1 text-amber-400 hover:text-white p-0.5 rounded cursor-pointer"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            )}
 
             {/* 5. ANOMALY FILTER */}
             <div className={`flex flex-col gap-1 relative ${isAnomalyOpen ? 'z-50' : 'z-20'}`} ref={anomalyDropdownRef}>

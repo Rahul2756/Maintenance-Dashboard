@@ -57,8 +57,8 @@ export const CHAINAGE_PRESETS: Record<'All' | 'DPR' | 'Sec1' | 'Sec2', ChainageP
 export const DEFAULT_FILTER_STATE: GlobalFilterState = {
   side: 'Both',
   selectedActivities: ['Milling', 'Tackcoat', 'DBM', 'BC'],
-  dateRange: { start: '14.10.2026', end: '23.10.2026' },
-  selectedSingleDate: null,
+  dateRange: { start: '14.10.2026', end: '01.11.2026' },
+  selectedSingleDate: '01.11.2026',
   chainageScope: 'DPR',
   chainageBounds: { from: 169.000, to: 206.220 },
   anomaliesOnly: false,
@@ -77,6 +77,8 @@ interface FilterContextType {
   selectAllActivities: () => void;
   setDateRange: (range: { start: string; end: string }) => void;
   setSelectedSingleDate: (date: string | null) => void;
+  setSelectedDate: (date: string | null) => void;
+  selectedDate: string;
   setChainageScope: (scope: 'All' | 'DPR' | 'Sec1' | 'Sec2') => void;
   setChainageBounds: (bounds: { from: number; to: number }) => void;
   setAnomaliesOnly: (val: boolean | ((prev: boolean) => boolean)) => void;
@@ -175,8 +177,14 @@ export const FilterProvider: React.FC<{
   }, []);
 
   const setSelectedSingleDate = useCallback((date: string | null) => {
-    setFilters(prev => ({ ...prev, selectedSingleDate: date }));
+    setFilters(prev => ({
+      ...prev,
+      selectedSingleDate: date,
+      dateRange: date ? { start: prev.dateRange.start, end: date } : prev.dateRange
+    }));
   }, []);
+
+  const setSelectedDate = setSelectedSingleDate;
 
   const setChainageScope = useCallback((scope: 'All' | 'DPR' | 'Sec1' | 'Sec2') => {
     const preset = CHAINAGE_PRESETS[scope];
@@ -220,14 +228,16 @@ export const FilterProvider: React.FC<{
   }, []);
 
   const resetFilters = useCallback((availableDates?: string[]) => {
+    const latest = availableDates?.[availableDates.length - 1] || '01.11.2026';
+    const earliest = availableDates?.[0] || '14.10.2026';
     setFilters({
       side: 'Both',
       selectedActivities: ['Milling', 'Tackcoat', 'DBM', 'BC'],
       dateRange: {
-        start: availableDates?.[0] || '14.10.2026',
-        end: availableDates?.[availableDates.length - 1] || '23.10.2026'
+        start: earliest,
+        end: latest
       },
-      selectedSingleDate: null,
+      selectedSingleDate: latest,
       chainageScope: 'DPR',
       chainageBounds: { from: 169.000, to: 206.220 },
       anomaliesOnly: false,
@@ -269,6 +279,8 @@ export const FilterProvider: React.FC<{
     setFilters(prev => ({ ...prev }));
   }, []);
 
+  const selectedDate = filters.selectedSingleDate || filters.dateRange.end || '01.11.2026';
+
   const value = useMemo(
     () => ({
       filters,
@@ -282,6 +294,8 @@ export const FilterProvider: React.FC<{
       selectAllActivities,
       setDateRange,
       setSelectedSingleDate,
+      setSelectedDate,
+      selectedDate,
       setChainageScope,
       setChainageBounds,
       setAnomaliesOnly,
@@ -313,6 +327,8 @@ export const FilterProvider: React.FC<{
       selectAllActivities,
       setDateRange,
       setSelectedSingleDate,
+      setSelectedDate,
+      selectedDate,
       setChainageScope,
       setChainageBounds,
       setAnomaliesOnly,

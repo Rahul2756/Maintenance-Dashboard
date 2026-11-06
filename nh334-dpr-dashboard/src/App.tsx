@@ -14,6 +14,8 @@ import {
 } from './types/dpr';
 import {
   loadDashboardData,
+  computeBOQProgressMetrics,
+  dmyToIso,
   DEFAULT_PROJECT_BASELINE,
   DEFAULT_SCHEDULE_MILESTONES,
   DEFAULT_SECTION_SCOPES,
@@ -108,64 +110,41 @@ function DashboardContent() {
   const [isQCOpen, setIsQCOpen] = useState(false);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
 
-  // Hydrate dashboard from IndexedDB on initial mount
+  // Hydrate dashboard dynamically from final_sheet.xlsx (Single Source of Truth)
   const hydrateDashboard = async () => {
     setIsLoading(true);
     try {
-      // 1. Check if user has uploaded data persisted in IndexedDB (Dual Keys)
-      const { plannedData, actualData, meta } = await loadAllStoredData();
-      let hasCachedPlanned = false;
-      let hasCachedActual = false;
-
-      if (meta) {
-        setUploadMeta(meta);
-      }
-
-      if (plannedData) {
-        setPlannedRecords(plannedData.plannedRecords);
-        setBaseline(plannedData.baseline);
-        if (plannedData.sectionScopes) setSectionScopes(plannedData.sectionScopes);
-        if (plannedData.consolidatedScope) setConsolidatedScope(plannedData.consolidatedScope);
-        hasCachedPlanned = true;
-      }
-
-      if (actualData) {
-        setActualRows(actualData.actualRows);
-        setMetadata(actualData.metadata);
-        setQcLogs(actualData.qcLogs);
-        if (actualData.milestones) setMilestones(actualData.milestones);
-        if (actualData.cumulativeAchieved) setCumulativeAchieved(actualData.cumulativeAchieved);
-        hasCachedActual = true;
-      }
-
-      // 2. If neither or only one exists in IndexedDB, load default live excel / fallback
-      if (!hasCachedPlanned || !hasCachedActual) {
-        const defaultData = await loadDashboardData();
-        if (!hasCachedPlanned) {
-          setPlannedRecords(defaultData.planned);
-          setBaseline(defaultData.baseline);
-          setSectionScopes(defaultData.sectionScopes);
-          setConsolidatedScope(defaultData.consolidatedScope);
-        }
-        if (!hasCachedActual) {
-          setActualRows(defaultData.actual);
-          setMetadata(defaultData.metadata);
-          setQcLogs(defaultData.qcLogs);
-          setMilestones(defaultData.milestones);
-          setCumulativeAchieved(defaultData.cumulativeAchieved);
-        }
-        setDataSource(hasCachedPlanned || hasCachedActual ? 'indexeddb' : defaultData.source);
-      } else {
-        setDataSource('indexeddb');
-      }
-    } catch (e) {
-      console.error('Failed to hydrate dashboard, falling back:', e);
       const defaultData = await loadDashboardData();
       setActualRows(defaultData.actual);
       setPlannedRecords(defaultData.planned);
       setBaseline(defaultData.baseline);
+      setSectionScopes(defaultData.sectionScopes);
+      setConsolidatedScope(defaultData.consolidatedScope);
       setMetadata(defaultData.metadata);
       setQcLogs(defaultData.qcLogs);
+      setMilestones(defaultData.milestones);
+      setCumulativeAchieved(defaultData.cumulativeAchieved);
+      setDataSource(defaultData.source);
+    } catch (e) {
+      console.error('Failed to load final_sheet.xlsx, checking stored data:', e);
+      try {
+        const { plannedData, actualData } = await loadAllStoredData();
+        if (plannedData && actualData) {
+          setPlannedRecords(plannedData.plannedRecords);
+          setBaseline(plannedData.baseline);
+          setActualRows(actualData.actualRows);
+          setMetadata(actualData.metadata);
+          setQcLogs(actualData.qcLogs);
+          setDataSource('indexeddb');
+          return;
+        }
+      } catch {}
+      const fallbackData = await loadDashboardData();
+      setActualRows(fallbackData.actual);
+      setPlannedRecords(fallbackData.planned);
+      setBaseline(fallbackData.baseline);
+      setMetadata(fallbackData.metadata);
+      setQcLogs(fallbackData.qcLogs);
       setDataSource('fallback');
     } finally {
       setIsLoading(false);
@@ -261,6 +240,25 @@ function DashboardContent() {
     return actualRows.filter(r => rowMatchesGlobalFilter(r, filters));
   }, [actualRows, filters]);
 
+  // Selected date (As of date) for DPR and cumulative calculations
+  const selectedDate = filters.selectedSingleDate || filters.dateRange.end || (availableDates[availableDates.length - 1] || '01.11.2026');
+  const selectedIso = dmyToIso(selectedDate);
+
+  // Authoritative BOQ and Linear progress metrics computed dynamically from final_sheet.xlsx
+  const boqMetrics = useMemo(() => {
+    return computeBOQProgressMetrics(actualRows, baseline, selectedDate, filters.side);
+  }, [actualRows, baseline, selectedDate, filters.side]);
+
+  // Cumulative rows up to and including selectedDate (matching side filter)
+  const cumulativeRows = useMemo(() => {
+    return actualRows.filter(r => {
+      const rIso = r.isoDate || dmyToIso(r.date);
+      const matchesDate = rIso !== '' && selectedIso !== '' && rIso <= selectedIso;
+      const matchesSide = filters.side === 'Both' || r.side === filters.side || r.side === 'BHS';
+      return matchesDate && matchesSide;
+    });
+  }, [actualRows, selectedIso, filters.side]);
+
   // Filtered rows matching date, activity, and chainage but retaining both LHS & RHS for side-wise comparison
   const filteredRowsBothSides = useMemo(() => {
     return actualRows.filter(r => rowMatchesGlobalFilter(r, { ...filters, side: 'Both' }));
@@ -271,88 +269,12 @@ function DashboardContent() {
     return actualRows.filter(r => r.isAnomaly).length;
   }, [actualRows]);
 
-  // Aggregate KPIs reactively against immutable fixed baseline
+  // Aggregate KPIs reactively against authoritative final_sheet.xlsx data
   const kpis: KPIAggregates = useMemo(() => {
-    // Determine target baselines according to side selection (Both, LHS, RHS)
-    let millingTarget = 681284;
-    let tackcoatTarget = 1848271;
-    let dbmTargetCum = 37026;
-    let dbmTargetMT = 37026;
-    let bcTarget = baseline.totalBcTargetMT || 92053;
-
-    if (filters.side === 'LHS') {
-      millingTarget = 334999.5;
-      tackcoatTarget = 871827;
-      dbmTargetMT = 18388;
-      dbmTargetCum = 18388;
-    } else if (filters.side === 'RHS') {
-      millingTarget = 346284.5;
-      tackcoatTarget = 976444;
-      dbmTargetMT = 18638;
-      dbmTargetCum = 18638;
-    }
-
-    // 1. Milling Actual (Sqm from Achieved Today)
     const isMillingSelected = filters.selectedActivities.includes('Milling');
-    const millingRows = filteredRows.filter(r => r.activity === 'Milling');
-    const millingAchieved = isMillingSelected
-      ? millingRows.reduce((acc, r) => acc + (r.achievedToday || 0), 0)
-      : 0;
-    const effectiveMillingTarget = isMillingSelected ? millingTarget : 0;
-    const millingVariance = millingAchieved - effectiveMillingTarget;
-    const millingPercent = effectiveMillingTarget > 0 ? (millingAchieved / effectiveMillingTarget) * 100 : 0;
-
-    // 2. Tackcoat Actual (Sqm from Achieved Today)
     const isTackSelected = filters.selectedActivities.includes('Tackcoat');
-    const tackcoatRows = filteredRows.filter(r => r.activity === 'Tackcoat');
-    const tackcoatAchieved = isTackSelected
-      ? tackcoatRows.reduce((acc, r) => acc + (r.achievedToday || 0), 0)
-      : 0;
-    const effectiveTackcoatTarget = isTackSelected ? tackcoatTarget : 0;
-    const tackcoatVariance = tackcoatAchieved - effectiveTackcoatTarget;
-    const tackcoatPercent = effectiveTackcoatTarget > 0 ? (tackcoatAchieved / effectiveTackcoatTarget) * 100 : 0;
-
-    // 3. DBM Actual (MT: Achieved Today Cum * 2.38 density, or directly if MT)
     const isDbmSelected = filters.selectedActivities.includes('DBM');
-    const dbmRows = filteredRows.filter(r => r.activity === 'DBM');
-    let dbmAchievedMT = 0;
-    let dbmAchievedCum = 0;
-    if (isDbmSelected) {
-      dbmRows.forEach(r => {
-        const val = r.achievedToday || 0;
-        const unit = (r.unit || '').trim().toLowerCase();
-        if (unit.includes('mt') || unit.includes('ton')) {
-          dbmAchievedMT += val;
-          dbmAchievedCum += val / 2.38;
-        } else {
-          // Defaults to Cum
-          dbmAchievedCum += val;
-          dbmAchievedMT += val * 2.38;
-        }
-      });
-    }
-    const effectiveDbmTarget = isDbmSelected ? dbmTargetCum : 0;
-    const dbmVariance = dbmAchievedCum - effectiveDbmTarget;
-    const dbmPercent = effectiveDbmTarget > 0 ? (dbmAchievedCum / effectiveDbmTarget) * 100 : 0;
-
-    // 4. BC (Bituminous Concrete)
     const isBcSelected = filters.selectedActivities.includes('BC');
-    const bcRows = filteredRows.filter(r => r.activity === 'BC');
-    let bcAchievedMT = 0;
-    if (isBcSelected) {
-      bcRows.forEach(r => {
-        const val = r.achievedToday || 0;
-        const unit = (r.unit || '').trim().toLowerCase();
-        if (unit.includes('mt') || unit.includes('ton')) {
-          bcAchievedMT += val;
-        } else {
-          bcAchievedMT += val * 2.35;
-        }
-      });
-    }
-    const effectiveBcTarget = isBcSelected ? bcTarget : 0;
-    const bcVariance = bcAchievedMT - effectiveBcTarget;
-    const bcPercent = effectiveBcTarget > 0 ? (bcAchievedMT / effectiveBcTarget) * 100 : 0;
 
     // Daily sparklines (cumulative progression over available dates)
     const millingSparkline: number[] = [];
@@ -366,14 +288,11 @@ function DashboardContent() {
     let cumBc = 0;
 
     availableDates.forEach(date => {
-      const dayRows = actualRows.filter(r => r.date === date);
+      const dayRows = actualRows.filter(r => r.date === date && (filters.side === 'Both' || r.side === filters.side || r.side === 'BHS'));
       dayRows.forEach(r => {
         if (r.activity === 'Milling') cumMilling += r.achievedToday;
         if (r.activity === 'Tackcoat') cumTack += r.achievedToday;
-        if (r.activity === 'DBM') {
-          const u = (r.unit || '').trim().toLowerCase();
-          cumDbm += (u.includes('mt') || u.includes('ton')) ? r.achievedToday : r.achievedToday * 2.38;
-        }
+        if (r.activity === 'DBM') cumDbm += r.achievedToday;
         if (r.activity === 'BC') cumBc += r.achievedToday;
       });
       millingSparkline.push(cumMilling);
@@ -392,49 +311,74 @@ function DashboardContent() {
     let weightedSum = 0;
     let totalWeight = 0;
     if (isMillingSelected) {
-      weightedSum += millingPercent * 0.35;
+      weightedSum += boqMetrics.milling.progressPercent * 0.35;
       totalWeight += 0.35;
     }
     if (isTackSelected) {
-      weightedSum += tackcoatPercent * 0.20;
+      weightedSum += boqMetrics.tackcoat.progressPercent * 0.20;
       totalWeight += 0.20;
     }
     if (isDbmSelected) {
-      weightedSum += dbmPercent * 0.25;
+      weightedSum += boqMetrics.dbm.progressPercent * 0.25;
       totalWeight += 0.25;
     }
     if (isBcSelected) {
-      weightedSum += bcPercent * 0.20;
+      weightedSum += boqMetrics.bc.progressPercent * 0.20;
       totalWeight += 0.20;
     }
     const overallAdherence = totalWeight > 0 ? Math.min(100, weightedSum / totalWeight) : 100;
 
     return {
-      millingAchieved,
-      millingTarget: effectiveMillingTarget,
-      millingVariance,
-      millingPercent,
+      // 1. Milling
+      millingAchieved: boqMetrics.milling.cumulativeAchieved,
+      millingAchievedToday: boqMetrics.milling.achievedToday,
+      millingCumulative: boqMetrics.milling.cumulativeAchieved,
+      millingBalance: boqMetrics.milling.balanceQuantity,
+      millingTarget: boqMetrics.milling.targetQuantity,
+      millingVariance: boqMetrics.milling.cumulativeAchieved - boqMetrics.milling.targetQuantity,
+      millingPercent: boqMetrics.milling.progressPercent,
       millingSparkline,
+      millingCardMetric: boqMetrics.milling,
 
-      tackcoatAchieved,
-      tackcoatTarget: effectiveTackcoatTarget,
-      tackcoatVariance,
-      tackcoatPercent,
+      // 2. Tackcoat
+      tackcoatAchieved: boqMetrics.tackcoat.cumulativeAchieved,
+      tackcoatAchievedToday: boqMetrics.tackcoat.achievedToday,
+      tackcoatCumulative: boqMetrics.tackcoat.cumulativeAchieved,
+      tackcoatBalance: boqMetrics.tackcoat.balanceQuantity,
+      tackcoatTarget: boqMetrics.tackcoat.targetQuantity,
+      tackcoatVariance: boqMetrics.tackcoat.cumulativeAchieved - boqMetrics.tackcoat.targetQuantity,
+      tackcoatPercent: boqMetrics.tackcoat.progressPercent,
       tackcoatSparkline,
+      tackcoatCardMetric: boqMetrics.tackcoat,
 
-      dbmAchieved: dbmAchievedCum,
-      dbmAchievedCum,
-      dbmTarget: effectiveDbmTarget,
-      dbmTargetCum: effectiveDbmTarget,
-      dbmVariance,
-      dbmPercent,
+      // 3. DBM (Strictly in Cum)
+      dbmAchieved: boqMetrics.dbm.cumulativeAchieved,
+      dbmAchievedCum: boqMetrics.dbm.cumulativeAchieved,
+      dbmAchievedTodayCum: boqMetrics.dbm.achievedToday,
+      dbmCumulativeCum: boqMetrics.dbm.cumulativeAchieved,
+      dbmBalanceCum: boqMetrics.dbm.balanceQuantity,
+      dbmTarget: boqMetrics.dbm.targetQuantity,
+      dbmTargetCum: boqMetrics.dbm.targetQuantity,
+      dbmVariance: boqMetrics.dbm.cumulativeAchieved - boqMetrics.dbm.targetQuantity,
+      dbmPercent: boqMetrics.dbm.progressPercent,
       dbmSparkline,
+      dbmCardMetric: boqMetrics.dbm,
 
-      bcAchieved: bcAchievedMT,
-      bcTarget: effectiveBcTarget,
-      bcVariance,
-      bcPercent,
+      // 4. BC (Strictly in Cum)
+      bcAchieved: boqMetrics.bc.cumulativeAchieved,
+      bcAchievedCum: boqMetrics.bc.cumulativeAchieved,
+      bcAchievedTodayCum: boqMetrics.bc.achievedToday,
+      bcCumulativeCum: boqMetrics.bc.cumulativeAchieved,
+      bcBalanceCum: boqMetrics.bc.balanceQuantity,
+      bcTarget: boqMetrics.bc.targetQuantity,
+      bcTargetCum: boqMetrics.bc.targetQuantity,
+      bcVariance: boqMetrics.bc.cumulativeAchieved - boqMetrics.bc.targetQuantity,
+      bcPercent: boqMetrics.bc.progressPercent,
       bcSparkline,
+      bcCardMetric: boqMetrics.bc,
+
+      // Linear distance aggregates
+      linearMetrics: boqMetrics.linearMetrics,
 
       overallAdherence,
       totalAnomaliesCount: totalAnom,
@@ -442,7 +386,7 @@ function DashboardContent() {
       excessDepthCount: excessDepth,
       offsetCount: offset
     };
-  }, [filteredRows, actualRows, availableDates, filters.selectedActivities, filters.side, baseline, cumulativeAchieved]);
+  }, [boqMetrics, actualRows, availableDates, filters.selectedActivities, filters.side, filteredRows]);
 
   // Grouped daily progress comparisons for Bar/Line visual
   const dailyComparisons: DailyProgressComparison[] = useMemo(() => {
@@ -451,6 +395,7 @@ function DashboardContent() {
       let millingAchieved = 0;
       let tackcoatAchieved = 0;
       let dbmAchievedCum = 0;
+      let bcAchievedCum = 0;
 
       dayRows.forEach(r => {
         if (r.activity === 'Milling') {
@@ -459,6 +404,8 @@ function DashboardContent() {
           tackcoatAchieved += r.achievedToday;
         } else if (r.activity === 'DBM') {
           dbmAchievedCum += r.achievedToday;
+        } else if (r.activity === 'BC') {
+          bcAchievedCum += r.achievedToday;
         }
       });
 
@@ -484,6 +431,8 @@ function DashboardContent() {
         tackcoatAchieved: Math.round(tackcoatAchieved),
         dbmPlanned: phasedDailyTargetCum,
         dbmAchieved: actualDbmCum,
+        bcPlanned: 0,
+        bcAchieved: Number(bcAchievedCum.toFixed(2)),
         totalPlannedWeighted: phasedDailyTargetMT,
         totalAchievedWeighted: actualDbmMT,
         adherenceRate: rate
@@ -603,10 +552,12 @@ function DashboardContent() {
           >
             {/* Row 1: Physical Linear Progress & Chainage Length KPI Cards */}
             <LinearKPICards
-              actualRows={filteredRows}
+              actualRows={actualRows}
               baseline={baseline}
               selectedActivities={filters.selectedActivities}
               side={filters.side}
+              selectedDate={selectedDate}
+              boqMetrics={boqMetrics}
             />
 
             {/* Row 2: Volumetric KPI Summary Cards (BoQ Quantities & Material Volumes) */}
@@ -636,7 +587,7 @@ function DashboardContent() {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <div className="min-h-[380px]">
                 <ActivityCompletionBalance
-                  actualRows={filteredRows}
+                  actualRows={cumulativeRows}
                   baseline={baseline}
                   selectedActivities={filters.selectedActivities}
                   side={filters.side}
@@ -644,7 +595,7 @@ function DashboardContent() {
               </div>
               <div className="min-h-[380px]">
                 <LHSRHSProgressComparison
-                  actualRows={filteredRowsBothSides}
+                  actualRows={cumulativeRows}
                   baseline={baseline}
                   selectedActivities={filters.selectedActivities}
                   globalSide={filters.side}

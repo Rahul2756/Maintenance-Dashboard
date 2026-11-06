@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { Clock } from 'lucide-react';
+import {
+  Clock,
+  Calendar,
+  Layers,
+  CheckCircle2,
+  Hourglass,
+  ArrowRight,
+  TrendingUp,
+  MapPin,
+  Maximize2
+} from 'lucide-react';
 import {
   ScheduleMilestones,
   SectionQuantityScope,
@@ -21,19 +31,6 @@ export interface ProjectOverviewModuleProps {
   className?: string;
 }
 
-interface MilestonePackageItem {
-  id: string;
-  title: string;
-  chainage: string;
-  statusLabel: string;
-  statusType: 'completed' | 'in_progress' | 'upcoming' | 'delayed';
-  plannedSchedule: string;
-  actualProgress: string;
-  metrics: string;
-  variance: string;
-  varianceColor: 'emerald' | 'cyan' | 'slate' | 'rose';
-}
-
 // Convert "13.10.2026" -> "13 Oct 2026"
 function formatMilestoneDate(dateStr: string): string {
   if (!dateStr) return '';
@@ -47,260 +44,149 @@ function formatMilestoneDate(dateStr: string): string {
   return `${d} ${monthName} ${y}`;
 }
 
-const KEY_PACKAGES_DATA: MilestonePackageItem[] = [
-  {
-    id: 'MS-01',
-    title: 'Section 2 Milling & DBM – Bahadarabad Toll to Haridwar',
-    chainage: 'Km 188+900 to Km 206+220 BHS',
-    statusLabel: 'IN_PROGRESS',
-    statusType: 'in_progress',
-    plannedSchedule: '13.10.2026 → 23.10.2026',
-    actualProgress: 'Completed on 23.10.2026',
-    metrics: '80,745 Sqm Milling / 4,054.75 Cum DBM (17.32 km)',
-    variance: 'In Progress (Active)',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'MS-02',
-    title: 'Section 2 Milling & DBM – Roorkee Bypass to Bahadarabad Toll',
-    chainage: 'Km 167+250 to Km 188+900 RHS & LHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '19.10.2026 → 18.11.2026',
-    actualProgress: 'Started 22.10.2026',
-    metrics: '186,536 Sqm Milling / 9,838 Cum DBM (21.65 km)',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'MS-03',
-    title: 'Section 2 BC Wearing Course – Roorkee to Haridwar',
-    chainage: 'Km 169+000 to Km 206+220 BHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '26.10.2026 → 22.11.2026',
-    actualProgress: 'Scheduled',
-    metrics: '256,320 Sqm Tack Coat / 10,252.8 Cum BC (37.22 km)',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'MS-04',
-    title: 'Section 1 Milling & DBM – Muzaffarnagar to Roorkee',
-    chainage: 'Km 130+560 to Km 167+250 RHS & LHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '16.11.2026 → 18.12.2026',
-    actualProgress: 'Scheduled',
-    metrics: '248,017 Sqm Milling / 14,513.2 Cum DBM (36.69 km)',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'MS-05',
-    title: 'Section 1 BC Wearing Course – Muzaffarnagar to Roorkee',
-    chainage: 'Km 130+560 to Km 169+000 BHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '28.11.2026 → 01.01.2027',
-    actualProgress: 'Scheduled',
-    metrics: '445,326 Sqm Tack Coat / 17,813 Cum BC (38.44 km)',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'MS-06',
-    title: 'Section 3 Service Roads Milling, DBM & Surfacing',
-    chainage: 'Full Corridor Service Roads BHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '14.12.2026 → 10.01.2027',
-    actualProgress: 'Scheduled',
-    metrics: '165,986 Sqm Milling / 8,620 Cum DBM & 7,508 Cum BC',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'MS-07',
-    title: 'Corridor Finishing, Road Markings & Earthen Shoulders',
-    chainage: 'Km 130+560 to Km 206+220 BHS (75.66 km)',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '21.11.2026 → 10.01.2027',
-    actualProgress: 'Scheduled',
-    metrics: '59,397 Sqm Road Marking / 159,084 Cum Shoulder',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  }
-];
-
-const WP_R1_PHASES_DATA: MilestonePackageItem[] = [
-  {
-    id: 'WK-01',
-    title: 'Phase 1: Bahadarabad Toll to Haridwar (LHS & RHS DBM Completion)',
-    chainage: 'Ch. 188+900 to 206+220 BHS',
-    statusLabel: 'COMPLETED',
-    statusType: 'completed',
-    plannedSchedule: '02.11.2026 → 07.11.2026',
-    actualProgress: 'Completed 07.11.2026',
-    metrics: '64,617 Sqm Milling / 3,223 Cum DBM Completed',
-    variance: 'On Schedule',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'WK-02',
-    title: 'Phase 2: Roorkee Bypass to Bahadarabad Toll (RHS Active Execution)',
-    chainage: 'Ch. 188+900 to 167+250 RHS',
-    statusLabel: 'IN_PROGRESS',
-    statusType: 'in_progress',
-    plannedSchedule: '10.11.2026 → 15.11.2026',
-    actualProgress: 'In Progress',
-    metrics: '24,498 Sqm Milling / 1,350 Cum DBM Targeted',
-    variance: 'In Progress (Active)',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'WK-03',
-    title: 'Phase 3: Roorkee to Haridwar BC Wearing Course Overlay',
-    chainage: 'Ch. 188+900 to 206+220 BHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '16.11.2026 → 22.11.2026',
-    actualProgress: 'Scheduled',
-    metrics: '21,500 Cum Tack Coat / 860 Cum BC Targeted',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'WK-04',
-    title: 'Phase 4: Roorkee Bypass to Bahadarabad Toll (LHS Milling & DBM)',
-    chainage: 'Ch. 167+250 to 188+900 LHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '23.11.2026 → 29.11.2026',
-    actualProgress: 'Scheduled',
-    metrics: '31,048 Sqm Milling / 1,575 Cum DBM Targeted',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'WK-05',
-    title: 'Phase 5: Muzaffarnagar to Roorkee Bypass (RHS Milling & DBM)',
-    chainage: 'Ch. 167+250 to 130+560 RHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '30.11.2026 → 06.12.2026',
-    actualProgress: 'Scheduled',
-    metrics: '25,711 Sqm Milling / 1,450 Cum DBM Targeted',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'WK-06',
-    title: 'Phase 6: Muzaffarnagar to Roorkee Bypass (LHS Milling Launch)',
-    chainage: 'Ch. 130+560 to 167+250 LHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '07.12.2026 → 13.12.2026',
-    actualProgress: 'Scheduled',
-    metrics: '11,589 Sqm Milling / 700 Cum DBM Targeted',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'WK-07',
-    title: 'Phase 7: Full Corridor Service Roads Surfacing (BHS)',
-    chainage: 'Full Corridor Service Roads BHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '14.12.2026 → 20.12.2026',
-    actualProgress: 'Scheduled',
-    metrics: '40,437 Sqm Milling / 2,100 Cum DBM Targeted',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'WK-08',
-    title: 'Phase 8: Muzaffarnagar to Roorkee BC Wearing Course (RHS)',
-    chainage: 'Ch. 167+250 to 130+560 RHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '21.12.2026 → 27.12.2026',
-    actualProgress: 'Scheduled',
-    metrics: '81,750 Sqm Tack Coat / 3,270 Cum BC Targeted',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'WK-09',
-    title: 'Phase 9: Muzaffarnagar to Roorkee BC Wearing Course (LHS)',
-    chainage: 'Ch. 130+560 to 167+250 LHS',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '28.12.2026 → 03.01.2027',
-    actualProgress: 'Scheduled',
-    metrics: '78,125 Sqm Tack Coat / 3,125 Cum BC Targeted',
-    variance: 'Upcoming Scheduled',
-    varianceColor: 'emerald'
-  },
-  {
-    id: 'WK-10',
-    title: 'Phase 10: Final Handover, Road Markings & Earthen Shoulders',
-    chainage: 'Ch. 130+560 to 206+220 BHS (75.66 km)',
-    statusLabel: 'UPCOMING',
-    statusType: 'upcoming',
-    plannedSchedule: '04.01.2027 → 10.01.2027',
-    actualProgress: 'Scheduled',
-    metrics: '59,397 Sqm Road Markings / 159,084 Cum Shoulders',
-    variance: 'Final Delivery',
-    varianceColor: 'emerald'
-  }
-];
-
-function getStatusBadgeClass(statusType: string): string {
-  switch (statusType) {
-    case 'in_progress':
-      return 'bg-blue-950/70 text-blue-400 border border-blue-600/40';
-    case 'upcoming':
-      return 'bg-slate-800/70 text-slate-300 border border-slate-700/60';
-    case 'completed':
-      return 'bg-emerald-950/70 text-emerald-400 border border-emerald-600/40';
-    case 'delayed':
-      return 'bg-rose-950/70 text-rose-400 border border-rose-600/40';
-    default:
-      return 'bg-slate-800/70 text-slate-300 border border-slate-700/60';
-  }
-}
-
-function getStatusDotClass(statusType: string): string {
-  switch (statusType) {
-    case 'in_progress':
-      return 'bg-blue-400 animate-pulse';
-    case 'upcoming':
-      return 'bg-slate-400';
-    case 'completed':
-      return 'bg-emerald-400';
-    case 'delayed':
-      return 'bg-rose-400 animate-pulse';
-    default:
-      return 'bg-slate-400';
-  }
+// Format numbers with thousands separators
+function formatNumber(val: number | undefined | null, decimals: number = 0): string {
+  if (val === null || val === undefined || isNaN(val) || !isFinite(val)) return '0';
+  return val.toLocaleString('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
 }
 
 export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
   milestones = DEFAULT_SCHEDULE_MILESTONES,
-  _sectionScopes = DEFAULT_SECTION_SCOPES,
-  _consolidatedScope = DEFAULT_CONSOLIDATED_SCOPE,
-  _cumulativeAchieved = DEFAULT_CUMULATIVE_ACHIEVED,
+  sectionScopes = DEFAULT_SECTION_SCOPES,
+  consolidatedScope = DEFAULT_CONSOLIDATED_SCOPE,
+  cumulativeAchieved = DEFAULT_CUMULATIVE_ACHIEVED,
   className = ''
-}: any) => {
-  const [activeTab, setActiveTab] = useState<'packages' | 'phases'>('packages');
+}) => {
+  const [selectedSection, setSelectedSection] = useState<'all' | 'sec1' | 'sec2'>('all');
+
+  const sec1 = sectionScopes[0] || DEFAULT_SECTION_SCOPES[0];
+  const sec2 = sectionScopes[1] || DEFAULT_SECTION_SCOPES[1];
 
   // Derived timeline calculations
   const totalDays = milestones.totalDays || (milestones.daysElapsed + milestones.daysRemaining) || 79;
   const timeElapsedPct = totalDays > 0 ? (milestones.daysElapsed / totalDays) * 100 : 12.66;
 
-  const currentItems = activeTab === 'packages' ? KEY_PACKAGES_DATA : WP_R1_PHASES_DATA;
+  // Selected Section View Scope & Progress Calculations
+  const currentView = React.useMemo(() => {
+    if (selectedSection === 'sec1') {
+      return {
+        name: sec1.sectionName,
+        span: sec1.chainageSpan,
+        lengthKm: sec1.lengthKm,
+        milling: {
+          scope: sec1.millingSqm.total,
+          achieved: 0,
+          pct: 0,
+          lhs: sec1.millingSqm.lhs,
+          rhs: sec1.millingSqm.rhs
+        },
+        tackCoat: {
+          scope: sec1.tackCoatSqm.total,
+          achieved: 0,
+          pct: 0,
+          lhs: sec1.tackCoatSqm.lhs,
+          rhs: sec1.tackCoatSqm.rhs
+        },
+        dbm: {
+          scope: sec1.dbmCum.total,
+          achieved: 0,
+          pct: 0,
+          lhs: sec1.dbmCum.lhs,
+          rhs: sec1.dbmCum.rhs
+        },
+        bc: {
+          scope: sec1.bcCum.total,
+          achieved: 0,
+          pct: 0,
+          lhs: sec1.bcCum.lhs,
+          rhs: sec1.bcCum.rhs
+        }
+      };
+    }
+
+    if (selectedSection === 'sec2') {
+      const mAchieved = cumulativeAchieved.millingSqm;
+      const tAchieved = cumulativeAchieved.tackCoatSqm;
+      const dAchieved = cumulativeAchieved.dbmCum;
+      const bAchieved = cumulativeAchieved.bcCum;
+
+      return {
+        name: sec2.sectionName,
+        span: sec2.chainageSpan,
+        lengthKm: sec2.lengthKm,
+        milling: {
+          scope: sec2.millingSqm.total,
+          achieved: mAchieved,
+          pct: sec2.millingSqm.total > 0 ? (mAchieved / sec2.millingSqm.total) * 100 : 13.7,
+          lhs: sec2.millingSqm.lhs,
+          rhs: sec2.millingSqm.rhs
+        },
+        tackCoat: {
+          scope: sec2.tackCoatSqm.total,
+          achieved: tAchieved,
+          pct: sec2.tackCoatSqm.total > 0 ? (tAchieved / sec2.tackCoatSqm.total) * 100 : 3.8,
+          lhs: sec2.tackCoatSqm.lhs,
+          rhs: sec2.tackCoatSqm.rhs
+        },
+        dbm: {
+          scope: sec2.dbmCum.total,
+          achieved: dAchieved,
+          pct: sec2.dbmCum.total > 0 ? (dAchieved / sec2.dbmCum.total) * 100 : 11.2,
+          lhs: sec2.dbmCum.lhs,
+          rhs: sec2.dbmCum.rhs
+        },
+        bc: {
+          scope: sec2.bcCum.total,
+          achieved: bAchieved,
+          pct: 0,
+          lhs: sec2.bcCum.lhs,
+          rhs: sec2.bcCum.rhs
+        }
+      };
+    }
+
+    // Default 'all' - Consolidated Scope
+    const mScope = consolidatedScope.millingSqm.mcw || 515298;
+    const tScope = consolidatedScope.tackCoatSqm.mcw || 1494585;
+    const dScope = consolidatedScope.dbmCum || 28406.2;
+    const bScope = consolidatedScope.bcPmbCum || 39171.5;
+
+    const mAchieved = cumulativeAchieved.millingSqm;
+    const tAchieved = cumulativeAchieved.tackCoatSqm;
+    const dAchieved = cumulativeAchieved.dbmCum;
+    const bAchieved = cumulativeAchieved.bcCum;
+
+    return {
+      name: 'All Sections (Full Corridor)',
+      span: 'CH. 130+560 to 206+220',
+      lengthKm: 75.66,
+      milling: {
+        scope: mScope,
+        grandTotal: consolidatedScope.millingSqm.total,
+        achieved: mAchieved,
+        pct: mScope > 0 ? (mAchieved / mScope) * 100 : 6.6
+      },
+      tackCoat: {
+        scope: tScope,
+        grandTotal: consolidatedScope.tackCoatSqm.total,
+        achieved: tAchieved,
+        pct: tScope > 0 ? (tAchieved / tScope) * 100 : 1.9
+      },
+      dbm: {
+        scope: dScope,
+        achieved: dAchieved,
+        pct: dScope > 0 ? (dAchieved / dScope) * 100 : 5.1
+      },
+      bc: {
+        scope: bScope,
+        achieved: bAchieved,
+        pct: 0
+      }
+    };
+  }, [selectedSection, sec1, sec2, consolidatedScope, cumulativeAchieved]);
 
   return (
     <section
@@ -403,125 +289,317 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
       </div>
 
       {/* ============================================================ */}
-      {/* COLUMN 2: PROJECT MILESTONE TIMELINE (lg:col-span-8)          */}
+      {/* COLUMN 2: Total Contract Scope & BOQ Baseline (lg:col-span-8) */}
       {/* ============================================================ */}
       <div className="lg:col-span-8 bg-[#0F1422] border border-white/5 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xl shadow-black/40">
         {/* Header Row */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-3.5">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50" />
-            <h3 className="text-white font-bold text-sm md:text-base tracking-wider uppercase font-mono">
-              PROJECT MILESTONE TIMELINE
-            </h3>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-white font-bold text-base tracking-tight">
+                Total Project Scope & BOQ Baseline
+              </h2>
+              <p className="text-xs text-slate-400">
+                Work Program & Contractual Bill of Quantities (Muzaffarnagar – Haridwar)
+              </p>
+            </div>
           </div>
 
-          {/* View Toggles */}
-          <div className="flex items-center gap-1.5 bg-[#111624] p-1 rounded-xl border border-white/5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs px-3 py-1 rounded-full bg-cyan-950/40 text-cyan-300 border border-cyan-800/40 font-mono font-medium">
+              NH-334: 75.66 km Total Corridor
+            </span>
+            <span className="text-xs px-3 py-1 rounded-full bg-slate-800/60 text-slate-300 border border-white/10 font-medium">
+              Dual Carriageway (LHS & RHS)
+            </span>
+          </div>
+        </div>
+
+        {/* Section Filter Selector */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111624] p-1.5 rounded-xl border border-white/5">
+          <div className="flex items-center gap-1.5 pl-1.5 text-xs text-slate-400">
+            <MapPin className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="font-medium text-slate-300">Corridor Scope View:</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
               type="button"
-              onClick={() => setActiveTab('packages')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activeTab === 'packages'
-                  ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-900/40'
-                  : 'bg-transparent text-slate-400 hover:text-white border border-transparent'
+              onClick={() => setSelectedSection('all')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                selectedSection === 'all'
+                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-950/50 font-semibold'
+                  : 'bg-white/[0.03] text-slate-400 border-white/5 hover:text-white hover:bg-white/10'
               }`}
             >
-              Key Packages (MS 1–7)
+              All Sections (75.66 km)
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('phases')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activeTab === 'phases'
-                  ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-900/40'
-                  : 'bg-transparent text-slate-400 hover:text-white border border-transparent'
+              onClick={() => setSelectedSection('sec1')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                selectedSection === 'sec1'
+                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-950/50 font-semibold'
+                  : 'bg-white/[0.03] text-slate-400 border-white/5 hover:text-white hover:bg-white/10'
               }`}
             >
-              WP-R1 Phases (10 Wks)
+              Muzaffarnagar to Roorkee (38.44 km)
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedSection('sec2')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                selectedSection === 'sec2'
+                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-950/50 font-semibold'
+                  : 'bg-white/[0.03] text-slate-400 border-white/5 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              Roorkee to Haridwar (37.22 km)
             </button>
           </div>
         </div>
 
-        {/* Scrollable Milestone Cards List */}
-        <div className="space-y-3 overflow-y-auto max-h-[380px] pr-1.5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-          {currentItems.map((item) => (
-            <div
-              key={item.id}
-              className="bg-[#111726]/90 border border-white/[0.06] rounded-xl p-3.5 space-y-2.5 transition-all duration-200 hover:border-cyan-500/30 shadow-md shadow-black/20"
-            >
-              {/* Row 1: ID, Title & Status Badge */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-500/40 font-mono font-bold text-xs tracking-wider shrink-0">
-                    {item.id}
-                  </span>
-                  <h4 className="text-white font-bold text-sm tracking-tight">
-                    {item.title}
-                  </h4>
-                </div>
-
-                <span
-                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wide shrink-0 flex items-center gap-1.5 ${getStatusBadgeClass(
-                    item.statusType
-                  )}`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${getStatusDotClass(item.statusType)}`}
-                  />
-                  {item.statusLabel}
+        {/* 4 Core Engineering Scope Cards (Milling, Tack Coat, DBM, BC) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5 my-1">
+          {/* 1. Milling Card */}
+          <div className="bg-[#111624] border border-white/5 rounded-xl p-3.5 flex flex-col justify-between space-y-3 transition-all hover:border-cyan-500/30">
+            <div>
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="font-semibold text-slate-300 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                  Milling
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-800/40">
+                  Sqm
                 </span>
               </div>
-
-              {/* Row 2: Subtitle / Chainage */}
-              <div className="text-slate-400 text-xs font-mono">
-                {item.chainage}
+              <div className="text-lg font-bold font-mono text-white">
+                {formatNumber(currentView.milling.scope)} <span className="text-xs font-normal text-slate-400">Sqm</span>
               </div>
-
-              {/* Row 3: Inner Schedule & Actual Box */}
-              <div className="bg-[#0B0F19] border border-white/[0.04] rounded-lg px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-400">Planned Schedule:</span>
-                  <span className="text-slate-200 font-medium">{item.plannedSchedule}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-400">Actual / Progress:</span>
-                  <span className="text-cyan-400 font-semibold">{item.actualProgress}</span>
-                </div>
+              <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between font-mono">
+                <span>Achieved:</span>
+                <span className="text-cyan-400 font-semibold">{formatNumber(currentView.milling.achieved, 1)} Sqm</span>
               </div>
-
-              {/* Row 4: Scope metrics and status variance */}
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
-                <span className="text-slate-400">{item.metrics}</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-slate-400">Status Variance:</span>
-                  <span className="text-emerald-400 font-medium">{item.variance}</span>
+              {selectedSection !== 'all' && (currentView.milling as any).lhs !== undefined && (
+                <div className="text-[10px] text-slate-500 mt-1 pt-1 border-t border-white/5 flex justify-between font-mono">
+                  <span>LHS: {formatNumber((currentView.milling as any).lhs)}</span>
+                  <span>RHS: {formatNumber((currentView.milling as any).rhs)}</span>
                 </div>
-              </div>
+              )}
             </div>
-          ))}
-        </div>
 
-        {/* Footer: Status Legend */}
-        <div className="pt-3 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-3 text-xs">
-          <span className="text-slate-400 font-medium">Status Legend:</span>
-          <div className="flex flex-wrap items-center gap-4 text-slate-300 font-medium">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>Completed</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-cyan-400" />
-              <span>In Progress</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-slate-400" />
-              <span>Upcoming</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-rose-500" />
-              <span>Delayed</span>
+            <div>
+              <div className="flex items-center justify-between text-[11px] font-mono mb-1 text-slate-400">
+                <span>Scope Progress</span>
+                <span className="text-cyan-300 font-semibold">{currentView.milling.pct.toFixed(1)}%</span>
+              </div>
+              <div className="w-full bg-[#1A2234] rounded-full h-2 overflow-hidden flex">
+                <div
+                  className="h-full rounded-full bg-cyan-400 transition-all duration-700"
+                  style={{ width: `${Math.min(100, Math.max(0, currentView.milling.pct))}%` }}
+                />
+              </div>
             </div>
           </div>
+
+          {/* 2. Tack Coat Card */}
+          <div className="bg-[#111624] border border-white/5 rounded-xl p-3.5 flex flex-col justify-between space-y-3 transition-all hover:border-amber-500/30">
+            <div>
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="font-semibold text-slate-300 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  Tack Coat
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-950/60 text-amber-300 border border-amber-800/40">
+                  Sqm
+                </span>
+              </div>
+              <div className="text-lg font-bold font-mono text-white">
+                {formatNumber(currentView.tackCoat.scope)} <span className="text-xs font-normal text-slate-400">Sqm</span>
+              </div>
+              <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between font-mono">
+                <span>Achieved:</span>
+                <span className="text-amber-400 font-semibold">{formatNumber(currentView.tackCoat.achieved, 1)} Sqm</span>
+              </div>
+              {selectedSection !== 'all' && (currentView.tackCoat as any).lhs !== undefined && (
+                <div className="text-[10px] text-slate-500 mt-1 pt-1 border-t border-white/5 flex justify-between font-mono">
+                  <span>LHS: {formatNumber((currentView.tackCoat as any).lhs)}</span>
+                  <span>RHS: {formatNumber((currentView.tackCoat as any).rhs)}</span>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between text-[11px] font-mono mb-1 text-slate-400">
+                <span>Scope Progress</span>
+                <span className="text-amber-300 font-semibold">{currentView.tackCoat.pct.toFixed(1)}%</span>
+              </div>
+              <div className="w-full bg-[#1A2234] rounded-full h-2 overflow-hidden flex">
+                <div
+                  className="h-full rounded-full bg-amber-400 transition-all duration-700"
+                  style={{ width: `${Math.min(100, Math.max(0, currentView.tackCoat.pct))}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. DBM (Bituminous Base) Card */}
+          <div className="bg-[#111624] border border-white/5 rounded-xl p-3.5 flex flex-col justify-between space-y-3 transition-all hover:border-emerald-500/30">
+            <div>
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="font-semibold text-slate-300 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  DBM (Bituminous Base)
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-800/40">
+                  Cum
+                </span>
+              </div>
+              <div className="text-lg font-bold font-mono text-white">
+                {formatNumber(currentView.dbm.scope, 0)} <span className="text-xs font-normal text-slate-400">Cum</span>
+              </div>
+              <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between font-mono">
+                <span>Achieved:</span>
+                <span className="text-emerald-400 font-semibold">{formatNumber(currentView.dbm.achieved, 1)} Cum</span>
+              </div>
+              {selectedSection !== 'all' && (currentView.dbm as any).lhs !== undefined && (
+                <div className="text-[10px] text-slate-500 mt-1 pt-1 border-t border-white/5 flex justify-between font-mono">
+                  <span>LHS: {formatNumber((currentView.dbm as any).lhs, 1)}</span>
+                  <span>RHS: {formatNumber((currentView.dbm as any).rhs, 1)}</span>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between text-[11px] font-mono mb-1 text-slate-400">
+                <span>Scope Progress</span>
+                <span className="text-emerald-300 font-semibold">{currentView.dbm.pct.toFixed(1)}%</span>
+              </div>
+              <div className="w-full bg-[#1A2234] rounded-full h-2 overflow-hidden flex">
+                <div
+                  className="h-full rounded-full bg-emerald-400 transition-all duration-700"
+                  style={{ width: `${Math.min(100, Math.max(0, currentView.dbm.pct))}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 4. BC (Wearing Course) Card */}
+          <div className="bg-[#111624] border border-white/5 rounded-xl p-3.5 flex flex-col justify-between space-y-3 transition-all hover:border-purple-500/30">
+            <div>
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="font-semibold text-slate-300 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-purple-400" />
+                  BC (Wearing Course)
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-950/60 text-purple-300 border border-purple-800/40">
+                  Cum
+                </span>
+              </div>
+              <div className="text-lg font-bold font-mono text-white">
+                {formatNumber(currentView.bc.scope, 0)} <span className="text-xs font-normal text-slate-400">Cum</span>
+              </div>
+              <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between font-mono">
+                <span>Achieved:</span>
+                <span className="text-purple-300 font-semibold">{formatNumber(currentView.bc.achieved, 1)} Cum</span>
+              </div>
+              {selectedSection !== 'all' && (currentView.bc as any).lhs !== undefined && (
+                <div className="text-[10px] text-slate-500 mt-1 pt-1 border-t border-white/5 flex justify-between font-mono">
+                  <span>LHS: {formatNumber((currentView.bc as any).lhs, 1)}</span>
+                  <span>RHS: {formatNumber((currentView.bc as any).rhs, 1)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Visual Indicator: Pending Layer Sequencing */}
+            <div>
+              <div className="flex items-center justify-between text-[11px] font-mono mb-1 text-slate-400">
+                <span>Scope Status</span>
+                <span className="text-slate-500">0.0%</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-medium w-full justify-center">
+                <Hourglass className="w-3 h-3 text-amber-400 animate-spin" style={{ animationDuration: '6s' }} />
+                <span>Pending Layer Sequencing</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Corridor Strip Details */}
+        <div className="pt-3 border-t border-white/[0.06] grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* Section 1 Breakdown Card */}
+          <button
+            type="button"
+            onClick={() => setSelectedSection(selectedSection === 'sec1' ? 'all' : 'sec1')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+              selectedSection === 'sec1'
+                ? 'bg-cyan-950/30 border-cyan-500/40 ring-1 ring-cyan-500/30 shadow-md'
+                : 'bg-[#111624] border-white/5 hover:border-white/10 hover:bg-[#141b2c]'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span>Muzaffarnagar</span>
+                  <ArrowRight className="w-3 h-3 text-slate-400" />
+                  <span>Roorkee</span>
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                  38.44 km
+                </span>
+              </div>
+              <span className="text-[11px] font-mono text-cyan-400">
+                Ch. 130+560 to 169+000
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-xs font-mono text-slate-400">
+              <span>Milling: <strong className="text-slate-200">{formatNumber(sec1.millingSqm.total)}</strong> Sqm</span>
+              <span className="text-slate-600">•</span>
+              <span>DBM: <strong className="text-slate-200">{formatNumber(sec1.dbmCum.total, 0)}</strong> Cum</span>
+              <span className="text-slate-600">•</span>
+              <span>BC: <strong className="text-slate-200">{formatNumber(sec1.bcCum.total, 0)}</strong> Cum</span>
+            </div>
+          </button>
+
+          {/* Section 2 Breakdown Card */}
+          <button
+            type="button"
+            onClick={() => setSelectedSection(selectedSection === 'sec2' ? 'all' : 'sec2')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+              selectedSection === 'sec2'
+                ? 'bg-cyan-950/30 border-cyan-500/40 ring-1 ring-cyan-500/30 shadow-md'
+                : 'bg-[#111624] border-white/5 hover:border-white/10 hover:bg-[#141b2c]'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span>Roorkee</span>
+                  <ArrowRight className="w-3 h-3 text-slate-400" />
+                  <span>Haridwar</span>
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 font-mono font-medium">
+                  Active DPR
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                  37.22 km
+                </span>
+              </div>
+              <span className="text-[11px] font-mono text-cyan-400">
+                Ch. 169+000 to 206+220
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-xs font-mono text-slate-400">
+              <span>Milling: <strong className="text-slate-200">{formatNumber(sec2.millingSqm.total)}</strong> Sqm</span>
+              <span className="text-slate-600">•</span>
+              <span>DBM: <strong className="text-slate-200">{formatNumber(sec2.dbmCum.total, 0)}</strong> Cum</span>
+              <span className="text-slate-600">•</span>
+              <span>BC: <strong className="text-slate-200">{formatNumber(sec2.bcCum.total, 0)}</strong> Cum</span>
+            </div>
+          </button>
         </div>
       </div>
     </section>
