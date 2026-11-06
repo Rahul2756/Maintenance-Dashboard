@@ -1,0 +1,9 @@
+{
+  "name": "nh334-maintenance-dashboard-root",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix nh334-dpr-dashboard run dev",
+    "build": "npm --prefix nh334-dpr-dashboard run build",
+    "preview": "npm --prefix nh334-dpr-dashboard run preview"
+  }
+}

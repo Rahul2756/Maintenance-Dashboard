@@ -1,0 +1,7283 @@
+{
+  "metadata": {
+    "title": "Muzaffarnagar to Haridwar (MH) Project Strip Chart KM Wise",
+    "chainageSpanText": "130+560 to 206+200",
+    "startChainage": "130+560",
+    "endChainage": "206+200",
+    "startM": 130560,
+    "endM": 206200,
+    "totalLengthM": 75840,
+    "totalIntervals": 95
+  },
+  "lhsActivities": [
+    {
+      "id": "road_marking",
+      "name": "Road Marking",
+      "row": 2
+    },
+    {
+      "id": "earthen_shoulder",
+      "name": "Earthen Shoulder",
+      "row": 3
+    },
+    {
+      "id": "bc_fw",
+      "name": "BC (FW)",
+      "row": 4
+    },
+    {
+      "id": "composite_glass_grid",
+      "name": "Composite Glass Grid/Crack Sealing",
+      "row": 5
+    },
+    {
+      "id": "dbm",
+      "name": "DBM",
+      "row": 6
+    },
+    {
+      "id": "milling_dbm",
+      "name": "Milling DBM",
+      "row": 7
+    }
+  ],
+  "rhsActivities": [
+    {
+      "id": "milling_dbm",
+      "name": "Milling DBM",
+      "row": 12
+    },
+    {
+      "id": "dbm",
+      "name": "DBM",
+      "row": 13
+    },
+    {
+      "id": "composite_glass_grid",
+      "name": "Composite Glass Grid/Crack Sealing",
+      "row": 14
+    },
+    {
+      "id": "bc_fw",
+      "name": "BC (FW)",
+      "row": 15
+    },
+    {
+      "id": "earthen_shoulder",
+      "name": "Earthen Shoulder",
+      "row": 16
+    },
+    {
+      "id": "road_marking",
+      "name": "Road Marking",
+      "row": 17
+    }
+  ],
+  "intervals": [
+    {
+      "index": 0,
+      "col": 3,
+      "colLetter": "D",
+      "fromChainage": "130+560",
+      "toChainage": "131+000",
+      "fromM": 130560,
+      "toM": 131000,
+      "lengthM": 440,
+      "lengthRHS": 440,
+      "calculatedLengthM": 440,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 1,
+      "col": 4,
+      "colLetter": "E",
+      "fromChainage": "131+000",
+      "toChainage": "132+000",
+      "fromM": 131000,
+      "toM": 132000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 2,
+      "col": 5,
+      "colLetter": "F",
+      "fromChainage": "132+000",
+      "toChainage": "133+000",
+      "fromM": 132000,
+      "toM": 133000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 3,
+      "col": 6,
+      "colLetter": "G",
+      "fromChainage": "133+000",
+      "toChainage": "134+000",
+      "fromM": 133000,
+      "toM": 134000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 4,
+      "col": 7,
+      "colLetter": "H",
+      "fromChainage": "134+000",
+      "toChainage": "135+000",
+      "fromM": 134000,
+      "toM": 135000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 5,
+      "col": 8,
+      "colLetter": "I",
+      "fromChainage": "135+000",
+      "toChainage": "136+000",
+      "fromM": 135000,
+      "toM": 136000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 6,
+      "col": 9,
+      "colLetter": "J",
+      "fromChainage": "136+000",
+      "toChainage": "137+000",
+      "fromM": 136000,
+      "toM": 137000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 7,
+      "col": 10,
+      "colLetter": "K",
+      "fromChainage": "137+000",
+      "toChainage": "138+000",
+      "fromM": 137000,
+      "toM": 138000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 8,
+      "col": 11,
+      "colLetter": "L",
+      "fromChainage": "138+000",
+      "toChainage": "139+000",
+      "fromM": 138000,
+      "toM": 139000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 9,
+      "col": 12,
+      "colLetter": "M",
+      "fromChainage": "139+000",
+      "toChainage": "140+000",
+      "fromM": 139000,
+      "toM": 140000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 10,
+      "col": 13,
+      "colLetter": "N",
+      "fromChainage": "140+000",
+      "toChainage": "141+000",
+      "fromM": 140000,
+      "toM": 141000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 11,
+      "col": 14,
+      "colLetter": "O",
+      "fromChainage": "141+000",
+      "toChainage": "142+000",
+      "fromM": 141000,
+      "toM": 142000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 12,
+      "col": 15,
+      "colLetter": "P",
+      "fromChainage": "142+000",
+      "toChainage": "143+000",
+      "fromM": 142000,
+      "toM": 143000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 13,
+      "col": 16,
+      "colLetter": "Q",
+      "fromChainage": "143+000",
+      "toChainage": "144+000",
+      "fromM": 143000,
+      "toM": 144000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 14,
+      "col": 17,
+      "colLetter": "R",
+      "fromChainage": "144+000",
+      "toChainage": "145+000",
+      "fromM": 144000,
+      "toM": 145000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 15,
+      "col": 18,
+      "colLetter": "S",
+      "fromChainage": "145+000",
+      "toChainage": "146+000",
+      "fromM": 145000,
+      "toM": 146000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 16,
+      "col": 19,
+      "colLetter": "T",
+      "fromChainage": "146+000",
+      "toChainage": "147+000",
+      "fromM": 146000,
+      "toM": 147000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 17,
+      "col": 20,
+      "colLetter": "U",
+      "fromChainage": "147+000",
+      "toChainage": "148+000",
+      "fromM": 147000,
+      "toM": 148000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 18,
+      "col": 21,
+      "colLetter": "V",
+      "fromChainage": "148+000",
+      "toChainage": "149+000",
+      "fromM": 148000,
+      "toM": 149000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 19,
+      "col": 22,
+      "colLetter": "W",
+      "fromChainage": "149+000",
+      "toChainage": "150+000",
+      "fromM": 149000,
+      "toM": 150000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 20,
+      "col": 23,
+      "colLetter": "X",
+      "fromChainage": "150+000",
+      "toChainage": "151+000",
+      "fromM": 150000,
+      "toM": 151000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 21,
+      "col": 24,
+      "colLetter": "Y",
+      "fromChainage": "151+000",
+      "toChainage": "152+000",
+      "fromM": 151000,
+      "toM": 152000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 22,
+      "col": 25,
+      "colLetter": "Z",
+      "fromChainage": "152+000",
+      "toChainage": "153+000",
+      "fromM": 152000,
+      "toM": 153000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 23,
+      "col": 26,
+      "colLetter": "AA",
+      "fromChainage": "153+000",
+      "toChainage": "153+900",
+      "fromM": 153000,
+      "toM": 153900,
+      "lengthM": 900,
+      "lengthRHS": 900,
+      "calculatedLengthM": 900,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 24,
+      "col": 27,
+      "colLetter": "AB",
+      "fromChainage": "153+900",
+      "toChainage": "154+000",
+      "fromM": 153900,
+      "toM": 154000,
+      "lengthM": 100,
+      "lengthRHS": 100,
+      "calculatedLengthM": 100,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 25,
+      "col": 28,
+      "colLetter": "AC",
+      "fromChainage": "154+000",
+      "toChainage": "154+600",
+      "fromM": 154000,
+      "toM": 154600,
+      "lengthM": 600,
+      "lengthRHS": 600,
+      "calculatedLengthM": 600,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 26,
+      "col": 29,
+      "colLetter": "AD",
+      "fromChainage": "154+600",
+      "toChainage": "155+000",
+      "fromM": 154600,
+      "toM": 155000,
+      "lengthM": 400,
+      "lengthRHS": 400,
+      "calculatedLengthM": 400,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 27,
+      "col": 30,
+      "colLetter": "AE",
+      "fromChainage": "155+000",
+      "toChainage": "156+000",
+      "fromM": 155000,
+      "toM": 156000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 28,
+      "col": 31,
+      "colLetter": "AF",
+      "fromChainage": "156+000",
+      "toChainage": "157+000",
+      "fromM": 156000,
+      "toM": 157000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 29,
+      "col": 32,
+      "colLetter": "AG",
+      "fromChainage": "157+000",
+      "toChainage": "158+000",
+      "fromM": 157000,
+      "toM": 158000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 30,
+      "col": 33,
+      "colLetter": "AH",
+      "fromChainage": "158+000",
+      "toChainage": "159+000",
+      "fromM": 158000,
+      "toM": 159000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 31,
+      "col": 34,
+      "colLetter": "AI",
+      "fromChainage": "159+000",
+      "toChainage": "159+300",
+      "fromM": 159000,
+      "toM": 159300,
+      "lengthM": 300,
+      "lengthRHS": 300,
+      "calculatedLengthM": 300,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 32,
+      "col": 35,
+      "colLetter": "AJ",
+      "fromChainage": "159+300",
+      "toChainage": "160+000",
+      "fromM": 159300,
+      "toM": 160000,
+      "lengthM": 700,
+      "lengthRHS": 700,
+      "calculatedLengthM": 700,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 33,
+      "col": 36,
+      "colLetter": "AK",
+      "fromChainage": "160+000",
+      "toChainage": "160+200",
+      "fromM": 160000,
+      "toM": 160200,
+      "lengthM": 200,
+      "lengthRHS": 200,
+      "calculatedLengthM": 200,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 34,
+      "col": 37,
+      "colLetter": "AL",
+      "fromChainage": "160+200",
+      "toChainage": "161+000",
+      "fromM": 160200,
+      "toM": 161000,
+      "lengthM": 800,
+      "lengthRHS": 800,
+      "calculatedLengthM": 800,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 35,
+      "col": 38,
+      "colLetter": "AM",
+      "fromChainage": "161+000",
+      "toChainage": "161+400",
+      "fromM": 161000,
+      "toM": 161400,
+      "lengthM": 400,
+      "lengthRHS": 400,
+      "calculatedLengthM": 400,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 36,
+      "col": 39,
+      "colLetter": "AN",
+      "fromChainage": "161+400",
+      "toChainage": "162+000",
+      "fromM": 161400,
+      "toM": 162000,
+      "lengthM": 600,
+      "lengthRHS": 600,
+      "calculatedLengthM": 600,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 37,
+      "col": 40,
+      "colLetter": "AO",
+      "fromChainage": "162+000",
+      "toChainage": "162+100",
+      "fromM": 162000,
+      "toM": 162100,
+      "lengthM": 100,
+      "lengthRHS": 100,
+      "calculatedLengthM": 100,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 38,
+      "col": 41,
+      "colLetter": "AP",
+      "fromChainage": "162+100",
+      "toChainage": "163+000",
+      "fromM": 162100,
+      "toM": 163000,
+      "lengthM": 900,
+      "lengthRHS": 900,
+      "calculatedLengthM": 900,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 39,
+      "col": 42,
+      "colLetter": "AQ",
+      "fromChainage": "163+000",
+      "toChainage": "164+000",
+      "fromM": 163000,
+      "toM": 164000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 40,
+      "col": 43,
+      "colLetter": "AR",
+      "fromChainage": "164+000",
+      "toChainage": "165+000",
+      "fromM": 164000,
+      "toM": 165000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 41,
+      "col": 44,
+      "colLetter": "AS",
+      "fromChainage": "165+000",
+      "toChainage": "166+000",
+      "fromM": 165000,
+      "toM": 166000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 42,
+      "col": 45,
+      "colLetter": "AT",
+      "fromChainage": "166+000",
+      "toChainage": "167+000",
+      "fromM": 166000,
+      "toM": 167000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 43,
+      "col": 46,
+      "colLetter": "AU",
+      "fromChainage": "167+000",
+      "toChainage": "168+000",
+      "fromM": 167000,
+      "toM": 168000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 44,
+      "col": 47,
+      "colLetter": "AV",
+      "fromChainage": "168+000",
+      "toChainage": "169+000",
+      "fromM": 168000,
+      "toM": 169000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 45,
+      "col": 48,
+      "colLetter": "AW",
+      "fromChainage": "169+000",
+      "toChainage": "170+000",
+      "fromM": 169000,
+      "toM": 170000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 46,
+      "col": 49,
+      "colLetter": "AX",
+      "fromChainage": "170+000",
+      "toChainage": "171+000",
+      "fromM": 170000,
+      "toM": 171000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 47,
+      "col": 50,
+      "colLetter": "AY",
+      "fromChainage": "171+000",
+      "toChainage": "172+000",
+      "fromM": 171000,
+      "toM": 172000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 48,
+      "col": 51,
+      "colLetter": "AZ",
+      "fromChainage": "172+000",
+      "toChainage": "173+000",
+      "fromM": 172000,
+      "toM": 173000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 49,
+      "col": 52,
+      "colLetter": "BA",
+      "fromChainage": "173+000",
+      "toChainage": "174+000",
+      "fromM": 173000,
+      "toM": 174000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 50,
+      "col": 53,
+      "colLetter": "BB",
+      "fromChainage": "174+000",
+      "toChainage": "175+000",
+      "fromM": 174000,
+      "toM": 175000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 51,
+      "col": 54,
+      "colLetter": "BC",
+      "fromChainage": "175+000",
+      "toChainage": "176+000",
+      "fromM": 175000,
+      "toM": 176000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 52,
+      "col": 55,
+      "colLetter": "BD",
+      "fromChainage": "176+000",
+      "toChainage": "177+000",
+      "fromM": 176000,
+      "toM": 177000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 53,
+      "col": 56,
+      "colLetter": "BE",
+      "fromChainage": "177+000",
+      "toChainage": "178+000",
+      "fromM": 177000,
+      "toM": 178000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 54,
+      "col": 57,
+      "colLetter": "BF",
+      "fromChainage": "178+000",
+      "toChainage": "179+000",
+      "fromM": 178000,
+      "toM": 179000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 55,
+      "col": 58,
+      "colLetter": "BG",
+      "fromChainage": "179+000",
+      "toChainage": "180+000",
+      "fromM": 179000,
+      "toM": 180000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 56,
+      "col": 59,
+      "colLetter": "BH",
+      "fromChainage": "180+000",
+      "toChainage": "181+000",
+      "fromM": 180000,
+      "toM": 181000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 57,
+      "col": 60,
+      "colLetter": "BI",
+      "fromChainage": "181+000",
+      "toChainage": "182+000",
+      "fromM": 181000,
+      "toM": 182000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 58,
+      "col": 61,
+      "colLetter": "BJ",
+      "fromChainage": "182+000",
+      "toChainage": "182+100",
+      "fromM": 182000,
+      "toM": 182100,
+      "lengthM": 100,
+      "lengthRHS": 100,
+      "calculatedLengthM": 100,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 59,
+      "col": 62,
+      "colLetter": "BK",
+      "fromChainage": "182+100",
+      "toChainage": "183+000",
+      "fromM": 182100,
+      "toM": 183000,
+      "lengthM": 900,
+      "lengthRHS": 900,
+      "calculatedLengthM": 900,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 60,
+      "col": 63,
+      "colLetter": "BL",
+      "fromChainage": "183+000",
+      "toChainage": "184+000",
+      "fromM": 183000,
+      "toM": 184000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 61,
+      "col": 64,
+      "colLetter": "BM",
+      "fromChainage": "184+000",
+      "toChainage": "185+000",
+      "fromM": 184000,
+      "toM": 185000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 62,
+      "col": 65,
+      "colLetter": "BN",
+      "fromChainage": "185+000",
+      "toChainage": "186+000",
+      "fromM": 185000,
+      "toM": 186000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 63,
+      "col": 66,
+      "colLetter": "BO",
+      "fromChainage": "186+000",
+      "toChainage": "187+000",
+      "fromM": 186000,
+      "toM": 187000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 64,
+      "col": 67,
+      "colLetter": "BP",
+      "fromChainage": "187+000",
+      "toChainage": "188+000",
+      "fromM": 187000,
+      "toM": 188000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 65,
+      "col": 68,
+      "colLetter": "BQ",
+      "fromChainage": "188+000",
+      "toChainage": "188+800",
+      "fromM": 188000,
+      "toM": 188800,
+      "lengthM": 800,
+      "lengthRHS": 800,
+      "calculatedLengthM": 800,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 66,
+      "col": 69,
+      "colLetter": "BR",
+      "fromChainage": "188+800",
+      "toChainage": "189+000",
+      "fromM": 188800,
+      "toM": 189000,
+      "lengthM": 200,
+      "lengthRHS": 200,
+      "calculatedLengthM": 200,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 67,
+      "col": 70,
+      "colLetter": "BS",
+      "fromChainage": "189+000",
+      "toChainage": "190+000",
+      "fromM": 189000,
+      "toM": 190000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 68,
+      "col": 71,
+      "colLetter": "BT",
+      "fromChainage": "190+000",
+      "toChainage": "191+000",
+      "fromM": 190000,
+      "toM": 191000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 69,
+      "col": 72,
+      "colLetter": "BU",
+      "fromChainage": "191+000",
+      "toChainage": "191+200",
+      "fromM": 191000,
+      "toM": 191200,
+      "lengthM": 200,
+      "lengthRHS": 200,
+      "calculatedLengthM": 200,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 70,
+      "col": 73,
+      "colLetter": "BV",
+      "fromChainage": "191+200",
+      "toChainage": "191+600",
+      "fromM": 191200,
+      "toM": 191600,
+      "lengthM": 600,
+      "lengthRHS": 600,
+      "calculatedLengthM": 400,
+      "hasLengthMismatch": true
+    },
+    {
+      "index": 71,
+      "col": 74,
+      "colLetter": "BW",
+      "fromChainage": "191+600",
+      "toChainage": "191+900",
+      "fromM": 191600,
+      "toM": 191900,
+      "lengthM": 300,
+      "lengthRHS": 300,
+      "calculatedLengthM": 300,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 72,
+      "col": 75,
+      "colLetter": "BX",
+      "fromChainage": "191+900",
+      "toChainage": "192+000",
+      "fromM": 191900,
+      "toM": 192000,
+      "lengthM": 100,
+      "lengthRHS": 100,
+      "calculatedLengthM": 100,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 73,
+      "col": 76,
+      "colLetter": "BY",
+      "fromChainage": "192+000",
+      "toChainage": "193+000",
+      "fromM": 192000,
+      "toM": 193000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 74,
+      "col": 77,
+      "colLetter": "BZ",
+      "fromChainage": "193+000",
+      "toChainage": "193+100",
+      "fromM": 193000,
+      "toM": 193100,
+      "lengthM": 100,
+      "lengthRHS": 100,
+      "calculatedLengthM": 100,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 75,
+      "col": 78,
+      "colLetter": "CA",
+      "fromChainage": "193+100",
+      "toChainage": "194+000",
+      "fromM": 193100,
+      "toM": 194000,
+      "lengthM": 900,
+      "lengthRHS": 900,
+      "calculatedLengthM": 900,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 76,
+      "col": 79,
+      "colLetter": "CB",
+      "fromChainage": "194+000",
+      "toChainage": "194+900",
+      "fromM": 194000,
+      "toM": 194900,
+      "lengthM": 900,
+      "lengthRHS": 900,
+      "calculatedLengthM": 900,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 77,
+      "col": 80,
+      "colLetter": "CC",
+      "fromChainage": "194+900",
+      "toChainage": "195+000",
+      "fromM": 194900,
+      "toM": 195000,
+      "lengthM": 100,
+      "lengthRHS": 100,
+      "calculatedLengthM": 100,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 78,
+      "col": 81,
+      "colLetter": "CD",
+      "fromChainage": "195+000",
+      "toChainage": "195+300",
+      "fromM": 195000,
+      "toM": 195300,
+      "lengthM": 300,
+      "lengthRHS": 300,
+      "calculatedLengthM": 300,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 79,
+      "col": 82,
+      "colLetter": "CE",
+      "fromChainage": "195+300",
+      "toChainage": "195+400",
+      "fromM": 195300,
+      "toM": 195400,
+      "lengthM": 100,
+      "lengthRHS": 100,
+      "calculatedLengthM": 100,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 80,
+      "col": 83,
+      "colLetter": "CF",
+      "fromChainage": "195+400",
+      "toChainage": "195+500",
+      "fromM": 195400,
+      "toM": 195500,
+      "lengthM": 100,
+      "lengthRHS": 100,
+      "calculatedLengthM": 100,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 81,
+      "col": 84,
+      "colLetter": "CG",
+      "fromChainage": "195+500",
+      "toChainage": "195+700",
+      "fromM": 195500,
+      "toM": 195700,
+      "lengthM": 200,
+      "lengthRHS": 200,
+      "calculatedLengthM": 200,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 82,
+      "col": 85,
+      "colLetter": "CH",
+      "fromChainage": "195+700",
+      "toChainage": "196+000",
+      "fromM": 195700,
+      "toM": 196000,
+      "lengthM": 300,
+      "lengthRHS": 300,
+      "calculatedLengthM": 300,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 83,
+      "col": 86,
+      "colLetter": "CI",
+      "fromChainage": "196+000",
+      "toChainage": "197+000",
+      "fromM": 196000,
+      "toM": 197000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 84,
+      "col": 87,
+      "colLetter": "CJ",
+      "fromChainage": "197+000",
+      "toChainage": "198+000",
+      "fromM": 197000,
+      "toM": 198000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 85,
+      "col": 88,
+      "colLetter": "CK",
+      "fromChainage": "198+000",
+      "toChainage": "199+000",
+      "fromM": 198000,
+      "toM": 199000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 86,
+      "col": 89,
+      "colLetter": "CL",
+      "fromChainage": "199+000",
+      "toChainage": "199+400",
+      "fromM": 199000,
+      "toM": 199400,
+      "lengthM": 400,
+      "lengthRHS": 400,
+      "calculatedLengthM": 400,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 87,
+      "col": 90,
+      "colLetter": "CM",
+      "fromChainage": "199+400",
+      "toChainage": "200+000",
+      "fromM": 199400,
+      "toM": 200000,
+      "lengthM": 600,
+      "lengthRHS": 600,
+      "calculatedLengthM": 600,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 88,
+      "col": 91,
+      "colLetter": "CN",
+      "fromChainage": "200+000",
+      "toChainage": "201+000",
+      "fromM": 200000,
+      "toM": 201000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 89,
+      "col": 92,
+      "colLetter": "CO",
+      "fromChainage": "201+000",
+      "toChainage": "202+000",
+      "fromM": 201000,
+      "toM": 202000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 90,
+      "col": 93,
+      "colLetter": "CP",
+      "fromChainage": "202+000",
+      "toChainage": "203+000",
+      "fromM": 202000,
+      "toM": 203000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 91,
+      "col": 94,
+      "colLetter": "CQ",
+      "fromChainage": "203+000",
+      "toChainage": "204+000",
+      "fromM": 203000,
+      "toM": 204000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 92,
+      "col": 95,
+      "colLetter": "CR",
+      "fromChainage": "204+000",
+      "toChainage": "205+000",
+      "fromM": 204000,
+      "toM": 205000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 93,
+      "col": 96,
+      "colLetter": "CS",
+      "fromChainage": "205+000",
+      "toChainage": "206+000",
+      "fromM": 205000,
+      "toM": 206000,
+      "lengthM": 1000,
+      "lengthRHS": 1000,
+      "calculatedLengthM": 1000,
+      "hasLengthMismatch": false
+    },
+    {
+      "index": 94,
+      "col": 97,
+      "colLetter": "CT",
+      "fromChainage": "206+000",
+      "toChainage": "206+200",
+      "fromM": 206000,
+      "toM": 206200,
+      "lengthM": 200,
+      "lengthRHS": 200,
+      "calculatedLengthM": 200,
+      "hasLengthMismatch": false
+    }
+  ],
+  "lhsCells": {
+    "road_marking": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z3"
+      },
+      {
+        "status": "dps",
+        "text": "Work Done by DPS",
+        "cellAddr": "AA3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AB3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AC3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AD3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AK3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AL3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AN3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AO3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AP3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BF3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BG3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BH3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BI3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BJ3"
+      },
+      {
+        "status": "under_construction",
+        "text": "Under Construction",
+        "cellAddr": "BK3"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL3"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM3"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN3"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO3"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP3"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BS3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BT3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BU3"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BW3"
+      },
+      {
+        "status": "himalayan",
+        "text": "Himalayan",
+        "cellAddr": "BX3"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY3"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CA3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CB3"
+      },
+      {
+        "status": "himalayan",
+        "text": "Himalayan",
+        "cellAddr": "CC3"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CE3"
+      },
+      {
+        "status": "himalayan",
+        "text": "Himalayan",
+        "cellAddr": "CF3"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG3"
+      },
+      {
+        "status": "dps",
+        "text": "Work Done by DPS",
+        "cellAddr": "CH3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CI3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CJ3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CK3"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CL3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CM3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CN3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CO3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CP3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CQ3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CR3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CS3"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT3"
+      }
+    ],
+    "earthen_shoulder": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AA4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AB4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AC4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AD4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AK4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AL4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AN4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AO4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AP4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BF4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BG4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BH4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BI4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BJ4"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BK4"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL4"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM4"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN4"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO4"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP4"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BS4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BT4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BU4"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BW4"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BX4"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY4"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CA4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CB4"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CC4"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CE4"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CF4"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CH4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CI4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CJ4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CK4"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CL4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CM4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CN4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CO4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CP4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CQ4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CR4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CS4"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT4"
+      }
+    ],
+    "bc_fw": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AA5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AB5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AC5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AD5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AK5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AL5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AN5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AO5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AP5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BF5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BG5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BH5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BI5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BJ5"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BK5"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL5"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM5"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN5"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO5"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP5"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR5"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BS5"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BT5"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BU5"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BW5"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BX5"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY5"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CA5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CB5"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CC5"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CE5"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CF5"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CH5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CI5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CJ5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CK5"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CL5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CM5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CN5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CO5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CP5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CQ5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CR5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CS5"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT5"
+      }
+    ],
+    "composite_glass_grid": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AA6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AB6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AC6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AD6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AK6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AL6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AN6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AO6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AP6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BF6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BG6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BH6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BI6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BJ6"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BK6"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL6"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM6"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN6"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO6"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP6"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR6"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BS6"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BT6"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BU6"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BW6"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BX6"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY6"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CA6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CB6"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CC6"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CE6"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CF6"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CH6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CI6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CJ6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CK6"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CL6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CM6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CN6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CO6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CP6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CQ6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CR6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CS6"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT6"
+      }
+    ],
+    "dbm": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AA7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AB7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AC7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AD7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AK7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AL7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AN7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AO7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AP7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BF7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BG7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BH7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BI7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BJ7"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BK7"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL7"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM7"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN7"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO7"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP7"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BS7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BT7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BU7"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BW7"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BX7"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY7"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CA7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CB7"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CC7"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CE7"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CF7"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CH7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CI7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CJ7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CK7"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CL7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CM7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CN7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CO7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CP7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CQ7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CR7"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CS7"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT7"
+      }
+    ],
+    "milling_dbm": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AA8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AB8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AC8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AD8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AK8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AL8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AN8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AO8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AP8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BF8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BG8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BH8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BI8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BJ8"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BK8"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL8"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM8"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN8"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO8"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP8"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BS8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BT8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BU8"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BW8"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BX8"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY8"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CA8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CB8"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CC8"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CE8"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CF8"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CH8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CI8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CJ8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CK8"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "CL8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CM8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CN8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CO8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CP8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CQ8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CR8"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CS8"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT8"
+      }
+    ]
+  },
+  "rhsCells": {
+    "milling_dbm": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AA13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AB13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AC13"
+      },
+      {
+        "status": "dps",
+        "text": "Work Done by DPS",
+        "cellAddr": "AD13"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE13"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF13"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG13"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH13"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI13"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AK13"
+      },
+      {
+        "status": "dps",
+        "text": "Work Done by DPS",
+        "cellAddr": "AL13"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM13"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AN13"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AO13"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AP13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BF13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BG13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BH13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BI13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BJ13"
+      },
+      {
+        "status": "under_construction",
+        "text": "Under Construction",
+        "cellAddr": "BK13"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL13"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM13"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN13"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO13"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP13"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BS13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BT13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BU13"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BW13"
+      },
+      {
+        "status": "himalayan",
+        "text": "Himalayan",
+        "cellAddr": "BX13"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY13"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CA13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CB13"
+      },
+      {
+        "status": "himalayan",
+        "text": "Himalayan",
+        "cellAddr": "CC13"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CE13"
+      },
+      {
+        "status": "himalayan",
+        "text": "Himalayan",
+        "cellAddr": "CF13"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CH13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CI13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CJ13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CK13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CL13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CM13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CN13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CO13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CP13"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CQ13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CR13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CS13"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT13"
+      }
+    ],
+    "dbm": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AA14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AB14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AC14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AD14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AK14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AL14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AN14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AO14"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AP14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BF14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BG14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BH14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BI14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BJ14"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BK14"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL14"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM14"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN14"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO14"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP14"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BS14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BT14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BU14"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "BW14"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BX14"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY14"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CA14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CB14"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CC14"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CE14"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CF14"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CH14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CI14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CJ14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CK14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CL14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CM14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CN14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CO14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CP14"
+      },
+      {
+        "status": "completed",
+        "text": null,
+        "cellAddr": "CQ14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CR14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CS14"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT14"
+      }
+    ],
+    "composite_glass_grid": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AA15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AB15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AC15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AD15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AK15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AL15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AN15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AO15"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AP15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BF15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BG15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BH15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BI15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BJ15"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BK15"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL15"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM15"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN15"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO15"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP15"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BS15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BT15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BU15"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BW15"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BX15"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY15"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CA15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CB15"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CC15"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CE15"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CF15"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CH15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CI15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CJ15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CK15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CL15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CM15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CN15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CO15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CP15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CQ15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CR15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CS15"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT15"
+      }
+    ],
+    "bc_fw": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AA16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AB16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AC16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AD16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AK16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AL16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AN16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AO16"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AP16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BF16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BG16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BH16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BI16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BJ16"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BK16"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL16"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM16"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN16"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO16"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP16"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BS16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BT16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BU16"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BW16"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BX16"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY16"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CA16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CB16"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CC16"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CE16"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CF16"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CH16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CI16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CJ16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CK16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CL16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CM16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CN16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CO16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CP16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CQ16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CR16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CS16"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT16"
+      }
+    ],
+    "earthen_shoulder": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AA17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AB17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AC17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AD17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AK17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AL17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AN17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AO17"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AP17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BF17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BG17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BH17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BI17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BJ17"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BK17"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL17"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM17"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN17"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO17"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP17"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BS17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BT17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BU17"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BW17"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BX17"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY17"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CA17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CB17"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CC17"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CE17"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CF17"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CH17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CI17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CJ17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CK17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CL17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CM17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CN17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CO17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CP17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CQ17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CR17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CS17"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT17"
+      }
+    ],
+    "road_marking": [
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "D18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "E18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "F18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "G18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "H18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "I18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "J18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "K18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "L18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "M18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "N18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "O18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "P18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Q18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "R18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "S18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "T18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "U18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "V18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "W18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "X18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Y18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "Z18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AA18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AB18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AC18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AD18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AE18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AF18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AG18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AH18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AI18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AJ18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AK18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AL18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AM18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AN18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AO18"
+      },
+      {
+        "status": "dps",
+        "text": null,
+        "cellAddr": "AP18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AQ18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AR18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AS18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AT18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AU18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AV18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AW18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AX18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AY18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "AZ18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BA18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BB18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BC18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BD18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BE18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BF18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BG18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BH18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BI18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BJ18"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BK18"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BL18"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BM18"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BN18"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BO18"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BP18"
+      },
+      {
+        "status": "under_construction",
+        "text": null,
+        "cellAddr": "BQ18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BR18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BS18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BT18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BU18"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BV18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "BW18"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BX18"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BY18"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "BZ18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CA18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CB18"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CC18"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CD18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CE18"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CF18"
+      },
+      {
+        "status": "himalayan",
+        "text": null,
+        "cellAddr": "CG18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CH18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CI18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CJ18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CK18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CL18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CM18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CN18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CO18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CP18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CQ18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CR18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CS18"
+      },
+      {
+        "status": "planned",
+        "text": null,
+        "cellAddr": "CT18"
+      }
+    ]
+  },
+  "lhsWorkZones": [
+    {
+      "id": "lhs-dps-23",
+      "side": "LHS",
+      "status": "dps",
+      "type": "DPS",
+      "label": "Work Done by DPS",
+      "startIndex": 23,
+      "endIndex": 35,
+      "fromM": 153000,
+      "toM": 161400,
+      "fromChainage": "153+000",
+      "toChainage": "161+400",
+      "totalLengthM": 8400,
+      "intervalCount": 13,
+      "startCol": "AA",
+      "endCol": "AM"
+    },
+    {
+      "id": "lhs-under_construction-59",
+      "side": "LHS",
+      "status": "under_construction",
+      "type": "UNDER_CONSTRUCTION",
+      "label": "Under Construction",
+      "startIndex": 59,
+      "endIndex": 65,
+      "fromM": 182100,
+      "toM": 188800,
+      "fromChainage": "182+100",
+      "toChainage": "188+800",
+      "totalLengthM": 6700,
+      "intervalCount": 7,
+      "startCol": "BK",
+      "endCol": "BQ"
+    },
+    {
+      "id": "lhs-himalayan-70",
+      "side": "LHS",
+      "status": "himalayan",
+      "type": "HIMALAYAN",
+      "label": "Himalayan",
+      "startIndex": 70,
+      "endIndex": 70,
+      "fromM": 191200,
+      "toM": 191600,
+      "fromChainage": "191+200",
+      "toChainage": "191+600",
+      "totalLengthM": 600,
+      "intervalCount": 1,
+      "startCol": "BV",
+      "endCol": "BV"
+    },
+    {
+      "id": "lhs-himalayan-72",
+      "side": "LHS",
+      "status": "himalayan",
+      "type": "HIMALAYAN",
+      "label": "Himalayan",
+      "startIndex": 72,
+      "endIndex": 74,
+      "fromM": 191900,
+      "toM": 193100,
+      "fromChainage": "191+900",
+      "toChainage": "193+100",
+      "totalLengthM": 1200,
+      "intervalCount": 3,
+      "startCol": "BX",
+      "endCol": "BZ"
+    },
+    {
+      "id": "lhs-himalayan-77",
+      "side": "LHS",
+      "status": "himalayan",
+      "type": "HIMALAYAN",
+      "label": "Himalayan",
+      "startIndex": 77,
+      "endIndex": 78,
+      "fromM": 194900,
+      "toM": 195300,
+      "fromChainage": "194+900",
+      "toChainage": "195+300",
+      "totalLengthM": 400,
+      "intervalCount": 2,
+      "startCol": "CC",
+      "endCol": "CD"
+    },
+    {
+      "id": "lhs-himalayan-80",
+      "side": "LHS",
+      "status": "himalayan",
+      "type": "HIMALAYAN",
+      "label": "Himalayan",
+      "startIndex": 80,
+      "endIndex": 81,
+      "fromM": 195400,
+      "toM": 195700,
+      "fromChainage": "195+400",
+      "toChainage": "195+700",
+      "totalLengthM": 300,
+      "intervalCount": 2,
+      "startCol": "CF",
+      "endCol": "CF"
+    },
+    {
+      "id": "lhs-dps-82",
+      "side": "LHS",
+      "status": "dps",
+      "type": "DPS",
+      "label": "Work Done by DPS",
+      "startIndex": 82,
+      "endIndex": 86,
+      "fromM": 195700,
+      "toM": 199400,
+      "fromChainage": "195+700",
+      "toChainage": "199+400",
+      "totalLengthM": 3700,
+      "intervalCount": 5,
+      "startCol": "CH",
+      "endCol": "CL"
+    }
+  ],
+  "rhsWorkZones": [
+    {
+      "id": "rhs-dps-26",
+      "side": "RHS",
+      "status": "dps",
+      "type": "DPS",
+      "label": "Work Done by DPS",
+      "startIndex": 26,
+      "endIndex": 32,
+      "fromM": 154600,
+      "toM": 160000,
+      "fromChainage": "154+600",
+      "toChainage": "160+000",
+      "totalLengthM": 5400,
+      "intervalCount": 7,
+      "startCol": "AD",
+      "endCol": "AJ"
+    },
+    {
+      "id": "rhs-dps-34",
+      "side": "RHS",
+      "status": "dps",
+      "type": "DPS",
+      "label": "Work Done by DPS",
+      "startIndex": 34,
+      "endIndex": 38,
+      "fromM": 160200,
+      "toM": 163000,
+      "fromChainage": "160+200",
+      "toChainage": "163+000",
+      "totalLengthM": 2800,
+      "intervalCount": 5,
+      "startCol": "AL",
+      "endCol": "AP"
+    },
+    {
+      "id": "rhs-under_construction-59",
+      "side": "RHS",
+      "status": "under_construction",
+      "type": "UNDER_CONSTRUCTION",
+      "label": "Under Construction",
+      "startIndex": 59,
+      "endIndex": 65,
+      "fromM": 182100,
+      "toM": 188800,
+      "fromChainage": "182+100",
+      "toChainage": "188+800",
+      "totalLengthM": 6700,
+      "intervalCount": 7,
+      "startCol": "BK",
+      "endCol": "BQ"
+    },
+    {
+      "id": "rhs-himalayan-70",
+      "side": "RHS",
+      "status": "himalayan",
+      "type": "HIMALAYAN",
+      "label": "Himalayan",
+      "startIndex": 70,
+      "endIndex": 70,
+      "fromM": 191200,
+      "toM": 191600,
+      "fromChainage": "191+200",
+      "toChainage": "191+600",
+      "totalLengthM": 600,
+      "intervalCount": 1,
+      "startCol": "BV",
+      "endCol": "BV"
+    },
+    {
+      "id": "rhs-himalayan-72",
+      "side": "RHS",
+      "status": "himalayan",
+      "type": "HIMALAYAN",
+      "label": "Himalayan",
+      "startIndex": 72,
+      "endIndex": 74,
+      "fromM": 191900,
+      "toM": 193100,
+      "fromChainage": "191+900",
+      "toChainage": "193+100",
+      "totalLengthM": 1200,
+      "intervalCount": 3,
+      "startCol": "BX",
+      "endCol": "BZ"
+    },
+    {
+      "id": "rhs-himalayan-77",
+      "side": "RHS",
+      "status": "himalayan",
+      "type": "HIMALAYAN",
+      "label": "Himalayan",
+      "startIndex": 77,
+      "endIndex": 78,
+      "fromM": 194900,
+      "toM": 195300,
+      "fromChainage": "194+900",
+      "toChainage": "195+300",
+      "totalLengthM": 400,
+      "intervalCount": 2,
+      "startCol": "CC",
+      "endCol": "CD"
+    },
+    {
+      "id": "rhs-himalayan-80",
+      "side": "RHS",
+      "status": "himalayan",
+      "type": "HIMALAYAN",
+      "label": "Himalayan",
+      "startIndex": 80,
+      "endIndex": 81,
+      "fromM": 195400,
+      "toM": 195700,
+      "fromChainage": "195+400",
+      "toChainage": "195+700",
+      "totalLengthM": 300,
+      "intervalCount": 2,
+      "startCol": "CF",
+      "endCol": "CG"
+    }
+  ]
+}
