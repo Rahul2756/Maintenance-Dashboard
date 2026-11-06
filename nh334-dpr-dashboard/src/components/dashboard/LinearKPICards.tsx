@@ -50,23 +50,28 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
   const isMillingSelected = !selectedActivities || selectedActivities.includes('Milling');
   const isTackSelected = !selectedActivities || selectedActivities.includes('Tackcoat');
   const isDbmSelected = !selectedActivities || selectedActivities.includes('DBM');
+  const isBcSelected = !selectedActivities || selectedActivities.includes('BC');
 
   // Baseline planned corridor lengths per activity from Work Program.xlsx:
   // Milling: 91,176 m (MCW -Milling & DBM (BHS))
   // Tackcoat: 103,286 m (MCW -BC (BHS))
   // DBM: 91,176 m (MCW -Milling & DBM (BHS))
+  // BC: 103,286 m (MCW -BC (BHS))
   let millingPlannedLengthM = baseline.millingPlannedLengthM || 91176;
   let tackPlannedLengthM = baseline.tackcoatPlannedLengthM || 103286;
   let dbmPlannedLengthM = baseline.dbmPlannedLengthM || 91176;
+  let bcPlannedLengthM = baseline.totalBcTargetLengthM || 103286;
 
   if (side === 'LHS' && baseline.lhs) {
     millingPlannedLengthM = baseline.lhs.millingLengthM;
     tackPlannedLengthM = baseline.lhs.tackcoatLengthM;
     dbmPlannedLengthM = baseline.lhs.dbmLengthM;
+    if (baseline.lhs.bcLengthM) bcPlannedLengthM = baseline.lhs.bcLengthM;
   } else if (side === 'RHS' && baseline.rhs) {
     millingPlannedLengthM = baseline.rhs.millingLengthM;
     tackPlannedLengthM = baseline.rhs.tackcoatLengthM;
     dbmPlannedLengthM = baseline.rhs.dbmLengthM;
+    if (baseline.rhs.bcLengthM) bcPlannedLengthM = baseline.rhs.bcLengthM;
   }
 
   // Compute Linear distances achieved using non-overlapping merged chainage intervals
@@ -105,6 +110,27 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
       const exposedGapM = Math.max(0, millingM - dbmM);
       const exposedGapKm = exposedGapM / 1000;
 
+      // Requirement 2 Dual Measurements
+      const millingDailyLaneM = boqMetrics.milling.dailyExecutedLaneLengthM || millingDailyM;
+      const millingDailyLaneKm = boqMetrics.milling.dailyExecutedLaneLengthKm || millingDailyKm;
+      const millingCumLaneM = boqMetrics.milling.cumulativeExecutedLaneLengthM || millingM;
+      const millingCumLaneKm = boqMetrics.milling.cumulativeExecutedLaneLengthKm || millingKm;
+
+      const tackDailyLaneM = boqMetrics.tackcoat.dailyExecutedLaneLengthM || tackDailyM;
+      const tackDailyLaneKm = boqMetrics.tackcoat.dailyExecutedLaneLengthKm || tackDailyKm;
+      const tackCumLaneM = boqMetrics.tackcoat.cumulativeExecutedLaneLengthM || tackM;
+      const tackCumLaneKm = boqMetrics.tackcoat.cumulativeExecutedLaneLengthKm || tackKm;
+
+      const dbmDailyLaneM = boqMetrics.dbm.dailyExecutedLaneLengthM || dbmDailyM;
+      const dbmDailyLaneKm = boqMetrics.dbm.dailyExecutedLaneLengthKm || dbmDailyKm;
+      const dbmCumLaneM = boqMetrics.dbm.cumulativeExecutedLaneLengthM || dbmM;
+      const dbmCumLaneKm = boqMetrics.dbm.cumulativeExecutedLaneLengthKm || dbmKm;
+
+      const bcDailyLaneM = boqMetrics.bc.dailyExecutedLaneLengthM || bcDailyM;
+      const bcDailyLaneKm = boqMetrics.bc.dailyExecutedLaneLengthKm || bcDailyKm;
+      const bcCumLaneM = boqMetrics.bc.cumulativeExecutedLaneLengthM || bcM;
+      const bcCumLaneKm = boqMetrics.bc.cumulativeExecutedLaneLengthKm || bcKm;
+
       return {
         millingM,
         millingKm,
@@ -112,12 +138,20 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
         millingDailyKm,
         millingPercent,
         millingRemainingM,
+        millingDailyLaneM,
+        millingDailyLaneKm,
+        millingCumLaneM,
+        millingCumLaneKm,
         tackM,
         tackKm,
         tackDailyM,
         tackDailyKm,
         tackPercent,
         tackRemainingM,
+        tackDailyLaneM,
+        tackDailyLaneKm,
+        tackCumLaneM,
+        tackCumLaneKm,
         tackSync,
         dbmM,
         dbmKm,
@@ -125,6 +159,10 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
         dbmDailyKm,
         dbmPercent,
         dbmRemainingM,
+        dbmDailyLaneM,
+        dbmDailyLaneKm,
+        dbmCumLaneM,
+        dbmCumLaneKm,
         dbmSync,
         bcM,
         bcKm,
@@ -132,6 +170,10 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
         bcDailyKm,
         bcPercent,
         bcRemainingM,
+        bcDailyLaneM,
+        bcDailyLaneKm,
+        bcCumLaneM,
+        bcCumLaneKm,
         exposedGapM,
         exposedGapKm
       };
@@ -174,12 +216,20 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
       millingDailyKm: 0,
       millingPercent,
       millingRemainingM,
+      millingDailyLaneM: 0,
+      millingDailyLaneKm: 0,
+      millingCumLaneM: millingM,
+      millingCumLaneKm: millingKm,
       tackM,
       tackKm,
       tackDailyM: 0,
       tackDailyKm: 0,
       tackPercent,
       tackRemainingM,
+      tackDailyLaneM: 0,
+      tackDailyLaneKm: 0,
+      tackCumLaneM: tackM,
+      tackCumLaneKm: tackKm,
       tackSync,
       dbmM,
       dbmKm,
@@ -187,6 +237,10 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
       dbmDailyKm: 0,
       dbmPercent,
       dbmRemainingM,
+      dbmDailyLaneM: 0,
+      dbmDailyLaneKm: 0,
+      dbmCumLaneM: dbmM,
+      dbmCumLaneKm: dbmKm,
       dbmSync,
       bcM,
       bcKm,
@@ -194,6 +248,10 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
       bcDailyKm: 0,
       bcPercent,
       bcRemainingM,
+      bcDailyLaneM: 0,
+      bcDailyLaneKm: 0,
+      bcCumLaneM: bcM,
+      bcCumLaneKm: bcKm,
       exposedGapM,
       exposedGapKm
     };
@@ -303,18 +361,41 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                     </span>
                   )}
                 </div>
+
+                {/* Dual Measurement: Executed Lane Length */}
+                {isMillingSelected && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-amber-200/90 mt-1 font-medium font-mono">
+                    <span className="text-slate-400">Lane Length:</span>
+                    <span className="font-bold">
+                      {fmt(linearMetrics.millingCumLaneM)} m ({linearMetrics.millingCumLaneKm.toFixed(2)} km)
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium">
                   <span className="text-slate-400">Target:</span>
                   <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
                     {fmt(millingPlannedLengthM)} m ({(millingPlannedLengthM / 1000).toFixed(2)} km)
                   </span>
                 </div>
+
+                {/* Today: Dual measurements if recorded */}
                 {linearMetrics.millingDailyM > 0 && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-amber-300 mt-0.5 font-medium">
-                    <span className="text-slate-400">Today:</span>
-                    <span className="font-mono font-bold">
-                      +{fmt(linearMetrics.millingDailyM)} m ({linearMetrics.millingDailyKm.toFixed(2)} km)
-                    </span>
+                  <div className="mt-1 pt-1 border-t border-cyan-500/15 space-y-0.5">
+                    <div className="flex items-center gap-1.5 text-[11px] text-amber-300 font-medium">
+                      <span className="text-slate-400">Today Coverage:</span>
+                      <span className="font-mono font-bold">
+                        +{fmt(linearMetrics.millingDailyM)} m ({linearMetrics.millingDailyKm.toFixed(2)} km)
+                      </span>
+                    </div>
+                    {linearMetrics.millingDailyLaneM !== linearMetrics.millingDailyM && (
+                      <div className="flex items-center gap-1.5 text-[10px] text-amber-200/90 font-medium font-mono">
+                        <span className="text-slate-400">Today Lane:</span>
+                        <span className="font-bold">
+                          +{fmt(linearMetrics.millingDailyLaneM)} m ({linearMetrics.millingDailyLaneKm.toFixed(2)} km)
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -439,18 +520,41 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                     </span>
                   )}
                 </div>
+
+                {/* Dual Measurement: Executed Lane Length */}
+                {isTackSelected && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-cyan-200/90 mt-1 font-medium font-mono">
+                    <span className="text-slate-400">Lane Length:</span>
+                    <span className="font-bold">
+                      {fmt(linearMetrics.tackCumLaneM)} m ({linearMetrics.tackCumLaneKm.toFixed(2)} km)
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium">
                   <span className="text-slate-400">Target:</span>
                   <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
                     {fmt(tackPlannedLengthM)} m ({(tackPlannedLengthM / 1000).toFixed(2)} km)
                   </span>
                 </div>
+
+                {/* Today: Dual measurements if recorded */}
                 {linearMetrics.tackDailyM > 0 && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-cyan-300 mt-0.5 font-medium">
-                    <span className="text-slate-400">Today:</span>
-                    <span className="font-mono font-bold">
-                      +{fmt(linearMetrics.tackDailyM)} m ({linearMetrics.tackDailyKm.toFixed(2)} km)
-                    </span>
+                  <div className="mt-1 pt-1 border-t border-cyan-500/15 space-y-0.5">
+                    <div className="flex items-center gap-1.5 text-[11px] text-cyan-300 font-medium">
+                      <span className="text-slate-400">Today Coverage:</span>
+                      <span className="font-mono font-bold">
+                        +{fmt(linearMetrics.tackDailyM)} m ({linearMetrics.tackDailyKm.toFixed(2)} km)
+                      </span>
+                    </div>
+                    {linearMetrics.tackDailyLaneM !== linearMetrics.tackDailyM && (
+                      <div className="flex items-center gap-1.5 text-[10px] text-cyan-200/90 font-medium font-mono">
+                        <span className="text-slate-400">Today Lane:</span>
+                        <span className="font-bold">
+                          +{fmt(linearMetrics.tackDailyLaneM)} m ({linearMetrics.tackDailyLaneKm.toFixed(2)} km)
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -575,18 +679,41 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                     </span>
                   )}
                 </div>
+
+                {/* Dual Measurement: Executed Lane Length */}
+                {isDbmSelected && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-200/90 mt-1 font-medium font-mono">
+                    <span className="text-slate-400">Lane Length:</span>
+                    <span className="font-bold">
+                      {fmt(linearMetrics.dbmCumLaneM)} m ({linearMetrics.dbmCumLaneKm.toFixed(2)} km)
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium">
                   <span className="text-slate-400">Target:</span>
                   <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
                     {fmt(dbmPlannedLengthM)} m ({(dbmPlannedLengthM / 1000).toFixed(2)} km)
                   </span>
                 </div>
+
+                {/* Today: Dual measurements if recorded */}
                 {linearMetrics.dbmDailyM > 0 && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-300 mt-0.5 font-medium">
-                    <span className="text-slate-400">Today:</span>
-                    <span className="font-mono font-bold">
-                      +{fmt(linearMetrics.dbmDailyM)} m ({linearMetrics.dbmDailyKm.toFixed(2)} km)
-                    </span>
+                  <div className="mt-1 pt-1 border-t border-cyan-500/15 space-y-0.5">
+                    <div className="flex items-center gap-1.5 text-[11px] text-emerald-300 font-medium">
+                      <span className="text-slate-400">Today Coverage:</span>
+                      <span className="font-mono font-bold">
+                        +{fmt(linearMetrics.dbmDailyM)} m ({linearMetrics.dbmDailyKm.toFixed(2)} km)
+                      </span>
+                    </div>
+                    {linearMetrics.dbmDailyLaneM !== linearMetrics.dbmDailyM && (
+                      <div className="flex items-center gap-1.5 text-[10px] text-emerald-200/90 font-medium font-mono">
+                        <span className="text-slate-400">Today Lane:</span>
+                        <span className="font-bold">
+                          +{fmt(linearMetrics.dbmDailyLaneM)} m ({linearMetrics.dbmDailyLaneKm.toFixed(2)} km)
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -646,11 +773,17 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
         </div>
 
         {/* ============================================================== */}
-        {/* Card 4: Exposed Milled Gap & Pavement Continuity               */}
+        {/* Card 4: BC Layer Laid & Exposed Gap                            */}
         {/* ============================================================== */}
-        <div className="relative group transition-all duration-300 rounded-2xl overflow-hidden bg-gradient-to-b from-[#0F172A] to-[#0A0F1D] border border-rose-500/30 shadow-xl shadow-rose-950/20">
-          {/* Top Highway Warning Ribbon */}
-          <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-rose-500 to-red-600 relative">
+        <div
+          className={`relative group transition-all duration-300 rounded-2xl overflow-hidden bg-gradient-to-b from-[#0F172A] to-[#0A0F1D] border ${
+            isBcSelected ? 'border-teal-500/30 shadow-teal-950/20' : 'border-rose-500/30 shadow-rose-950/20'
+          } shadow-xl ${
+            isBcSelected ? 'opacity-100 ring-1 ring-teal-400/40' : 'opacity-40 grayscale-[40%]'
+          }`}
+        >
+          {/* Top Highway Centerline Ribbon */}
+          <div className="h-1.5 w-full bg-gradient-to-r from-teal-400 via-cyan-400 to-rose-500 relative">
             <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent,transparent_8px,rgba(0,0,0,0.4)_8px,rgba(0,0,0,0.4)_16px)]" />
           </div>
 
@@ -659,107 +792,136 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
               <div className="flex items-center gap-2.5">
                 <div
                   className={`p-2.5 rounded-xl border ${
-                    linearMetrics.exposedGapM > 1000
-                      ? 'bg-rose-500/20 text-rose-300 border-rose-400/40 shadow-md shadow-rose-950/40'
-                      : 'bg-amber-500/20 text-amber-300 border-amber-400/40'
+                    isBcSelected
+                      ? 'bg-teal-500/15 text-teal-300 border-teal-400/40 shadow-md shadow-teal-950/40'
+                      : 'bg-slate-800 text-slate-500 border-slate-700'
                   }`}
                 >
-                  <AlertTriangle className="w-5 h-5" />
+                  <Navigation className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm font-bold uppercase tracking-wider text-white drop-shadow-sm">
-                      Exposed Milled Gap
+                      BC Layer Laid
                     </span>
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-950 text-rose-300 border border-rose-500/30 font-mono font-bold">
-                      Gap Length
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30 font-mono font-bold">
+                      Length
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">Uncovered lane waiting DBM</p>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">40mm wearing course</p>
                 </div>
               </div>
 
-              <Badge
-                variant={linearMetrics.exposedGapM > 1500 ? 'crimson' : 'amber'}
-                size="sm"
-                className="font-mono font-bold shadow-sm"
-              >
-                {linearMetrics.exposedGapM > 1500 ? 'High Exposure' : 'Safety Watch'}
-              </Badge>
+              {isBcSelected ? (
+                <Badge
+                  variant={linearMetrics.bcPercent >= 1 ? 'emerald' : 'cyan'}
+                  size="sm"
+                  className="font-mono font-bold shadow-sm"
+                >
+                  {`${linearMetrics.bcPercent.toFixed(1)}% Target`}
+                </Badge>
+              ) : (
+                <Badge variant="neutral" size="xs">
+                  Filtered Out
+                </Badge>
+              )}
             </div>
 
             <div className="mt-4 flex items-center justify-between gap-2">
               <div>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight drop-shadow-sm">
-                    {fmt(linearMetrics.exposedGapM)}
+                    {isBcSelected ? fmt(linearMetrics.bcM) : '—'}
                   </span>
-                  <span className="text-xs text-rose-400 font-bold font-mono">m</span>
-                  <span className="text-xs text-rose-300 font-mono ml-1 font-bold">
-                    ({linearMetrics.exposedGapKm.toFixed(2)} km)
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium">
-                  <span className="text-slate-400">Milled:</span>
-                  <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
-                    {fmt(linearMetrics.millingM)} m
-                  </span>
-                  <span className="text-slate-400 ml-1">Paved:</span>
-                  <span className="font-mono font-bold text-emerald-300 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
-                    {fmt(linearMetrics.dbmM)} m
-                  </span>
-                </div>
-                {linearMetrics.bcM > 0 && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-teal-300 mt-0.5 font-medium">
-                    <span className="text-slate-400">BC Laid:</span>
-                    <span className="font-mono font-bold">
-                      {fmt(linearMetrics.bcM)} m ({linearMetrics.bcKm.toFixed(2)} km)
+                  <span className="text-xs text-cyan-400 font-bold font-mono">m</span>
+                  {isBcSelected && (
+                    <span className="text-xs text-teal-300 font-mono ml-1 font-bold">
+                      ({linearMetrics.bcKm.toFixed(2)} km)
                     </span>
-                    {linearMetrics.bcDailyM > 0 && (
-                      <span className="text-slate-400 font-mono">(+{fmt(linearMetrics.bcDailyM)} m today)</span>
+                  )}
+                </div>
+
+                {/* Dual Measurement: Executed Lane Length */}
+                {isBcSelected && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-teal-200/90 mt-1 font-medium font-mono">
+                    <span className="text-slate-400">Lane Length:</span>
+                    <span className="font-bold">
+                      {fmt(linearMetrics.bcCumLaneM)} m ({linearMetrics.bcCumLaneKm.toFixed(2)} km)
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium">
+                  <span className="text-slate-400">Target:</span>
+                  <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
+                    {fmt(bcPlannedLengthM)} m ({(bcPlannedLengthM / 1000).toFixed(2)} km)
+                  </span>
+                </div>
+
+                {/* Today: Dual measurements if recorded */}
+                {linearMetrics.bcDailyM > 0 && (
+                  <div className="mt-1 pt-1 border-t border-cyan-500/15 space-y-0.5">
+                    <div className="flex items-center gap-1.5 text-[11px] text-teal-300 font-medium">
+                      <span className="text-slate-400">Today Coverage:</span>
+                      <span className="font-mono font-bold">
+                        +{fmt(linearMetrics.bcDailyM)} m ({linearMetrics.bcDailyKm.toFixed(2)} km)
+                      </span>
+                    </div>
+                    {linearMetrics.bcDailyLaneM !== linearMetrics.bcDailyM && (
+                      <div className="flex items-center gap-1.5 text-[10px] text-teal-200/90 font-medium font-mono">
+                        <span className="text-slate-400">Today Lane:</span>
+                        <span className="font-bold">
+                          +{fmt(linearMetrics.bcDailyLaneM)} m ({linearMetrics.bcDailyLaneKm.toFixed(2)} km)
+                        </span>
+                      </div>
                     )}
                   </div>
                 )}
               </div>
 
-              <div className="hidden sm:block">
-                <MiniTripleBarChart
-                  planned={linearMetrics.millingM > 0 ? linearMetrics.millingM : millingPlannedLengthM}
-                  actual={linearMetrics.dbmM}
-                  balance={linearMetrics.exposedGapM}
-                  unit="m"
-                  actualColor="#F43F5E"
-                />
-              </div>
+              {isBcSelected && (
+                <div className="hidden sm:block">
+                  <MiniTripleBarChart
+                    planned={bcPlannedLengthM}
+                    actual={linearMetrics.bcM}
+                    balance={linearMetrics.bcRemainingM}
+                    unit="m"
+                    actualColor="#14B8A6"
+                  />
+                </div>
+              )}
             </div>
 
-            {/* Gap Continuity Progress Bar */}
+            {/* Progress Bar with Highway Ticks */}
             <div className="mt-4">
-              <div className="w-full h-2 rounded-full bg-[#090D16] border border-rose-500/20 overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#090D16] border border-cyan-500/20 overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-500 shadow-sm ${
-                    linearMetrics.exposedGapM > 1500
-                      ? 'bg-gradient-to-r from-rose-500 to-red-600 shadow-rose-500/50'
-                      : 'bg-gradient-to-r from-amber-400 to-rose-500 shadow-amber-500/50'
-                  }`}
+                  className="h-full bg-gradient-to-r from-teal-400 to-cyan-500 rounded-full transition-all duration-500 shadow-sm shadow-teal-500/50"
                   style={{
-                    width: `${Math.min(100, Math.max(5, (linearMetrics.exposedGapM / 2000) * 100))}%`
+                    width: `${isBcSelected ? Math.min(linearMetrics.bcPercent, 100) : 0}%`
                   }}
                 />
               </div>
 
               <div className="mt-2.5 flex items-center justify-between text-xs gap-1.5 min-w-0">
                 <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-rose-950/70 border border-rose-500/40 text-rose-300 font-bold font-mono whitespace-nowrap shrink-0">
-                  <Clock className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                   <span>
-                    <span className="hidden 2xl:inline">Continuity:&nbsp;</span>{linearMetrics.dbmSync.toFixed(1)}%&nbsp;Paved
+                    Exposed Gap: {fmt(linearMetrics.exposedGapM)} m
                   </span>
                 </span>
 
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0A101D] border border-rose-500/30 text-xs font-mono shadow-sm whitespace-nowrap shrink-0">
-                  <span className="text-slate-400 font-medium">Corridor Base:</span>
-                  <span className="text-rose-300 font-extrabold whitespace-nowrap">{linearMetrics.dbmPercent.toFixed(1)}%</span>
-                </div>
+                {isBcSelected && (
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0A101D] border border-cyan-500/30 text-xs font-mono shadow-sm whitespace-nowrap shrink-0">
+                    <span className="text-slate-400 font-medium">Balance:</span>
+                    <span className="font-extrabold text-teal-300 whitespace-nowrap">
+                      {fmt(linearMetrics.bcRemainingM)}&nbsp;m
+                    </span>
+                    <span className="text-slate-300 font-bold whitespace-nowrap">
+                      ({(linearMetrics.bcRemainingM / 1000).toFixed(1)}&nbsp;km)
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

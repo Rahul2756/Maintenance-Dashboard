@@ -147,6 +147,7 @@ export interface DPRMetadata {
 
 export interface GlobalFilterState {
   side: 'LHS' | 'RHS' | 'Both';
+  lane?: 'All' | 'F/L' | 'S/L' | 'FW' | 'SR';
   selectedActivities: ('Milling' | 'Tackcoat' | 'DBM' | 'BC')[];
   dateRange: { start: string; end: string }; // ISO or DD.MM.YYYY
   selectedSingleDate: string | null; // e.g. "16.10.2026"
@@ -155,7 +156,6 @@ export interface GlobalFilterState {
   anomaliesOnly: boolean;
   searchQuery: string;
 }
-
 
 export interface DashboardFilters {
   startDate: string;
@@ -168,6 +168,62 @@ export interface DashboardFilters {
   searchQuery: string;
 }
 
+export interface StretchData {
+  plannedKm: number;
+  actualKm: number;
+  remainingKm: number;
+  percentDone: number; // 0 to 100
+}
+
+export interface StretchWiseSummaryRow {
+  rowNum: number;
+  side: HighwaySide;
+  activity: string;
+  normalizedActivity: string;
+  lane: string;
+  stretch1: StretchData;
+  stretch2: StretchData;
+  stretch3: StretchData;
+  total: StretchData;
+}
+
+export interface StretchWiseSummaryTableData {
+  stretches: {
+    stretch1: { name: string; fromM: number; toM: number; lengthKm: number };
+    stretch2: { name: string; fromM: number; toM: number; lengthKm: number };
+    stretch3: { name: string; fromM: number; toM: number; lengthKm: number };
+    total: { name: string; fromM: number; toM: number; lengthKm: number };
+  };
+  rows: StretchWiseSummaryRow[];
+  totals: {
+    stretch1: StretchData;
+    stretch2: StretchData;
+    stretch3: StretchData;
+    total: StretchData;
+  };
+}
+
+export interface DailyGroupedExecutionRow {
+  date: string;
+  isoDate: string;
+  activity: string;
+  side: HighwaySide;
+  lane: string;
+  chainageSpan: string;
+  minChainageM: number;
+  maxChainageM: number;
+  recordCount: number;
+  dailyExecutedLaneLengthM: number;
+  dailyExecutedLaneLengthKm: number;
+  dailyUniqueCoverageM: number;
+  dailyUniqueCoverageKm: number;
+  cumulativeExecutedLaneLengthM: number;
+  cumulativeExecutedLaneLengthKm: number;
+  cumulativeUniqueCoverageM: number;
+  cumulativeUniqueCoverageKm: number;
+  hasMultiLaneOrOverlap: boolean;
+}
+
 export interface BOQCardMetric {
   activity: ActivityType;
   unit: string;
@@ -178,6 +234,7 @@ export interface BOQCardMetric {
   progressPercent: number;
   isOverachieved: boolean;
   overachievementPercent: number;
+  // Linear measurements
   dailyCompletedLengthM: number;
   dailyCompletedLengthKm: number;
   cumulativeCompletedLengthM: number;
@@ -185,6 +242,15 @@ export interface BOQCardMetric {
   balanceLengthM: number;
   balanceLengthKm: number;
   linearProgressPercent: number;
+  // Dual measurement fields (Requirement 2)
+  dailyExecutedLaneLengthM?: number;
+  dailyExecutedLaneLengthKm?: number;
+  cumulativeExecutedLaneLengthM?: number;
+  cumulativeExecutedLaneLengthKm?: number;
+  dailyUniqueCoverageM?: number;
+  dailyUniqueCoverageKm?: number;
+  cumulativeUniqueCoverageM?: number;
+  cumulativeUniqueCoverageKm?: number;
 }
 
 export interface KPIAggregates {
