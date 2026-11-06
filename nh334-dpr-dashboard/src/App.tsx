@@ -574,9 +574,16 @@ function DashboardContent() {
             aria-label="Module 1: Project Overview"
             className="space-y-5 animate-fade-in"
           >
-            {/* Redesigned Module 1: Project Overview & Baseline Milestone Control */}
+            {/* Project Overview & Schedule Milestone Module */}
             <ProjectOverviewModule
               milestones={milestones}
+              sectionScopes={sectionScopes}
+              consolidatedScope={consolidatedScope}
+              cumulativeAchieved={cumulativeAchieved}
+            />
+
+            {/* Daily Quick Insight Timeline & Day Scrubber */}
+            <DailyQuickInsight
               actualRows={actualRows}
               baseline={baseline}
               availableDates={availableDates}
