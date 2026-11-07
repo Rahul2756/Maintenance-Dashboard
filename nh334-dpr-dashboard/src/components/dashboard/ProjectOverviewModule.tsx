@@ -239,10 +239,10 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
             <Calendar className="w-7 h-7 sm:w-8 sm:h-8 text-[#00E599]" />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl lg:text-[28px] font-bold text-white tracking-tight leading-tight">
+            <h2 className="text-xs sm:text-sm font-bold text-white tracking-wide leading-tight">
               Schedule Milestone Variance
             </h2>
-            <p className="text-sm sm:text-base lg:text-[18px] text-slate-400 font-normal mt-1">
+            <p className="text-[11px] text-slate-400 font-normal mt-0.5">
               Targets vs Actual Timeline
             </p>
           </div>
@@ -256,13 +256,13 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
               <Flag className="w-6 h-6 sm:w-6.5 sm:h-6.5 text-[#00E599]" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-base sm:text-lg lg:text-[20px] font-bold text-white leading-tight">
+              <span className="text-xs sm:text-[13px] font-bold text-white leading-tight">
                 Project Start
               </span>
-              <span className="text-xs sm:text-sm lg:text-[16px] text-slate-400 leading-normal mt-1">
+              <span className="text-[10px] text-slate-400 leading-normal mt-0.5">
                 Planned work commencement
               </span>
-              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-sm sm:text-base lg:text-[17px] w-fit shadow-sm">
+              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-xs w-fit shadow-sm">
                 {formatMilestoneDate(milestones.startDate)}
               </span>
             </div>
@@ -274,13 +274,13 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
               <Target className="w-6 h-6 sm:w-6.5 sm:h-6.5 text-[#00E599]" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-base sm:text-lg lg:text-[20px] font-bold text-white leading-tight">
+              <span className="text-xs sm:text-[13px] font-bold text-white leading-tight">
                 Target Completion
               </span>
-              <span className="text-xs sm:text-sm lg:text-[16px] text-slate-400 leading-normal mt-1">
+              <span className="text-[10px] text-slate-400 leading-normal mt-0.5">
                 Contractual completion date
               </span>
-              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-sm sm:text-base lg:text-[17px] w-fit shadow-sm">
+              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-xs w-fit shadow-sm">
                 {formatMilestoneDate(milestones.completionDate)}
               </span>
             </div>
@@ -292,13 +292,13 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
               <Timer className="w-6 h-6 sm:w-6.5 sm:h-6.5 text-[#00E599]" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-base sm:text-lg lg:text-[20px] font-bold text-white leading-tight">
+              <span className="text-xs sm:text-[13px] font-bold text-white leading-tight">
                 Days Elapsed
               </span>
-              <span className="text-xs sm:text-sm lg:text-[16px] text-slate-400 leading-normal mt-1">
+              <span className="text-[10px] text-slate-400 leading-normal mt-0.5">
                 Active construction window
               </span>
-              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-sm sm:text-base lg:text-[17px] w-fit shadow-sm">
+              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-xs w-fit shadow-sm">
                 {milestones.daysElapsed} days
               </span>
             </div>
@@ -310,13 +310,13 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
               <Hourglass className="w-6 h-6 sm:w-6.5 sm:h-6.5 text-[#00E599]" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-base sm:text-lg lg:text-[20px] font-bold text-white leading-tight">
+              <span className="text-xs sm:text-[13px] font-bold text-white leading-tight">
                 Days Remaining
               </span>
-              <span className="text-xs sm:text-sm lg:text-[16px] text-slate-400 leading-normal mt-1">
+              <span className="text-[10px] text-slate-400 leading-normal mt-0.5">
                 To milestone finish
               </span>
-              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-sm sm:text-base lg:text-[17px] w-fit shadow-sm">
+              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-xs w-fit shadow-sm">
                 {milestones.daysRemaining} days
               </span>
             </div>
@@ -324,10 +324,10 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
 
           {/* Block 5: Time Progress */}
           <div className="flex flex-col justify-center sm:col-span-2 lg:col-span-1 lg:border-l lg:border-white/[0.08] lg:pl-7">
-            <div className="text-xl sm:text-2xl lg:text-[28px] font-extrabold text-[#00E599] font-sans tracking-tight leading-tight">
+            <div className="text-sm sm:text-base font-bold text-[#00E599] font-sans tracking-tight leading-tight">
               {timeElapsedPct.toFixed(1)}% Elapsed
             </div>
-            <div className="text-sm sm:text-base lg:text-[17px] text-slate-300 font-mono font-medium mt-1.5">
+            <div className="text-[11px] text-slate-300 font-mono font-medium mt-0.5">
               {milestones.daysElapsed} / {totalDays} Days
             </div>
             <div className="mt-3.5 w-full bg-[#112420] border border-[#0F5A46]/50 rounded-full h-[16px] sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
@@ -354,18 +354,18 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
               <Layers className="w-7 h-7 sm:w-8 sm:h-8 text-[#00E599]" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl lg:text-[28px] font-bold text-white tracking-tight leading-tight">
+              <h2 className="text-xs sm:text-sm font-bold text-white tracking-wide leading-tight">
                 Total Project Scope & BOQ Baseline
               </h2>
-              <p className="text-sm sm:text-base lg:text-[18px] text-slate-400 font-normal mt-1">
+              <p className="text-[11px] text-slate-400 font-normal mt-0.5">
                 Work Program & Contractual Bill of Quantities (Muzaffarnagar – Haridwar)
               </p>
             </div>
           </div>
 
           {/* Top-Right Highway Corridor Badge */}
-          <div className="inline-flex items-center gap-2.5 sm:gap-3 px-5 py-2.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-sm sm:text-base font-medium shadow-sm">
-            <HighwayRoadIcon className="w-5 h-5 text-[#00E599]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-xs font-medium shadow-sm">
+            <HighwayRoadIcon className="w-4 h-4 text-[#00E599]" />
             <span className="text-white font-semibold">NH-334:</span>
             <span className="text-[#00E599] font-bold font-mono">75.66 km</span>
             <span className="text-slate-300">Total Corridor</span>
@@ -374,8 +374,8 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
 
         {/* Corridor Scope Selector */}
         <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-6 pt-5 border-t border-white/[0.08]">
-          <div className="flex items-center gap-2 text-sm sm:text-base lg:text-[17px] text-white font-semibold mr-1">
-            <MapPin className="w-4.5 h-4.5 text-[#00E599]" />
+          <div className="flex items-center gap-1.5 text-xs text-white font-semibold mr-1">
+            <MapPin className="w-4 h-4 text-[#00E599]" />
             <span>Corridor Scope View:</span>
           </div>
 
@@ -383,7 +383,7 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
             <button
               type="button"
               onClick={() => setSelectedSection('all')}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm lg:text-[16px] transition-all cursor-pointer ${
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs transition-all cursor-pointer ${
                 selectedSection === 'all'
                   ? 'bg-[#003B2C] text-[#00E599] border-2 border-[#00E599] shadow-md font-bold'
                   : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/25 hover:text-white font-medium'
@@ -394,7 +394,7 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
             <button
               type="button"
               onClick={() => setSelectedSection('sec1')}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm lg:text-[16px] transition-all cursor-pointer ${
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs transition-all cursor-pointer ${
                 selectedSection === 'sec1'
                   ? 'bg-[#003B2C] text-[#00E599] border-2 border-[#00E599] shadow-md font-bold'
                   : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/25 hover:text-white font-medium'
@@ -405,7 +405,7 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
             <button
               type="button"
               onClick={() => setSelectedSection('sec2')}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm lg:text-[16px] transition-all cursor-pointer ${
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs transition-all cursor-pointer ${
                 selectedSection === 'sec2'
                   ? 'bg-[#003B2C] text-[#00E599] border-2 border-[#00E599] shadow-md font-bold'
                   : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/25 hover:text-white font-medium'
@@ -426,22 +426,22 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0">
                     <MillingMachineIcon className="w-5 h-5 text-[#00E599]" />
                   </div>
-                  <span className="text-white font-bold text-base sm:text-lg lg:text-[20px] tracking-wide">
+                  <span className="text-white font-bold text-xs sm:text-sm tracking-wide">
                     Milling
                   </span>
                 </div>
-                <span className="px-3 py-1 rounded-lg bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-xs sm:text-sm font-mono font-bold">
+                <span className="px-2.5 py-0.5 rounded-md bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-[10px] font-mono font-bold">
                   Sqm
                 </span>
               </div>
 
-              <div className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-white font-mono tracking-tight my-4 leading-none">
+              <div className="text-xl sm:text-2xl font-bold text-white font-mono tracking-tight my-2.5 leading-none">
                 {formatNumber(currentView.milling.scope)}
               </div>
 
-              <div className="flex items-center justify-between text-sm sm:text-base lg:text-[18px] font-mono text-slate-300 mb-3">
+              <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
                 <span>Achieved: {formatNumber(currentView.milling.achieved, 1)} Sqm</span>
-                <span className="text-white font-bold text-base sm:text-lg lg:text-[22px] font-mono">
+                <span className="text-white font-bold text-xs sm:text-sm font-mono">
                   {currentView.milling.pct.toFixed(1)}%
                 </span>
               </div>
@@ -463,22 +463,22 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0">
                     <Droplet className="w-5 h-5 text-[#00E599]" />
                   </div>
-                  <span className="text-white font-bold text-base sm:text-lg lg:text-[20px] tracking-wide">
+                  <span className="text-white font-bold text-xs sm:text-sm tracking-wide">
                     Tack Coat
                   </span>
                 </div>
-                <span className="px-3 py-1 rounded-lg bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-xs sm:text-sm font-mono font-bold">
+                <span className="px-2.5 py-0.5 rounded-md bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-[10px] font-mono font-bold">
                   Sqm
                 </span>
               </div>
 
-              <div className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-white font-mono tracking-tight my-4 leading-none">
+              <div className="text-xl sm:text-2xl font-bold text-white font-mono tracking-tight my-2.5 leading-none">
                 {formatNumber(currentView.tackCoat.scope)}
               </div>
 
-              <div className="flex items-center justify-between text-sm sm:text-base lg:text-[18px] font-mono text-slate-300 mb-3">
+              <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
                 <span>Achieved: {formatNumber(currentView.tackCoat.achieved, 1)} Sqm</span>
-                <span className="text-white font-bold text-base sm:text-lg lg:text-[22px] font-mono">
+                <span className="text-white font-bold text-xs sm:text-sm font-mono">
                   {currentView.tackCoat.pct.toFixed(1)}%
                 </span>
               </div>
@@ -500,22 +500,22 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0">
                     <Layers className="w-5 h-5 text-[#00E599]" />
                   </div>
-                  <span className="text-white font-bold text-base sm:text-lg lg:text-[20px] tracking-wide">
-                    DBM <span className="text-slate-400 font-normal text-xs sm:text-sm">(Bituminous Base)</span>
+                  <span className="text-white font-bold text-xs sm:text-sm tracking-wide">
+                    DBM <span className="text-slate-400 font-normal text-[10px]">(Bituminous Base)</span>
                   </span>
                 </div>
-                <span className="px-3 py-1 rounded-lg bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-xs sm:text-sm font-mono font-bold">
+                <span className="px-2.5 py-0.5 rounded-md bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-[10px] font-mono font-bold">
                   Cum
                 </span>
               </div>
 
-              <div className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-white font-mono tracking-tight my-4 leading-none">
+              <div className="text-xl sm:text-2xl font-bold text-white font-mono tracking-tight my-2.5 leading-none">
                 {formatNumber(currentView.dbm.scope, 0)}
               </div>
 
-              <div className="flex items-center justify-between text-sm sm:text-base lg:text-[18px] font-mono text-slate-300 mb-3">
+              <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
                 <span>Achieved: {formatNumber(currentView.dbm.achieved, 1)} Cum</span>
-                <span className="text-white font-bold text-base sm:text-lg lg:text-[22px] font-mono">
+                <span className="text-white font-bold text-xs sm:text-sm font-mono">
                   {currentView.dbm.pct.toFixed(1)}%
                 </span>
               </div>
@@ -537,22 +537,22 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0">
                     <HighwayRoadIcon className="w-5 h-5 text-[#00E599]" />
                   </div>
-                  <span className="text-white font-bold text-base sm:text-lg lg:text-[20px] tracking-wide">
-                    BC <span className="text-slate-400 font-normal text-xs sm:text-sm">(Wearing Course)</span>
+                  <span className="text-white font-bold text-xs sm:text-sm tracking-wide">
+                    BC <span className="text-slate-400 font-normal text-[10px]">(Wearing Course)</span>
                   </span>
                 </div>
-                <span className="px-3 py-1 rounded-lg bg-[#241432] border border-[#6B21A8]/60 text-[#C084FC] text-xs sm:text-sm font-mono font-bold">
+                <span className="px-2.5 py-0.5 rounded-md bg-[#241432] border border-[#6B21A8]/60 text-[#C084FC] text-[10px] font-mono font-bold">
                   Cum
                 </span>
               </div>
 
-              <div className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-white font-mono tracking-tight my-4 leading-none">
+              <div className="text-xl sm:text-2xl font-bold text-white font-mono tracking-tight my-2.5 leading-none">
                 {formatNumber(currentView.bc.scope, 0)}
               </div>
 
-              <div className="flex items-center justify-between text-sm sm:text-base lg:text-[18px] font-mono text-slate-300 mb-3">
+              <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
                 <span>Achieved: {formatNumber(currentView.bc.achieved, 1)} Cum</span>
-                <span className="text-white font-bold text-base sm:text-lg lg:text-[22px] font-mono">
+                <span className="text-white font-bold text-xs sm:text-sm font-mono">
                   {currentView.bc.pct.toFixed(1)}%
                 </span>
               </div>
