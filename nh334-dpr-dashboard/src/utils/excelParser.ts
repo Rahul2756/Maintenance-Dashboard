@@ -1780,6 +1780,42 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
     });
   }
 
+  // 1.5. Stretch-wise Summary parsing for dynamic contractual targets
+  const ssSheetName = wb.SheetNames.find(n => n.toLowerCase().includes('stretch-wise') || n.toLowerCase().includes('stretchwise')) || 'Stretch-wise Summary';
+  const wsSS = wb.Sheets[ssSheetName];
+  let stretchWiseTemplate: StretchWiseTemplateRow[] = DEFAULT_STRETCH_WISE_TEMPLATE;
+
+  if (wsSS) {
+    const parsedTemplate: StretchWiseTemplateRow[] = [];
+    for (let r = 5; r <= 36; r++) {
+      const rowNum = r + 1;
+      const side = String(wsSS['A' + rowNum]?.v || '').trim() as HighwaySide;
+      const activity = String(wsSS['B' + rowNum]?.v || '').trim();
+      const lane = String(wsSS['C' + rowNum]?.v || '').trim();
+      if (!side || !activity) continue;
+
+      const s1P = Number(wsSS['D' + rowNum]?.v) || 0;
+      const s2P = Number(wsSS['H' + rowNum]?.v) || 0;
+      const s3P = Number(wsSS['L' + rowNum]?.v) || 0;
+      const totP = Number(wsSS['P' + rowNum]?.v) || (s1P + s2P + s3P);
+
+      parsedTemplate.push({
+        rowNum,
+        side,
+        activity,
+        normalizedActivity: normalizeActivity(activity),
+        lane,
+        stretch1PlannedKm: s1P,
+        stretch2PlannedKm: s2P,
+        stretch3PlannedKm: s3P,
+        totalPlannedKm: totP
+      });
+    }
+    if (parsedTemplate.length > 0) {
+      stretchWiseTemplate = parsedTemplate;
+    }
+  }
+
   // Compute dynamic contractual targets from stretchWiseTemplate
   const getTargetSumKm = (actNorm: string, sFilter?: 'LHS' | 'RHS') => {
     return stretchWiseTemplate
@@ -2012,42 +2048,6 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
     dbmCum: cumDbm,
     bcCum: cumBc
   };
-
-  // 3. Stretch-wise Summary parsing (if worksheet exists)
-  const ssSheetName = wb.SheetNames.find(n => n.toLowerCase().includes('stretch-wise') || n.toLowerCase().includes('stretchwise')) || 'Stretch-wise Summary';
-  const wsSS = wb.Sheets[ssSheetName];
-  let stretchWiseTemplate: StretchWiseTemplateRow[] = DEFAULT_STRETCH_WISE_TEMPLATE;
-
-  if (wsSS) {
-    const parsedTemplate: StretchWiseTemplateRow[] = [];
-    for (let r = 5; r <= 36; r++) {
-      const rowNum = r + 1;
-      const side = String(wsSS['A' + rowNum]?.v || '').trim() as HighwaySide;
-      const activity = String(wsSS['B' + rowNum]?.v || '').trim();
-      const lane = String(wsSS['C' + rowNum]?.v || '').trim();
-      if (!side || !activity) continue;
-
-      const s1P = Number(wsSS['D' + rowNum]?.v) || 0;
-      const s2P = Number(wsSS['H' + rowNum]?.v) || 0;
-      const s3P = Number(wsSS['L' + rowNum]?.v) || 0;
-      const totP = Number(wsSS['P' + rowNum]?.v) || (s1P + s2P + s3P);
-
-      parsedTemplate.push({
-        rowNum,
-        side,
-        activity,
-        normalizedActivity: normalizeActivity(activity),
-        lane,
-        stretch1PlannedKm: s1P,
-        stretch2PlannedKm: s2P,
-        stretch3PlannedKm: s3P,
-        totalPlannedKm: totP
-      });
-    }
-    if (parsedTemplate.length > 0) {
-      stretchWiseTemplate = parsedTemplate;
-    }
-  }
 
   const metadata: DPRMetadata = {
     projectName: 'Muzaffarnagar - Haridwar Section, NH-334 (Ch. 130+560KM to 206+220KM)',

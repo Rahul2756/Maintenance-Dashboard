@@ -82,6 +82,7 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
   const isMillingSelected = isAllActivities || (selectedActivities?.includes('Milling') ?? true);
   const isTackSelected = isAllActivities || (selectedActivities?.includes('Tackcoat') ?? true);
   const isDbmSelected = isAllActivities || (selectedActivities?.includes('DBM') ?? true);
+  const isBcActive = isAllActivities || (selectedActivities?.includes('BC') ?? true);
   const isBcSelected = Boolean(selectedActivities && selectedActivities.length === 1 && selectedActivities.includes('BC'));
 
   // 1. DYNAMIC CONTRACTUAL TARGET LENGTHS FROM STRETCH-WISE SUMMARY
@@ -160,7 +161,49 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
     const milling = calcActivity('Milling', millingTargetM);
     const tack = calcActivity('Tackcoat', tackTargetM);
     const dbm = calcActivity('DBM', dbmTargetM);
-    const bc = calcActivity('BC', bcTargetM);
+
+    // BC Linear Length Calculation according to Sections 3, 4, 5:
+    // Planned Target (km): SUM of matching BC planned values from Stretch-wise Summary, col P
+    // Actual Achievement (km): SUM of matching BC Length (m) entries from Chainage Log / 1000
+    const bcActRows = actualRows.filter(
+      (r) =>
+        r.activity === 'BC' &&
+        (side === 'Both' || side === 'ALL' || side === 'BHS' || r.side === side)
+    );
+    const bcDailyRows = bcActRows.filter((r) => serialToIsoDate(r.date) === selectedIso);
+    const bcCumRows = bcActRows.filter((r) => serialToIsoDate(r.date) <= selectedIso);
+
+    const bcDailyM = bcDailyRows.reduce((sum, r) => sum + getRowLengthM(r), 0);
+    const bcDailyKm = Number((bcDailyM / 1000).toFixed(3));
+    const bcDailyEntries = bcDailyRows.length;
+
+    // Actual BC calculation (Section 4 & 5):
+    // 1. Filter Chainage Log records where Activity = BC
+    // 2. Consider both LHS and RHS records (respecting side filter if selected)
+    // 3. Sum corresponding Length (m) values
+    // 4. Convert resulting value from metres to kilometres by dividing by 1,000
+    const bcCumulativeM = bcActRows.reduce((sum, r) => sum + getRowLengthM(r), 0);
+    const bcCumulativeKm = Number((bcCumulativeM / 1000).toFixed(2));
+    const bcCumulativeEntries = bcActRows.length;
+
+    const bcTargetKm = Number((bcTargetM / 1000).toFixed(2));
+    const bcBalanceM = Math.max(0, bcTargetM - bcCumulativeM);
+    const bcBalanceKm = Number((bcBalanceM / 1000).toFixed(2));
+    const bcProgressPercent = bcTargetM > 0 ? Number(((bcCumulativeM / bcTargetM) * 100).toFixed(1)) : 0;
+
+    const bc = {
+      targetM: bcTargetM,
+      targetKm: bcTargetKm,
+      dailyM: bcDailyM,
+      dailyKm: bcDailyKm,
+      dailyEntries: bcDailyEntries,
+      cumulativeM: bcCumulativeM,
+      cumulativeKm: bcCumulativeKm,
+      cumulativeEntries: bcCumulativeEntries,
+      balanceM: bcBalanceM,
+      balanceKm: bcBalanceKm,
+      progressPercent: bcProgressPercent
+    };
 
     // Sync percentages
     const tackSync = milling.cumulativeM > 0 ? (tack.cumulativeM / milling.cumulativeM) * 100 : 0;
@@ -227,9 +270,9 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
       </div>
 
       {/* ============================================================== */}
-      {/* 4 LINEAR KPI CARDS GRID - CYBER BLUEPRINT SLATE THEME          */}
+      {/* 5 LINEAR KPI CARDS GRID - CYBER BLUEPRINT SLATE THEME          */}
       {/* ============================================================== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3.5">
         {/* ============================================================== */}
         {/* Card 1: Milling Progress (Linear Metric)                       */}
         {/* ============================================================== */}
@@ -675,122 +718,148 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
         </div>
 
         {/* ============================================================== */}
-        {/* Card 4: Exposed Milled Gap OR BC Laid (Dynamic View)          */}
+        {/* Card 4: BC (Wearing Course) - Sum Target Length Metric         */}
         {/* ============================================================== */}
-        {isBcSelected ? (
-          // DEDICATED BC VIEW WHEN BC IS EXPLICITLY FILTERED
-          <div className="relative group transition-all duration-300 rounded-2xl overflow-hidden bg-gradient-to-b from-[#0F172A] to-[#0A0F1D] border border-teal-500/40 shadow-xl shadow-teal-950/20 ring-1 ring-teal-400/50">
-            {/* Top Highway Centerline Ribbon */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400 relative">
-              <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent,transparent_8px,rgba(0,0,0,0.4)_8px,rgba(0,0,0,0.4)_16px)]" />
-            </div>
+        <div
+          className={`relative group transition-all duration-300 rounded-2xl overflow-hidden bg-gradient-to-b from-[#0F172A] to-[#0A0F1D] border border-emerald-500/30 shadow-xl shadow-emerald-950/20 ${
+            isBcActive ? 'opacity-100 ring-1 ring-emerald-400/50' : 'opacity-40 grayscale-[40%]'
+          }`}
+        >
+          {/* Top Highway Centerline Ribbon */}
+          <div className="h-1.5 w-full bg-gradient-to-r from-emerald-400 via-teal-400 to-green-500 relative">
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent,transparent_8px,rgba(0,0,0,0.4)_8px,rgba(0,0,0,0.4)_16px)]" />
+          </div>
 
-            <div className="px-3.5 py-4">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2.5 rounded-xl border bg-teal-500/15 text-teal-300 border-teal-400/40 shadow-md shadow-teal-950/40">
-                    <Milestone className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-bold uppercase tracking-wider text-white drop-shadow-sm">
-                        BC Wearing Course
-                      </span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30 font-mono font-bold">
-                        Length
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 font-medium mt-0.5">40mm wearing layer paved</p>
-                  </div>
+          <div className="px-3.5 py-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className={`p-2.5 rounded-xl border ${
+                    isBcActive
+                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-400/40 shadow-md shadow-emerald-950/40'
+                      : 'bg-slate-800 text-slate-500 border-slate-700'
+                  }`}
+                >
+                  <Navigation className="w-5 h-5" />
                 </div>
-
-                <Badge variant="cyan" size="sm" className="font-mono font-bold shadow-sm">
-                  {`${metrics.bc.progressPercent.toFixed(1)}% Target`}
-                </Badge>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold uppercase tracking-wider text-white drop-shadow-sm">
+                      BC
+                    </span>
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 font-mono font-bold">
+                      Length (km)
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">Wearing Course</p>
+                </div>
               </div>
 
-              {/* Primary Achieved & Target Section */}
-              <div className="mt-4 flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="flex items-baseline gap-1.5 flex-wrap">
-                    <span className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight drop-shadow-sm">
-                      {fmt(metrics.bc.cumulativeM)}
-                    </span>
-                    <span className="text-xs text-cyan-400 font-bold font-mono">m</span>
-                    <span className="text-xs text-teal-300 font-mono ml-1 font-bold">
-                      ({metrics.bc.cumulativeKm.toFixed(2)} km)
-                    </span>
-                  </div>
+              {isBcActive ? (
+                <Badge
+                  variant="emerald"
+                  size="sm"
+                  className="font-mono font-bold shadow-sm"
+                >
+                  {`${metrics.bc.progressPercent.toFixed(1)}% Target`}
+                </Badge>
+              ) : (
+                <Badge variant="neutral" size="xs">
+                  Filtered Out
+                </Badge>
+              )}
+            </div>
 
-                  {/* Target row */}
-                  <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium flex-wrap">
-                    <span className="text-slate-400">Total Target:</span>
-                    <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
-                      {fmt(metrics.bc.targetM)} m ({metrics.bc.targetKm.toFixed(2)} km)
+            {/* Primary Achieved & Target Section */}
+            <div className="mt-4 flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="flex items-baseline gap-1.5 flex-wrap">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight drop-shadow-sm">
+                    {isBcActive ? metrics.bc.cumulativeKm.toFixed(2) : '—'}
+                  </span>
+                  <span className="text-xs text-emerald-400 font-bold font-mono">km</span>
+                  {isBcActive && (
+                    <span className="text-xs text-slate-300 font-mono ml-1 font-bold">
+                      ({fmt(metrics.bc.cumulativeM)} m)
                     </span>
-                  </div>
-
-                  {/* Selected Day Progress row */}
-                  <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono">
-                    <span className="text-slate-400">Today:</span>
-                    {metrics.bc.dailyM > 0 ? (
-                      <span className="font-bold text-teal-300 bg-teal-950/60 px-2 py-0.5 rounded border border-teal-500/30">
-                        +{fmt(metrics.bc.dailyM)} m ({metrics.bc.dailyKm.toFixed(3)} km)
-                        <span className="text-slate-300 text-[10px] ml-1 font-normal">
-                          [{metrics.bc.dailyEntries} {metrics.bc.dailyEntries === 1 ? 'entry' : 'entries'}]
-                        </span>
-                      </span>
-                    ) : (
-                      <span className="text-slate-500 bg-[#0A101D] px-2 py-0.5 rounded border border-slate-700/50">
-                        0 m (0 entries)
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
 
+                {/* Total Target Length row */}
+                <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium flex-wrap">
+                  <span className="text-slate-400">Total Target:</span>
+                  <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
+                    {metrics.bc.targetKm.toFixed(2)} km ({fmt(metrics.bc.targetM)} m)
+                  </span>
+                </div>
+
+                {/* Selected Day Progress row */}
+                <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono">
+                  <span className="text-slate-400">Today:</span>
+                  {metrics.bc.dailyM > 0 ? (
+                    <span className="font-bold text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                      +{metrics.bc.dailyKm.toFixed(3)} km ({fmt(metrics.bc.dailyM)} m)
+                      <span className="text-slate-300 text-[10px] ml-1 font-normal">
+                        [{metrics.bc.dailyEntries} {metrics.bc.dailyEntries === 1 ? 'entry' : 'entries'}]
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-slate-500 bg-[#0A101D] px-2 py-0.5 rounded border border-slate-700/50">
+                      0 km (0 entries)
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {isBcActive && (
                 <div className="hidden sm:block shrink-0">
                   <MiniTripleBarChart
                     planned={metrics.bc.targetM}
                     actual={metrics.bc.cumulativeM}
                     balance={metrics.bc.balanceM}
                     unit="m"
-                    actualColor="#14B8A6"
+                    actualColor="#10B981"
                   />
                 </div>
+              )}
+            </div>
+
+            {/* Progress Bar with Highway Ticks */}
+            <div className="mt-3.5">
+              <div className="w-full h-2 rounded-full bg-[#090D16] border border-cyan-500/20 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-400 to-green-500 rounded-full transition-all duration-500 shadow-sm shadow-emerald-500/50"
+                  style={{
+                    width: `${isBcActive ? Math.min(metrics.bc.progressPercent, 100) : 0}%`
+                  }}
+                />
               </div>
 
-              {/* Progress Bar */}
-              <div className="mt-3.5">
-                <div className="w-full h-2 rounded-full bg-[#090D16] border border-cyan-500/20 overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-teal-400 to-emerald-500 rounded-full transition-all duration-500 shadow-sm shadow-teal-500/50"
-                    style={{
-                      width: `${Math.min(metrics.bc.progressPercent, 100)}%`
-                    }}
-                  />
-                </div>
+              <div className="mt-2.5 flex items-center justify-between text-xs gap-1.5 min-w-0">
+                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 font-bold font-mono whitespace-nowrap shrink-0">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Method: Sum</span>
+                </span>
 
-                <div className="mt-2.5 flex items-center justify-between text-xs gap-1.5 min-w-0">
-                  <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-teal-950/70 border border-teal-500/40 text-teal-300 font-bold font-mono whitespace-nowrap shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                    <span>Active Wearing Front</span>
-                  </span>
-
+                {isBcActive && (
                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0A101D] border border-cyan-500/30 text-xs font-mono shadow-sm whitespace-nowrap shrink-0">
                     <span className="text-slate-400 font-medium">Balance:</span>
-                    <span className="font-extrabold text-teal-300 whitespace-nowrap">
-                      {fmt(metrics.bc.balanceM)}&nbsp;m
+                    <span className="font-extrabold text-emerald-300 whitespace-nowrap">
+                      {metrics.bc.balanceKm.toFixed(2)}&nbsp;km
                     </span>
-                    <span className="text-slate-300 font-bold whitespace-nowrap">
-                      ({metrics.bc.balanceKm.toFixed(1)}&nbsp;km)
+                    <span className="text-slate-300 font-bold whitespace-nowrap hidden sm:inline">
+                      ({fmt(metrics.bc.balanceM)}&nbsp;m)
                     </span>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
-        ) : (
-          // CARD 4: EXPOSED MILLED GAP & PAVEMENT CONTINUITY
+        </div>
+
+        {/* ============================================================== */}
+        {/* Card 5: Exposed Milled Gap & Pavement Continuity              */}
+        {/* ============================================================== */}
           <div className="relative group transition-all duration-300 rounded-2xl overflow-hidden bg-gradient-to-b from-[#0F172A] to-[#0A0F1D] border border-rose-500/30 shadow-xl shadow-rose-950/20">
             {/* Top Highway Warning Ribbon */}
             <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-rose-500 to-red-600 relative">
@@ -924,7 +993,6 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
               </div>
             </div>
           </div>
-        )}
       </div>
     </div>
   );
