@@ -66,6 +66,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
     ? availableDates
     : ['14.10.2026', '15.10.2026', '16.10.2026', '17.10.2026', '18.10.2026', '19.10.2026', '20.10.2026', '21.10.2026', '22.10.2026', '23.10.2026'];
 
+  // Ensure selectedSingleDate is synchronized with available dateOptions
+  useEffect(() => {
+    if (dateOptions && dateOptions.length > 0) {
+      if (!filters?.selectedSingleDate || !dateOptions.includes(filters.selectedSingleDate)) {
+        const latest = dateOptions[dateOptions.length - 1];
+        setSelectedSingleDate?.(latest);
+      }
+    }
+  }, [dateOptions, filters?.selectedSingleDate, setSelectedSingleDate]);
+
   const activities = ['Milling', 'Tackcoat', 'DBM', 'BC'] as const;
 
   const handleSingleModeClick = () => {
@@ -471,7 +481,11 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <select
-                  value={filters?.selectedSingleDate || (dateOptions[dateOptions.length - 1] || '01.11.2026')}
+                  value={
+                    filters?.selectedSingleDate && dateOptions.includes(filters.selectedSingleDate)
+                      ? filters.selectedSingleDate
+                      : (dateOptions[dateOptions.length - 1] || '23.10.2026')
+                  }
                   onChange={e => {
                     const val = e.target.value;
                     setSelectedSingleDate?.(val);
@@ -509,7 +523,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
             {/* Reset Button */}
             <button
-              onClick={() => resetFilters()}
+              onClick={() => resetFilters(dateOptions)}
               className="bg-[#0B121E] hover:bg-white/10 border border-white/15 text-gray-300 p-2.5 rounded-xl transition-all cursor-pointer"
               title="Reset Filters"
             >

@@ -12,7 +12,7 @@ export const ModuleSeparator: React.FC<ModuleSeparatorProps> = ({
   filteredRowsCount,
   overallAdherence
 }) => {
-  const { filters, activeModule } = useFilters();
+  const { filters, activeModule, selectedDate } = useFilters();
 
   const moduleMetaMap = {
     overview: {
@@ -180,9 +180,9 @@ export const ModuleSeparator: React.FC<ModuleSeparatorProps> = ({
             </div>
           )}
 
-          {filters.selectedSingleDate ? (
+          {(filters.selectedSingleDate || selectedDate) ? (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold">
-              <span>Day: {filters.selectedSingleDate}</span>
+              <span>Day: {filters.selectedSingleDate || selectedDate}</span>
             </div>
           ) : null}
 

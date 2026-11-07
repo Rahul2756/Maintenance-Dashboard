@@ -1986,7 +1986,7 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
     return new Date(ay, am - 1, ad).getTime() - new Date(by, bm - 1, bd).getTime();
   });
 
-  const latestDate = availableDates[availableDates.length - 1] || '01.11.2026';
+  const latestDate = availableDates[availableDates.length - 1] || '23.10.2026';
   const latestIso = dmyToIso(latestDate);
 
   // Calculate cumulative achieved quantities up to latest date
@@ -2504,7 +2504,7 @@ export function computeDailyGroupedExecution(
       const [bd, bm, by] = b.split('.').map(Number);
       return new Date(ay, am - 1, ad).getTime() - new Date(by, bm - 1, bd).getTime();
     });
-    targetDate = dates[dates.length - 1] || '01.11.2026';
+    targetDate = dates[dates.length - 1] || '23.10.2026';
   }
 
   const targetIso = dmyToIso(targetDate);
@@ -2741,7 +2741,7 @@ export async function loadDashboardData(): Promise<{
       consolidatedScope: fallback.consolidatedScope,
       cumulativeAchieved: fallback.cumulativeAchieved,
       source: 'fallback',
-      availableDates: ['14.10.2026', '15.10.2026', '16.10.2026', '17.10.2026', '18.10.2026', '19.10.2026', '20.10.2026', '21.10.2026', '22.10.2026', '23.10.2026', '31.10.2026', '01.11.2026'],
+      availableDates: ['14.10.2026', '15.10.2026', '16.10.2026', '17.10.2026', '18.10.2026', '19.10.2026', '20.10.2026', '21.10.2026', '22.10.2026', '23.10.2026'],
       dataQualityWarnings: ['Running in fallback mode due to live workbook load issue']
     };
   }

@@ -58,8 +58,8 @@ export const DEFAULT_FILTER_STATE: GlobalFilterState = {
   side: 'Both',
   lane: 'All',
   selectedActivities: ['Milling', 'Tackcoat', 'DBM', 'BC'],
-  dateRange: { start: '14.10.2026', end: '01.11.2026' },
-  selectedSingleDate: '01.11.2026',
+  dateRange: { start: '14.10.2026', end: '23.10.2026' },
+  selectedSingleDate: '23.10.2026',
   chainageScope: 'DPR',
   chainageBounds: { from: 169.000, to: 206.220 },
   anomaliesOnly: false,
@@ -235,7 +235,7 @@ export const FilterProvider: React.FC<{
   }, []);
 
   const resetFilters = useCallback((availableDates?: string[]) => {
-    const latest = availableDates?.[availableDates.length - 1] || '01.11.2026';
+    const latest = availableDates?.[availableDates.length - 1] || '23.10.2026';
     const earliest = availableDates?.[0] || '14.10.2026';
     setFilters({
       side: 'Both',
@@ -286,7 +286,7 @@ export const FilterProvider: React.FC<{
     setFilters(prev => ({ ...prev }));
   }, []);
 
-  const selectedDate = filters.selectedSingleDate || filters.dateRange.end || '01.11.2026';
+  const selectedDate = filters.selectedSingleDate || filters.dateRange.end || '23.10.2026';
 
   const value = useMemo(
     () => ({

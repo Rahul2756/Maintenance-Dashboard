@@ -64,7 +64,7 @@ export const StretchWiseSummaryModule: React.FC<StretchWiseSummaryModuleProps> =
     });
   }, [actualRows]);
 
-  const latestDate = availableDates[availableDates.length - 1] || '01.11.2026';
+  const latestDate = availableDates[availableDates.length - 1] || '23.10.2026';
   const [activeDate, setActiveDate] = useState<string>(selectedDate || latestDate);
 
   // Sync activeDate if selectedDate prop updates

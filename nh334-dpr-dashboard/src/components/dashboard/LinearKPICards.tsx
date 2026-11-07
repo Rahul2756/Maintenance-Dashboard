@@ -70,7 +70,7 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
   }, [availableDates, actualRows]);
 
   // Fallback date is latest available in dataset
-  const latestDate = allDates[allDates.length - 1] || '01.11.2026';
+  const latestDate = allDates[allDates.length - 1] || '23.10.2026';
   const effectiveDate = selectedDate || latestDate;
 
   // Selected date ISO and human-readable format (e.g. 14-Oct-2026)

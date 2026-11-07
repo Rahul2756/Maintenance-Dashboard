@@ -236,14 +236,19 @@ function DashboardContent() {
   // Update filter start/end if dates loaded
   useEffect(() => {
     if (availableDates.length > 0) {
-      if (!filters.dateRange.start || !filters.dateRange.end) {
+      const latest = availableDates[availableDates.length - 1];
+      const earliest = availableDates[0];
+      if (!filters.selectedSingleDate || !availableDates.includes(filters.selectedSingleDate)) {
+        setSelectedSingleDate(latest);
+      }
+      if (!filters.dateRange.start || !filters.dateRange.end || !availableDates.includes(filters.dateRange.end)) {
         setDateRange({
-          start: availableDates[0],
-          end: availableDates[availableDates.length - 1]
+          start: earliest,
+          end: latest
         });
       }
     }
-  }, [availableDates, filters.dateRange.start, filters.dateRange.end, setDateRange]);
+  }, [availableDates, filters.selectedSingleDate, filters.dateRange.start, filters.dateRange.end, setDateRange, setSelectedSingleDate]);
 
   // Filtered actual DPR rows based on global filter controls
   const filteredRows = useMemo(() => {
@@ -251,8 +256,34 @@ function DashboardContent() {
   }, [actualRows, filters]);
 
   // Selected date (As of date) for DPR and cumulative calculations
-  const selectedDate = filters.selectedSingleDate || filters.dateRange.end || (availableDates[availableDates.length - 1] || '01.11.2026');
+  const selectedDate = filters.selectedSingleDate || filters.dateRange.end || (availableDates[availableDates.length - 1] || '23.10.2026');
   const selectedIso = dmyToIso(selectedDate);
+
+  // Dynamic cumulative achieved quantities computed as of selectedDate
+  const dynamicCumulativeAchieved: CumulativeAchievedQuantities = useMemo(() => {
+    if (actualRows.length > 0) {
+      const selIso = dmyToIso(selectedDate);
+      const m = actualRows
+        .filter(r => r.activity === 'Milling' && (r.isoDate || dmyToIso(r.date)) <= selIso)
+        .reduce((sum, r) => sum + r.achievedToday, 0);
+      const t = actualRows
+        .filter(r => r.activity === 'Tackcoat' && (r.isoDate || dmyToIso(r.date)) <= selIso)
+        .reduce((sum, r) => sum + r.achievedToday, 0);
+      const d = actualRows
+        .filter(r => r.activity === 'DBM' && (r.isoDate || dmyToIso(r.date)) <= selIso)
+        .reduce((sum, r) => sum + r.achievedToday, 0);
+      const b = actualRows
+        .filter(r => r.activity === 'BC' && (r.isoDate || dmyToIso(r.date)) <= selIso)
+        .reduce((sum, r) => sum + r.achievedToday, 0);
+      return {
+        millingSqm: Number(m.toFixed(1)),
+        tackCoatSqm: Number(t.toFixed(1)),
+        dbmCum: Number(d.toFixed(1)),
+        bcCum: Number(b.toFixed(1))
+      };
+    }
+    return cumulativeAchieved;
+  }, [actualRows, selectedDate, cumulativeAchieved]);
 
   // Authoritative BOQ and Linear progress metrics computed dynamically from final_sheet.xlsx
   const boqMetrics = useMemo(() => {
@@ -538,7 +569,7 @@ function DashboardContent() {
               milestones={milestones}
               sectionScopes={sectionScopes}
               consolidatedScope={consolidatedScope}
-              cumulativeAchieved={cumulativeAchieved}
+              cumulativeAchieved={dynamicCumulativeAchieved}
             />
 
             {/* Daily Quick Insight Timeline & Day Scrubber */}
