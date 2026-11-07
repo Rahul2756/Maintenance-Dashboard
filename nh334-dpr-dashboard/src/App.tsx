@@ -60,7 +60,15 @@ import { Loader2, CheckCircle2, Layers, BarChart3, Compass, FileSpreadsheet, Cal
 import { ModuleSeparator } from './components/dashboard/ModuleSeparator';
 
 function DashboardContent() {
-  const { filters, setDateRange, activeModule } = useFilters();
+  const {
+    filters,
+    setDateRange,
+    activeModule,
+    setSelectedSingleDate,
+    setSelectedActivities,
+    selectAllActivities,
+    toggleActivity
+  } = useFilters();
 
   const [actualRows, setActualRows] = useState<ActualDPRRow[]>([]);
   const [plannedRecords, setPlannedRecords] = useState<PlannedRecord[]>([]);
@@ -84,7 +92,6 @@ function DashboardContent() {
   const [consolidatedScope, setConsolidatedScope] = useState<ConsolidatedQuantityScope>(DEFAULT_CONSOLIDATED_SCOPE);
   const [cumulativeAchieved, setCumulativeAchieved] = useState<CumulativeAchievedQuantities>(DEFAULT_CUMULATIVE_ACHIEVED);
   const [qcLogs, setQcLogs] = useState<QCTestLogItem[]>([]);
-  const [stretchWiseTemplate, setStretchWiseTemplate] = useState<StretchWiseTemplateRow[] | undefined>(undefined);
   const [dataSource, setDataSource] = useState<'live_excel' | 'fallback' | 'indexeddb'>('live_excel');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [uploadMeta, setUploadMeta] = useState<UploadMetadata | null>(null);
@@ -127,9 +134,6 @@ function DashboardContent() {
       setQcLogs(defaultData.qcLogs);
       setMilestones(defaultData.milestones);
       setCumulativeAchieved(defaultData.cumulativeAchieved);
-      if (defaultData.stretchWiseTemplate) {
-        setStretchWiseTemplate(defaultData.stretchWiseTemplate);
-      }
       setDataSource(defaultData.source);
     } catch (e) {
       console.error('Failed to load final_sheet.xlsx, checking stored data:', e);
@@ -206,9 +210,6 @@ function DashboardContent() {
       setQcLogs(data.qcLogs);
       setMilestones(data.milestones);
       setCumulativeAchieved(data.cumulativeAchieved);
-      if (data.stretchWiseTemplate) {
-        setStretchWiseTemplate(data.stretchWiseTemplate);
-      }
       setDataSource(data.source);
       showToast('Live Excel data synchronized', 'success');
     } catch (err) {
@@ -566,19 +567,20 @@ function DashboardContent() {
               selectedActivities={filters.selectedActivities}
               side={filters.side}
               selectedDate={selectedDate}
+              availableDates={availableDates}
               boqMetrics={boqMetrics}
+              onDateChange={(d) => setSelectedSingleDate(d)}
+              onActivitySelect={(act) => {
+                if (act === 'All') {
+                  selectAllActivities();
+                } else {
+                  toggleActivity(act, true);
+                }
+              }}
             />
 
             {/* Row 2: Volumetric KPI Summary Cards (BoQ Quantities & Material Volumes) */}
             <KPICards kpis={kpis} selectedActivities={filters.selectedActivities} />
-
-            {/* Row 2.5: Requirements 1 & 2 - Master Stretch-Wise Summary & Daily Completed Length Module */}
-            <StretchWiseSummaryModule
-              actualRows={actualRows}
-              templateRows={stretchWiseTemplate}
-              selectedDate={selectedDate}
-              globalSide={filters.side}
-            />
 
             {/* Row 3: Daily Execution Visuals (Daily Planned vs Actual MT & Cumulative Execution S-Curve To-Date) */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">

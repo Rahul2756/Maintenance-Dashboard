@@ -468,27 +468,29 @@ export const DEFAULT_PROJECT_BASELINE: ProjectBaseline = {
   minChainage: 130.560,
   maxChainage: 206.220,
   totalScopeKm: 75.660,
-  totalPlannedLengthM: 91176,
-  millingPlannedLengthM: 91176,
-  dbmPlannedLengthM: 91176,
-  tackcoatPlannedLengthM: 103286,
+  totalPlannedLengthM: 147228,
+  millingPlannedLengthM: 147228,
+  dbmPlannedLengthM: 147228,
+  tackcoatPlannedLengthM: 235114,
   lhs: {
     millingTargetSqm: 334999.5,
     dbmTargetMT: 18388.0,
     dbmTargetCum: 18388.0,
     tackcoatTargetSqm: 871827.0,
-    millingLengthM: 43758,
-    dbmLengthM: 43758,
-    tackcoatLengthM: 49358
+    millingLengthM: 72357,
+    dbmLengthM: 72357,
+    tackcoatLengthM: 115115,
+    bcLengthM: 49358
   },
   rhs: {
     millingTargetSqm: 346284.5,
     dbmTargetMT: 18638.0,
     dbmTargetCum: 18638.0,
     tackcoatTargetSqm: 976444.0,
-    millingLengthM: 47418,
-    dbmLengthM: 47418,
-    tackcoatLengthM: 53928
+    millingLengthM: 74871,
+    dbmLengthM: 74871,
+    tackcoatLengthM: 119999,
+    bcLengthM: 53928
   },
   dailyPhases: [
     {
@@ -1778,6 +1780,35 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
     });
   }
 
+  // Compute dynamic contractual targets from stretchWiseTemplate
+  const getTargetSumKm = (actNorm: string, sFilter?: 'LHS' | 'RHS') => {
+    return stretchWiseTemplate
+      .filter(r => {
+        const matchAct = actNorm === 'Tackcoat'
+          ? r.activity.toLowerCase().includes('tack')
+          : r.activity.toLowerCase() === actNorm.toLowerCase();
+        const matchSide = !sFilter || r.side === sFilter;
+        return matchAct && matchSide;
+      })
+      .reduce((sum, r) => sum + r.totalPlannedKm, 0);
+  };
+
+  const millingBothKm = getTargetSumKm('Milling');
+  const millingLhsKm = getTargetSumKm('Milling', 'LHS');
+  const millingRhsKm = getTargetSumKm('Milling', 'RHS');
+
+  const dbmBothKm = getTargetSumKm('DBM');
+  const dbmLhsKm = getTargetSumKm('DBM', 'LHS');
+  const dbmRhsKm = getTargetSumKm('DBM', 'RHS');
+
+  const tackBothKm = getTargetSumKm('Tackcoat');
+  const tackLhsKm = getTargetSumKm('Tackcoat', 'LHS');
+  const tackRhsKm = getTargetSumKm('Tackcoat', 'RHS');
+
+  const bcBothKm = getTargetSumKm('BC');
+  const bcLhsKm = getTargetSumKm('BC', 'LHS');
+  const bcRhsKm = getTargetSumKm('BC', 'RHS');
+
   const baseline: ProjectBaseline = {
     ...DEFAULT_PROJECT_BASELINE,
     totalMillingTargetSqm: targets.Both.Milling,
@@ -1786,6 +1817,11 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
     totalDbmTargetMT: Number((targets.Both.DBM * 2.38).toFixed(2)),
     totalBcTargetCum: targets.Both.BC,
     totalBcTargetMT: Number((targets.Both.BC * 2.35).toFixed(2)),
+    totalPlannedLengthM: Math.round(millingBothKm * 1000) || 147228,
+    millingPlannedLengthM: Math.round(millingBothKm * 1000) || 147228,
+    dbmPlannedLengthM: Math.round(dbmBothKm * 1000) || 147228,
+    tackcoatPlannedLengthM: Math.round(tackBothKm * 1000) || 235114,
+    totalBcTargetLengthM: Math.round(bcBothKm * 1000) || 103286,
     lhs: {
       millingTargetSqm: targets.LHS.Milling,
       dbmTargetMT: Number((targets.LHS.DBM * 2.38).toFixed(2)),
@@ -1793,10 +1829,10 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
       tackcoatTargetSqm: targets.LHS.Tackcoat,
       bcTargetCum: targets.LHS.BC,
       bcTargetMT: Number((targets.LHS.BC * 2.35).toFixed(2)),
-      millingLengthM: 43758,
-      dbmLengthM: 43758,
-      tackcoatLengthM: 49358,
-      bcLengthM: 49358
+      millingLengthM: Math.round(millingLhsKm * 1000) || 72357,
+      dbmLengthM: Math.round(dbmLhsKm * 1000) || 72357,
+      tackcoatLengthM: Math.round(tackLhsKm * 1000) || 115115,
+      bcLengthM: Math.round(bcLhsKm * 1000) || 49358
     },
     rhs: {
       millingTargetSqm: targets.RHS.Milling,
@@ -1805,10 +1841,10 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
       tackcoatTargetSqm: targets.RHS.Tackcoat,
       bcTargetCum: targets.RHS.BC,
       bcTargetMT: Number((targets.RHS.BC * 2.35).toFixed(2)),
-      millingLengthM: 47418,
-      dbmLengthM: 47418,
-      tackcoatLengthM: 53928,
-      bcLengthM: 53928
+      millingLengthM: Math.round(millingRhsKm * 1000) || 74871,
+      dbmLengthM: Math.round(dbmRhsKm * 1000) || 74871,
+      tackcoatLengthM: Math.round(tackRhsKm * 1000) || 119999,
+      bcLengthM: Math.round(bcRhsKm * 1000) || 53928
     },
     source: 'work_program_excel'
   };
@@ -2118,24 +2154,40 @@ export function computeBOQProgressMetrics(
 
     let targetQty = 0;
     let unit = 'Sqm';
-    let targetLengthM = 91176;
+    let targetLengthM = 147228;
 
     if (act === 'Milling') {
       targetQty = targetMilling;
       unit = 'Sqm';
-      targetLengthM = sideFilter === 'LHS' ? 43758 : sideFilter === 'RHS' ? 47418 : 91176;
+      targetLengthM = sideFilter === 'LHS'
+        ? (baseline.lhs?.millingLengthM || 72357)
+        : sideFilter === 'RHS'
+        ? (baseline.rhs?.millingLengthM || 74871)
+        : (baseline.millingPlannedLengthM || 147228);
     } else if (act === 'Tackcoat') {
       targetQty = targetTackcoat;
       unit = 'Sqm';
-      targetLengthM = sideFilter === 'LHS' ? 49358 : sideFilter === 'RHS' ? 53928 : 103286;
+      targetLengthM = sideFilter === 'LHS'
+        ? (baseline.lhs?.tackcoatLengthM || 115115)
+        : sideFilter === 'RHS'
+        ? (baseline.rhs?.tackcoatLengthM || 119999)
+        : (baseline.tackcoatPlannedLengthM || 235114);
     } else if (act === 'DBM') {
       targetQty = targetDbm;
       unit = 'Cum';
-      targetLengthM = sideFilter === 'LHS' ? 43758 : sideFilter === 'RHS' ? 47418 : 91176;
+      targetLengthM = sideFilter === 'LHS'
+        ? (baseline.lhs?.dbmLengthM || 72357)
+        : sideFilter === 'RHS'
+        ? (baseline.rhs?.dbmLengthM || 74871)
+        : (baseline.dbmPlannedLengthM || 147228);
     } else if (act === 'BC') {
       targetQty = targetBc;
       unit = 'Cum';
-      targetLengthM = sideFilter === 'LHS' ? 49358 : sideFilter === 'RHS' ? 53928 : 103286;
+      targetLengthM = sideFilter === 'LHS'
+        ? (baseline.lhs?.bcLengthM || 49358)
+        : sideFilter === 'RHS'
+        ? (baseline.rhs?.bcLengthM || 53928)
+        : (baseline.totalBcTargetLengthM || 103286);
     }
 
     const balanceQuantity = targetQty - cumulativeAchieved;
@@ -2143,7 +2195,7 @@ export function computeBOQProgressMetrics(
     const isOverachieved = cumulativeAchieved > targetQty;
     const overachievementPercent = isOverachieved ? Math.max(0, progressPercent - 100) : 0;
 
-    // Physical linear length calculations (Requirement 2 Dual Measurements)
+    // Physical linear length calculations (Master Prompt Length Priority)
     // 1. Executed lane length (sum of valid Length (m), preserving separate lanes)
     const dailyLaneLen = calculateExecutedLaneLength(dailyRows, act, sideFilter, laneFilter);
     const cumLaneLen = calculateExecutedLaneLength(cumRows, act, sideFilter, laneFilter);
@@ -2152,8 +2204,8 @@ export function computeBOQProgressMetrics(
     const dailyUniqLen = calculateUniqueLinearLength(dailyRows, act, sideFilter);
     const cumUniqLen = calculateUniqueLinearLength(cumRows, act, sideFilter);
 
-    const balanceLengthM = targetLengthM - cumUniqLen.meters;
-    const linearProgressPercent = targetLengthM > 0 ? (cumUniqLen.meters / targetLengthM) * 100 : 0;
+    const balanceLengthM = targetLengthM - cumLaneLen.meters;
+    const linearProgressPercent = targetLengthM > 0 ? (cumLaneLen.meters / targetLengthM) * 100 : 0;
 
     results[act] = {
       activity: act,
@@ -2165,14 +2217,16 @@ export function computeBOQProgressMetrics(
       progressPercent,
       isOverachieved,
       overachievementPercent,
-      // Default linear metrics (unique coverage for progress pacing)
-      dailyCompletedLengthM: dailyUniqLen.meters,
-      dailyCompletedLengthKm: dailyUniqLen.km,
-      cumulativeCompletedLengthM: cumUniqLen.meters,
-      cumulativeCompletedLengthKm: cumUniqLen.km,
+      // Default linear metrics (Executed completed length per Master Prompt)
+      dailyCompletedLengthM: dailyLaneLen.meters,
+      dailyCompletedLengthKm: dailyLaneLen.km,
+      cumulativeCompletedLengthM: cumLaneLen.meters,
+      cumulativeCompletedLengthKm: cumLaneLen.km,
       balanceLengthM,
       balanceLengthKm: Number((balanceLengthM / 1000).toFixed(3)),
       linearProgressPercent,
+      dailyEntriesCount: dailyRows.length,
+      cumulativeEntriesCount: cumRows.length,
       // Explicit dual measurements (Requirement 2)
       dailyExecutedLaneLengthM: dailyLaneLen.meters,
       dailyExecutedLaneLengthKm: dailyLaneLen.km,

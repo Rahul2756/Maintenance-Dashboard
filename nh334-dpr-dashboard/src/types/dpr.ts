@@ -251,6 +251,8 @@ export interface BOQCardMetric {
   dailyUniqueCoverageKm?: number;
   cumulativeUniqueCoverageM?: number;
   cumulativeUniqueCoverageKm?: number;
+  dailyEntriesCount?: number;
+  cumulativeEntriesCount?: number;
 }
 
 export interface KPIAggregates {
