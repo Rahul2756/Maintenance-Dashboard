@@ -53,7 +53,7 @@ function formatNumber(val: number | undefined | null, decimals: number = 0): str
 }
 
 // Highway road icon with dashed center lane matching reference design
-const HighwayRoadIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4 text-[#00E599]' }) => (
+const HighwayRoadIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5 text-[#00E599]' }) => (
   <svg
     className={className}
     viewBox="0 0 24 24"
@@ -72,7 +72,7 @@ const HighwayRoadIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-
 );
 
 // Road cold planer / milling machine icon
-const MillingMachineIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4 text-[#00E599]' }) => (
+const MillingMachineIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5 text-[#00E599]' }) => (
   <svg
     className={className}
     viewBox="0 0 24 24"
@@ -225,112 +225,112 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
   }, [selectedSection, sec1, sec2, consolidatedScope, cumulativeAchieved]);
 
   return (
-    <div className={`space-y-4 w-full ${className}`}>
+    <div className={`space-y-6 w-full ${className}`}>
       {/* ============================================================== */}
       {/* SECTION 1: SCHEDULE MILESTONE VARIANCE                         */}
       {/* ============================================================== */}
       <section
         aria-label="Schedule Milestone Variance"
-        className="w-full bg-[#0B1215] border border-[#14382F] rounded-2xl p-5 sm:p-6 shadow-xl shadow-black/40"
+        className="w-full bg-[#0B1215] border border-[#14382F] rounded-[24px] p-6 sm:p-7 lg:p-8 shadow-2xl shadow-black/50"
       >
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-sm">
-            <Calendar className="w-5 h-5 text-[#00E599]" />
+        <div className="flex items-center gap-4 sm:gap-5">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-[18px] sm:rounded-[20px] bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-md">
+            <Calendar className="w-7 h-7 sm:w-8 sm:h-8 text-[#00E599]" />
           </div>
           <div>
-            <h2 className="text-white font-bold text-sm sm:text-base tracking-tight leading-snug">
+            <h2 className="text-xl sm:text-2xl lg:text-[28px] font-bold text-white tracking-tight leading-tight">
               Schedule Milestone Variance
             </h2>
-            <p className="text-xs text-slate-400 font-normal mt-0.5">
+            <p className="text-sm sm:text-base lg:text-[18px] text-slate-400 font-normal mt-1">
               Targets vs Actual Timeline
             </p>
           </div>
         </div>
 
         {/* 5 Horizontal Information Blocks */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-5 items-center mt-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-7 items-center mt-7">
           {/* Block 1: Project Start */}
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-sm mt-0.5">
-              <Flag className="w-4.5 h-4.5 text-[#00E599]" />
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <div className="w-12 h-12 sm:w-[54px] sm:h-[54px] lg:w-[58px] lg:h-[58px] rounded-[16px] sm:rounded-[18px] bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-sm mt-0.5">
+              <Flag className="w-6 h-6 sm:w-6.5 sm:h-6.5 text-[#00E599]" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-white font-bold text-xs sm:text-[13px] leading-tight">
+              <span className="text-base sm:text-lg lg:text-[20px] font-bold text-white leading-tight">
                 Project Start
               </span>
-              <span className="text-[10px] text-slate-400 leading-tight mt-0.5">
+              <span className="text-xs sm:text-sm lg:text-[16px] text-slate-400 leading-normal mt-1">
                 Planned work commencement
               </span>
-              <span className="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-xs w-fit shadow-sm">
+              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-sm sm:text-base lg:text-[17px] w-fit shadow-sm">
                 {formatMilestoneDate(milestones.startDate)}
               </span>
             </div>
           </div>
 
           {/* Block 2: Target Completion */}
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-sm mt-0.5">
-              <Target className="w-4.5 h-4.5 text-[#00E599]" />
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <div className="w-12 h-12 sm:w-[54px] sm:h-[54px] lg:w-[58px] lg:h-[58px] rounded-[16px] sm:rounded-[18px] bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-sm mt-0.5">
+              <Target className="w-6 h-6 sm:w-6.5 sm:h-6.5 text-[#00E599]" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-white font-bold text-xs sm:text-[13px] leading-tight">
+              <span className="text-base sm:text-lg lg:text-[20px] font-bold text-white leading-tight">
                 Target Completion
               </span>
-              <span className="text-[10px] text-slate-400 leading-tight mt-0.5">
+              <span className="text-xs sm:text-sm lg:text-[16px] text-slate-400 leading-normal mt-1">
                 Contractual completion date
               </span>
-              <span className="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-xs w-fit shadow-sm">
+              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-sm sm:text-base lg:text-[17px] w-fit shadow-sm">
                 {formatMilestoneDate(milestones.completionDate)}
               </span>
             </div>
           </div>
 
           {/* Block 3: Days Elapsed */}
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-sm mt-0.5">
-              <Timer className="w-4.5 h-4.5 text-[#00E599]" />
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <div className="w-12 h-12 sm:w-[54px] sm:h-[54px] lg:w-[58px] lg:h-[58px] rounded-[16px] sm:rounded-[18px] bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-sm mt-0.5">
+              <Timer className="w-6 h-6 sm:w-6.5 sm:h-6.5 text-[#00E599]" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-white font-bold text-xs sm:text-[13px] leading-tight">
+              <span className="text-base sm:text-lg lg:text-[20px] font-bold text-white leading-tight">
                 Days Elapsed
               </span>
-              <span className="text-[10px] text-slate-400 leading-tight mt-0.5">
+              <span className="text-xs sm:text-sm lg:text-[16px] text-slate-400 leading-normal mt-1">
                 Active construction window
               </span>
-              <span className="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-xs w-fit shadow-sm">
+              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-sm sm:text-base lg:text-[17px] w-fit shadow-sm">
                 {milestones.daysElapsed} days
               </span>
             </div>
           </div>
 
           {/* Block 4: Days Remaining */}
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-sm mt-0.5">
-              <Hourglass className="w-4.5 h-4.5 text-[#00E599]" />
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <div className="w-12 h-12 sm:w-[54px] sm:h-[54px] lg:w-[58px] lg:h-[58px] rounded-[16px] sm:rounded-[18px] bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-sm mt-0.5">
+              <Hourglass className="w-6 h-6 sm:w-6.5 sm:h-6.5 text-[#00E599]" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-white font-bold text-xs sm:text-[13px] leading-tight">
+              <span className="text-base sm:text-lg lg:text-[20px] font-bold text-white leading-tight">
                 Days Remaining
               </span>
-              <span className="text-[10px] text-slate-400 leading-tight mt-0.5">
+              <span className="text-xs sm:text-sm lg:text-[16px] text-slate-400 leading-normal mt-1">
                 To milestone finish
               </span>
-              <span className="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-xs w-fit shadow-sm">
+              <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-sm sm:text-base lg:text-[17px] w-fit shadow-sm">
                 {milestones.daysRemaining} days
               </span>
             </div>
           </div>
 
           {/* Block 5: Time Progress */}
-          <div className="flex flex-col justify-center sm:col-span-2 lg:col-span-1 lg:border-l lg:border-white/[0.08] lg:pl-5">
-            <div className="text-lg font-bold text-[#00E599] font-sans tracking-tight">
+          <div className="flex flex-col justify-center sm:col-span-2 lg:col-span-1 lg:border-l lg:border-white/[0.08] lg:pl-7">
+            <div className="text-xl sm:text-2xl lg:text-[28px] font-extrabold text-[#00E599] font-sans tracking-tight leading-tight">
               {timeElapsedPct.toFixed(1)}% Elapsed
             </div>
-            <div className="text-xs text-slate-300 font-mono font-medium mt-0.5">
+            <div className="text-sm sm:text-base lg:text-[17px] text-slate-300 font-mono font-medium mt-1.5">
               {milestones.daysElapsed} / {totalDays} Days
             </div>
-            <div className="mt-2.5 w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-2.5 overflow-hidden p-[1px]">
+            <div className="mt-3.5 w-full bg-[#112420] border border-[#0F5A46]/50 rounded-full h-[16px] sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
               <div
                 className="h-full rounded-full bg-[#00E599] transition-all duration-700 ease-out"
                 style={{ width: `${Math.min(100, Math.max(0, timeElapsedPct))}%` }}
@@ -345,27 +345,27 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
       {/* ============================================================== */}
       <section
         aria-label="Total Project Scope & BOQ Baseline"
-        className="w-full bg-[#0B1215] border border-[#14382F] rounded-2xl p-5 sm:p-6 shadow-xl shadow-black/40"
+        className="w-full bg-[#0B1215] border border-[#14382F] rounded-[24px] p-6 sm:p-7 lg:p-8 shadow-2xl shadow-black/50"
       >
         {/* Header Row */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-sm">
-              <Layers className="w-5 h-5 text-[#00E599]" />
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4 sm:gap-5">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-[18px] sm:rounded-[20px] bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0 shadow-md">
+              <Layers className="w-7 h-7 sm:w-8 sm:h-8 text-[#00E599]" />
             </div>
             <div>
-              <h2 className="text-white font-bold text-sm sm:text-base tracking-tight leading-snug">
+              <h2 className="text-xl sm:text-2xl lg:text-[28px] font-bold text-white tracking-tight leading-tight">
                 Total Project Scope & BOQ Baseline
               </h2>
-              <p className="text-xs text-slate-400 font-normal mt-0.5">
+              <p className="text-sm sm:text-base lg:text-[18px] text-slate-400 font-normal mt-1">
                 Work Program & Contractual Bill of Quantities (Muzaffarnagar – Haridwar)
               </p>
             </div>
           </div>
 
           {/* Top-Right Highway Corridor Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-xs shadow-sm">
-            <HighwayRoadIcon className="w-4 h-4 text-[#00E599]" />
+          <div className="inline-flex items-center gap-2.5 sm:gap-3 px-5 py-2.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-sm sm:text-base font-medium shadow-sm">
+            <HighwayRoadIcon className="w-5 h-5 text-[#00E599]" />
             <span className="text-white font-semibold">NH-334:</span>
             <span className="text-[#00E599] font-bold font-mono">75.66 km</span>
             <span className="text-slate-300">Total Corridor</span>
@@ -373,20 +373,20 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
         </div>
 
         {/* Corridor Scope Selector */}
-        <div className="flex flex-wrap items-center gap-3 mt-4 pt-3.5 border-t border-white/[0.06]">
-          <div className="flex items-center gap-1.5 text-xs text-white font-medium mr-1">
-            <MapPin className="w-3.5 h-3.5 text-[#00E599]" />
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-6 pt-5 border-t border-white/[0.08]">
+          <div className="flex items-center gap-2 text-sm sm:text-base lg:text-[17px] text-white font-semibold mr-1">
+            <MapPin className="w-4.5 h-4.5 text-[#00E599]" />
             <span>Corridor Scope View:</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             <button
               type="button"
               onClick={() => setSelectedSection('all')}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm lg:text-[16px] transition-all cursor-pointer ${
                 selectedSection === 'all'
-                  ? 'bg-[#003B2C] text-[#00E599] border border-[#00E599] shadow-sm font-semibold'
-                  : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/20 hover:text-white'
+                  ? 'bg-[#003B2C] text-[#00E599] border-2 border-[#00E599] shadow-md font-bold'
+                  : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/25 hover:text-white font-medium'
               }`}
             >
               All Sections (75.66 km)
@@ -394,10 +394,10 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
             <button
               type="button"
               onClick={() => setSelectedSection('sec1')}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm lg:text-[16px] transition-all cursor-pointer ${
                 selectedSection === 'sec1'
-                  ? 'bg-[#003B2C] text-[#00E599] border border-[#00E599] shadow-sm font-semibold'
-                  : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/20 hover:text-white'
+                  ? 'bg-[#003B2C] text-[#00E599] border-2 border-[#00E599] shadow-md font-bold'
+                  : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/25 hover:text-white font-medium'
               }`}
             >
               Muzaffarnagar – Roorkee (38.44 km)
@@ -405,10 +405,10 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
             <button
               type="button"
               onClick={() => setSelectedSection('sec2')}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm lg:text-[16px] transition-all cursor-pointer ${
                 selectedSection === 'sec2'
-                  ? 'bg-[#003B2C] text-[#00E599] border border-[#00E599] shadow-sm font-semibold'
-                  : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/20 hover:text-white'
+                  ? 'bg-[#003B2C] text-[#00E599] border-2 border-[#00E599] shadow-md font-bold'
+                  : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/25 hover:text-white font-medium'
               }`}
             >
               Roorkee – Haridwar (37.22 km)
@@ -416,34 +416,38 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
           </div>
         </div>
 
-        {/* 4 Activity Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+        {/* 4 BOQ Activity Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 mt-6">
           {/* Card 1: Milling */}
-          <div className="rounded-2xl bg-[#091218] border border-[#143028] p-4 flex flex-col justify-between shadow-md hover:border-[#0F5A46] transition-all">
+          <div className="rounded-[22px] sm:rounded-[24px] bg-[#091218] border border-[#143028] p-5 sm:p-6 lg:p-7 flex flex-col justify-between shadow-lg hover:border-[#0F5A46] transition-all duration-200">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599]">
-                    <MillingMachineIcon className="w-4 h-4 text-[#00E599]" />
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0">
+                    <MillingMachineIcon className="w-5 h-5 text-[#00E599]" />
                   </div>
-                  <span className="text-white font-bold text-sm tracking-wide">Milling</span>
+                  <span className="text-white font-bold text-base sm:text-lg lg:text-[20px] tracking-wide">
+                    Milling
+                  </span>
                 </div>
-                <span className="px-2.5 py-0.5 rounded-md bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-[11px] font-mono font-bold">
+                <span className="px-3 py-1 rounded-lg bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-xs sm:text-sm font-mono font-bold">
                   Sqm
                 </span>
               </div>
 
-              <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight mt-2">
+              <div className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-white font-mono tracking-tight my-4 leading-none">
                 {formatNumber(currentView.milling.scope)}
               </div>
 
-              <div className="flex items-center justify-between text-xs font-mono text-slate-300 mt-2 mb-1.5">
+              <div className="flex items-center justify-between text-sm sm:text-base lg:text-[18px] font-mono text-slate-300 mb-3">
                 <span>Achieved: {formatNumber(currentView.milling.achieved, 1)} Sqm</span>
-                <span className="text-white font-bold">{currentView.milling.pct.toFixed(1)}%</span>
+                <span className="text-white font-bold text-base sm:text-lg lg:text-[22px] font-mono">
+                  {currentView.milling.pct.toFixed(1)}%
+                </span>
               </div>
             </div>
 
-            <div className="w-full bg-[#112420] border border-[#0F5A46]/30 rounded-full h-2 overflow-hidden p-[1px]">
+            <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
               <div
                 className="h-full rounded-full bg-[#00E599] transition-all duration-700"
                 style={{ width: `${Math.min(100, Math.max(0, currentView.milling.pct))}%` }}
@@ -452,31 +456,35 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
           </div>
 
           {/* Card 2: Tack Coat */}
-          <div className="rounded-2xl bg-[#091218] border border-[#143028] p-4 flex flex-col justify-between shadow-md hover:border-[#0F5A46] transition-all">
+          <div className="rounded-[22px] sm:rounded-[24px] bg-[#091218] border border-[#143028] p-5 sm:p-6 lg:p-7 flex flex-col justify-between shadow-lg hover:border-[#0F5A46] transition-all duration-200">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599]">
-                    <Droplet className="w-4 h-4 text-[#00E599]" />
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0">
+                    <Droplet className="w-5 h-5 text-[#00E599]" />
                   </div>
-                  <span className="text-white font-bold text-sm tracking-wide">Tack Coat</span>
+                  <span className="text-white font-bold text-base sm:text-lg lg:text-[20px] tracking-wide">
+                    Tack Coat
+                  </span>
                 </div>
-                <span className="px-2.5 py-0.5 rounded-md bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-[11px] font-mono font-bold">
+                <span className="px-3 py-1 rounded-lg bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-xs sm:text-sm font-mono font-bold">
                   Sqm
                 </span>
               </div>
 
-              <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight mt-2">
+              <div className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-white font-mono tracking-tight my-4 leading-none">
                 {formatNumber(currentView.tackCoat.scope)}
               </div>
 
-              <div className="flex items-center justify-between text-xs font-mono text-slate-300 mt-2 mb-1.5">
+              <div className="flex items-center justify-between text-sm sm:text-base lg:text-[18px] font-mono text-slate-300 mb-3">
                 <span>Achieved: {formatNumber(currentView.tackCoat.achieved, 1)} Sqm</span>
-                <span className="text-white font-bold">{currentView.tackCoat.pct.toFixed(1)}%</span>
+                <span className="text-white font-bold text-base sm:text-lg lg:text-[22px] font-mono">
+                  {currentView.tackCoat.pct.toFixed(1)}%
+                </span>
               </div>
             </div>
 
-            <div className="w-full bg-[#112420] border border-[#0F5A46]/30 rounded-full h-2 overflow-hidden p-[1px]">
+            <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
               <div
                 className="h-full rounded-full bg-[#00E599] transition-all duration-700"
                 style={{ width: `${Math.min(100, Math.max(0, currentView.tackCoat.pct))}%` }}
@@ -485,33 +493,35 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
           </div>
 
           {/* Card 3: DBM (Bituminous Base) */}
-          <div className="rounded-2xl bg-[#091218] border border-[#143028] p-4 flex flex-col justify-between shadow-md hover:border-[#0F5A46] transition-all">
+          <div className="rounded-[22px] sm:rounded-[24px] bg-[#091218] border border-[#143028] p-5 sm:p-6 lg:p-7 flex flex-col justify-between shadow-lg hover:border-[#0F5A46] transition-all duration-200">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599]">
-                    <Layers className="w-4 h-4 text-[#00E599]" />
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0">
+                    <Layers className="w-5 h-5 text-[#00E599]" />
                   </div>
-                  <span className="text-white font-bold text-sm tracking-wide">
-                    DBM <span className="text-slate-400 font-normal text-xs">(Bituminous Base)</span>
+                  <span className="text-white font-bold text-base sm:text-lg lg:text-[20px] tracking-wide">
+                    DBM <span className="text-slate-400 font-normal text-xs sm:text-sm">(Bituminous Base)</span>
                   </span>
                 </div>
-                <span className="px-2.5 py-0.5 rounded-md bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-[11px] font-mono font-bold">
+                <span className="px-3 py-1 rounded-lg bg-[#08201A] border border-[#0F5A46] text-[#00E599] text-xs sm:text-sm font-mono font-bold">
                   Cum
                 </span>
               </div>
 
-              <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight mt-2">
+              <div className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-white font-mono tracking-tight my-4 leading-none">
                 {formatNumber(currentView.dbm.scope, 0)}
               </div>
 
-              <div className="flex items-center justify-between text-xs font-mono text-slate-300 mt-2 mb-1.5">
+              <div className="flex items-center justify-between text-sm sm:text-base lg:text-[18px] font-mono text-slate-300 mb-3">
                 <span>Achieved: {formatNumber(currentView.dbm.achieved, 1)} Cum</span>
-                <span className="text-white font-bold">{currentView.dbm.pct.toFixed(1)}%</span>
+                <span className="text-white font-bold text-base sm:text-lg lg:text-[22px] font-mono">
+                  {currentView.dbm.pct.toFixed(1)}%
+                </span>
               </div>
             </div>
 
-            <div className="w-full bg-[#112420] border border-[#0F5A46]/30 rounded-full h-2 overflow-hidden p-[1px]">
+            <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
               <div
                 className="h-full rounded-full bg-[#00E599] transition-all duration-700"
                 style={{ width: `${Math.min(100, Math.max(0, currentView.dbm.pct))}%` }}
@@ -520,33 +530,35 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
           </div>
 
           {/* Card 4: BC (Wearing Course) */}
-          <div className="rounded-2xl bg-[#091218] border border-[#143028] p-4 flex flex-col justify-between shadow-md hover:border-[#0F5A46] transition-all">
+          <div className="rounded-[22px] sm:rounded-[24px] bg-[#091218] border border-[#143028] p-5 sm:p-6 lg:p-7 flex flex-col justify-between shadow-lg hover:border-[#0F5A46] transition-all duration-200">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599]">
-                    <HighwayRoadIcon className="w-4 h-4 text-[#00E599]" />
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#082820] border border-[#0F5A46] flex items-center justify-center text-[#00E599] shrink-0">
+                    <HighwayRoadIcon className="w-5 h-5 text-[#00E599]" />
                   </div>
-                  <span className="text-white font-bold text-sm tracking-wide">
-                    BC <span className="text-slate-400 font-normal text-xs">(Wearing Course)</span>
+                  <span className="text-white font-bold text-base sm:text-lg lg:text-[20px] tracking-wide">
+                    BC <span className="text-slate-400 font-normal text-xs sm:text-sm">(Wearing Course)</span>
                   </span>
                 </div>
-                <span className="px-2.5 py-0.5 rounded-md bg-[#241432] border border-[#6B21A8]/50 text-[#C084FC] text-[11px] font-mono font-bold">
+                <span className="px-3 py-1 rounded-lg bg-[#241432] border border-[#6B21A8]/60 text-[#C084FC] text-xs sm:text-sm font-mono font-bold">
                   Cum
                 </span>
               </div>
 
-              <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight mt-2">
+              <div className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-white font-mono tracking-tight my-4 leading-none">
                 {formatNumber(currentView.bc.scope, 0)}
               </div>
 
-              <div className="flex items-center justify-between text-xs font-mono text-slate-300 mt-2 mb-1.5">
+              <div className="flex items-center justify-between text-sm sm:text-base lg:text-[18px] font-mono text-slate-300 mb-3">
                 <span>Achieved: {formatNumber(currentView.bc.achieved, 1)} Cum</span>
-                <span className="text-white font-bold">{currentView.bc.pct.toFixed(1)}%</span>
+                <span className="text-white font-bold text-base sm:text-lg lg:text-[22px] font-mono">
+                  {currentView.bc.pct.toFixed(1)}%
+                </span>
               </div>
             </div>
 
-            <div className="w-full bg-[#112420] border border-[#0F5A46]/30 rounded-full h-2 overflow-hidden p-[1px]">
+            <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
               <div
                 className="h-full rounded-full bg-[#00E599] transition-all duration-700"
                 style={{ width: `${Math.min(100, Math.max(0, currentView.bc.pct))}%` }}
