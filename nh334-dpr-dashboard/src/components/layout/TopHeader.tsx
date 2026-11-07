@@ -24,7 +24,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   onReload,
   isLoading
 }) => {
-  const { 
+  const {
     side, setSide,
     selectedActivities, setSelectedActivities,
     scope, setScope,
@@ -72,7 +72,12 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
   const dateOptions = availableDates.length > 0
     ? availableDates
-    : ['14.10.2026', '15.10.2026', '16.10.2026', '17.10.2026', '18.10.2026', '19.10.2026', '20.10.2026', '21.10.2026', '22.10.2026', '23.10.2026'];
+    : [
+      '14.10.2026', '15.10.2026', '16.10.2026', '17.10.2026', '18.10.2026',
+      '19.10.2026', '20.10.2026', '21.10.2026', '22.10.2026', '23.10.2026',
+      '24.10.2026', '25.10.2026', '26.10.2026', '27.10.2026', '28.10.2026',
+      '29.10.2026', '31.10.2026', '01.11.2026'
+    ];
 
   const activities = ['Milling', 'Tackcoat', 'DBM', 'BC'] as const;
 
@@ -126,18 +131,18 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
   return (
     <header className="w-full bg-[#040911] border-b border-white/10 select-none relative z-40 font-sans text-white">
-      
+
       {/* =========================================================================
           TIER 1 & 2 HERO WRAPPER WITH SHARED HIGHWAY BACKDROP MATCHING IMAGE 1
           ========================================================================= */}
       <div className="w-full relative overflow-hidden bg-[#040911] border-b border-white/10">
-        
+
         {/* Right Highway Graphic with Gradient Dissolve Mask spanning Tier 1 & 2 */}
         <div className="absolute right-0 top-0 bottom-0 w-[48%] lg:w-[44%] pointer-events-none overflow-hidden z-0 hidden md:block">
           <div className="absolute inset-0 bg-gradient-to-r from-[#040911] via-[#040911]/60 to-transparent z-10" />
-          <img 
-            src="/images/highway-header-banner.jpg" 
-            alt="NH-334 Highway Corridor" 
+          <img
+            src="/images/highway-header-banner.jpg"
+            alt="NH-334 Highway Corridor"
             className="w-full h-full object-cover object-right"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/assets/highway-header-banner.jpg';
@@ -147,7 +152,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
         {/* TIER 1: PROJECT IDENTITY, METADATA & TOP-RIGHT METRIC BADGES */}
         <div className="w-full px-6 lg:px-8 pt-7 pb-6 flex flex-wrap items-center justify-between gap-6 border-b border-white/10 relative z-10">
-          
+
           {/* Left: Prominent Road Logo + Title Block */}
           <div className="flex items-center gap-5 lg:gap-6">
             {/* CubeTech Corporate Logo Container */}
@@ -218,18 +223,17 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
         {/* TIER 2: NAVIGATION TABS */}
         <div className="w-full px-6 lg:px-8 py-2.5 flex items-center justify-between min-h-[60px] relative z-10 bg-[#040911]/50 backdrop-blur-[2px]">
-          
+
           {/* Module Navigation Tabs */}
           <nav className="flex items-center gap-3 sm:gap-5 lg:gap-7 relative z-20 overflow-x-auto">
-            
+
             {/* Tab 1: Project Overview */}
             <button
               onClick={() => setActiveTab('overview')}
-              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === 'overview'
+              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === 'overview'
                   ? 'bg-gradient-to-b from-[#003B2A]/90 to-[#002218]/90 text-[#00E599] border border-[#00E599]/60 border-b-2 border-b-[#00E599] shadow-lg shadow-[#00E599]/20'
                   : 'text-slate-300 hover:text-white border border-transparent hover:bg-white/5'
-              }`}
+                }`}
             >
               <svg className={`w-4 h-4 ${activeTab === 'overview' ? 'text-[#00E599]' : 'text-slate-400'}`} fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
@@ -240,11 +244,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             {/* Tab 2: Daily Analytics */}
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === 'analytics'
+              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === 'analytics'
                   ? 'bg-gradient-to-b from-[#003B2A]/90 to-[#002218]/90 text-[#00E599] border border-[#00E599]/60 border-b-2 border-b-[#00E599] shadow-lg shadow-[#00E599]/20'
                   : 'text-slate-300 hover:text-white border border-transparent hover:bg-white/5'
-              }`}
+                }`}
             >
               <svg className={`w-4 h-4 ${activeTab === 'analytics' ? 'text-[#00E599]' : 'text-slate-400'}`} fill="currentColor" viewBox="0 0 24 24">
                 <rect x="3" y="12" width="4" height="9" rx="1" />
@@ -257,11 +260,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             {/* Tab 3: Spatial / Strip Map */}
             <button
               onClick={() => setActiveTab('spatial')}
-              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === 'spatial'
+              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === 'spatial'
                   ? 'bg-gradient-to-b from-[#003B2A]/90 to-[#002218]/90 text-[#00E599] border border-[#00E599]/60 border-b-2 border-b-[#00E599] shadow-lg shadow-[#00E599]/20'
                   : 'text-slate-300 hover:text-white border border-transparent hover:bg-white/5'
-              }`}
+                }`}
             >
               <svg className={`w-4 h-4 ${activeTab === 'spatial' ? 'text-[#00E599]' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -272,11 +274,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             {/* Tab 4: Chainage Logs & DPR */}
             <button
               onClick={() => setActiveTab('logs')}
-              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === 'logs' || activeTab === 'dpr'
+              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === 'logs' || activeTab === 'dpr'
                   ? 'bg-gradient-to-b from-[#003B2A]/90 to-[#002218]/90 text-[#00E599] border border-[#00E599]/60 border-b-2 border-b-[#00E599] shadow-lg shadow-[#00E599]/20'
                   : 'text-slate-300 hover:text-white border border-transparent hover:bg-white/5'
-              }`}
+                }`}
             >
               <svg className={`w-4 h-4 ${activeTab === 'logs' || activeTab === 'dpr' ? 'text-[#00E599]' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -295,13 +296,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           TIER 3: CONSOLIDATED FILTER RIBBON & INTERACTIVE ACTIVITY POPOVER
           ========================================================================= */}
       <div className="w-full px-6 py-2.5 bg-[#03070E] border-b border-white/10 relative z-30">
-        
+
         {/* Rounded Outer Filter Ribbon Container matching reference */}
         <div className="w-full p-2.5 bg-[#070D18]/90 border border-white/10 rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-lg backdrop-blur-md">
-          
+
           {/* Left Side Filter Controls Group */}
           <div className="flex flex-wrap items-center gap-4">
-            
+
             {/* 1. SIDE FILTER */}
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-gray-300 text-[11px] font-medium">
@@ -315,11 +316,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                   <button
                     key={s}
                     onClick={() => setSide(s)}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                      side === s 
-                        ? 'bg-[#008B6B] text-white shadow-sm shadow-[#008B6B]/40' 
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${side === s
+                        ? 'bg-[#008B6B] text-white shadow-sm shadow-[#008B6B]/40'
                         : 'text-gray-400 hover:text-white'
-                    }`}
+                      }`}
                   >
                     {s}
                   </button>
@@ -339,9 +339,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               {/* Trigger Button */}
               <button
                 onClick={() => setIsActivityOpen(!isActivityOpen)}
-                className={`bg-[#0B121E] border ${
-                  isActivityOpen ? 'border-[#00E599] shadow-[0_0_10px_rgba(0,229,153,0.2)]' : 'border-white/10 hover:border-white/20'
-                } rounded-xl px-3 py-1.5 flex items-center justify-between gap-3 text-xs text-white min-w-[145px] cursor-pointer transition-all`}
+                className={`bg-[#0B121E] border ${isActivityOpen ? 'border-[#00E599] shadow-[0_0_10px_rgba(0,229,153,0.2)]' : 'border-white/10 hover:border-white/20'
+                  } rounded-xl px-3 py-1.5 flex items-center justify-between gap-3 text-xs text-white min-w-[145px] cursor-pointer transition-all`}
               >
                 <div className="flex items-center gap-1.5 bg-[#008B6B] px-2 py-0.5 rounded text-[11px] font-medium">
                   <span>
@@ -351,7 +350,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                         ? selectedActivities[0]
                         : `${selectedActivities.length} Selected`}
                   </span>
-                  <span 
+                  <span
                     onClick={handleClearActivities}
                     className="text-white/80 hover:text-white cursor-pointer ml-0.5"
                     title={activityMode === 'single' ? 'Reset to Milling' : 'Reset to All'}
@@ -371,17 +370,15 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                   <div className="bg-black/50 border border-white/10 p-0.5 rounded-lg flex items-center">
                     <button
                       onClick={handleSingleModeClick}
-                      className={`w-1/2 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${
-                        activityMode === 'single' ? 'bg-[#008B6B] text-white shadow-sm' : 'text-gray-400 hover:text-white'
-                      }`}
+                      className={`w-1/2 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${activityMode === 'single' ? 'bg-[#008B6B] text-white shadow-sm' : 'text-gray-400 hover:text-white'
+                        }`}
                     >
                       Single
                     </button>
                     <button
                       onClick={handleMultiModeClick}
-                      className={`w-1/2 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${
-                        activityMode === 'multi' ? 'bg-[#008B6B] text-white shadow-sm' : 'text-gray-400 hover:text-white'
-                      }`}
+                      className={`w-1/2 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${activityMode === 'multi' ? 'bg-[#008B6B] text-white shadow-sm' : 'text-gray-400 hover:text-white'
+                        }`}
                     >
                       Multi
                     </button>
@@ -391,15 +388,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                   <div className="flex flex-col gap-1 mt-1">
                     {/* Select All - Only visible in Multi mode */}
                     {activityMode === 'multi' && (
-                      <div 
+                      <div
                         onClick={handleSelectAll}
-                        className={`flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/5 cursor-pointer text-xs font-medium text-gray-200 transition-colors ${
-                          selectedActivities.length === activities.length ? 'bg-[#003B2C]/50' : ''
-                        }`}
+                        className={`flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/5 cursor-pointer text-xs font-medium text-gray-200 transition-colors ${selectedActivities.length === activities.length ? 'bg-[#003B2C]/50' : ''
+                          }`}
                       >
-                        <div className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
-                          selectedActivities.length === activities.length ? 'bg-[#00E599] border-[#00E599] text-black font-extrabold text-[10px]' : 'border-gray-500 bg-black/40'
-                        }`}>
+                        <div className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${selectedActivities.length === activities.length ? 'bg-[#00E599] border-[#00E599] text-black font-extrabold text-[10px]' : 'border-gray-500 bg-black/40'
+                          }`}>
                           {selectedActivities.length === activities.length && '✓'}
                         </div>
                         <span>All ({activities.length})</span>
@@ -413,13 +408,11 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                         <div
                           key={act}
                           onClick={() => handleActivityToggle(act)}
-                          className={`flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/5 cursor-pointer text-xs font-medium text-gray-200 transition-colors ${
-                            isSelected ? 'bg-[#003B2C]/40 text-white font-medium' : ''
-                          }`}
+                          className={`flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/5 cursor-pointer text-xs font-medium text-gray-200 transition-colors ${isSelected ? 'bg-[#003B2C]/40 text-white font-medium' : ''
+                            }`}
                         >
-                          <div className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
-                            isSelected ? 'bg-[#00E599] border-[#00E599] text-black font-extrabold text-[10px]' : 'border-gray-500 bg-black/40'
-                          }`}>
+                          <div className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${isSelected ? 'bg-[#00E599] border-[#00E599] text-black font-extrabold text-[10px]' : 'border-gray-500 bg-black/40'
+                            }`}>
                             {isSelected && '✓'}
                           </div>
                           <span>{act}</span>
@@ -441,9 +434,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               </div>
               <button
                 onClick={() => setIsScopeOpen(!isScopeOpen)}
-                className={`bg-[#0B121E] border ${
-                  isScopeOpen ? 'border-[#00E599]' : 'border-white/10 hover:border-white/20'
-                } rounded-xl px-3 py-2 flex items-center justify-between gap-3 text-xs text-white min-w-[130px] cursor-pointer transition-all`}
+                className={`bg-[#0B121E] border ${isScopeOpen ? 'border-[#00E599]' : 'border-white/10 hover:border-white/20'
+                  } rounded-xl px-3 py-2 flex items-center justify-between gap-3 text-xs text-white min-w-[130px] cursor-pointer transition-all`}
               >
                 <span>
                   {scope === 'All' ? 'All Scopes' : scope === 'DPR' ? 'Active DPR Package' : scope === 'Sec1' ? 'Section 1' : 'Section 2'}
@@ -468,9 +460,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                         setScope(item.key as any);
                         setIsScopeOpen(false);
                       }}
-                      className={`text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                        scope === item.key ? 'bg-[#003B2C] text-[#00E599]' : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                      }`}
+                      className={`text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${scope === item.key ? 'bg-[#003B2C] text-[#00E599]' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                        }`}
                     >
                       {item.label}
                     </button>
@@ -505,7 +496,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                     const display = isoToDisplayDate(serialToIsoDate(d));
                     return (
                       <option key={`report-date-${d}`} value={d} className="bg-[#09121D] text-slate-200">
-                        {display} ({d}){isLatest ? ' ★ LATEST' : ''}
+                        {display}{isLatest ? ' (LATEST)' : ''}
                       </option>
                     );
                   })}
@@ -523,9 +514,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               </div>
               <button
                 onClick={() => setIsAnomalyOpen(!isAnomalyOpen)}
-                className={`bg-[#0B121E] border ${
-                  isAnomalyOpen ? 'border-[#00E599]' : 'border-white/10 hover:border-white/20'
-                } rounded-xl px-3 py-2 flex items-center justify-between gap-3 text-xs text-white min-w-[110px] cursor-pointer transition-all`}
+                className={`bg-[#0B121E] border ${isAnomalyOpen ? 'border-[#00E599]' : 'border-white/10 hover:border-white/20'
+                  } rounded-xl px-3 py-2 flex items-center justify-between gap-3 text-xs text-white min-w-[110px] cursor-pointer transition-all`}
               >
                 <span>{anomalyFilter === 'Anomalies' ? 'Flagged Only' : 'All'}</span>
                 <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${isAnomalyOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -541,9 +531,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                       setAnomalyFilter('All');
                       setIsAnomalyOpen(false);
                     }}
-                    className={`text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      anomalyFilter === 'All' ? 'bg-[#003B2C] text-[#00E599]' : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                    }`}
+                    className={`text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${anomalyFilter === 'All' ? 'bg-[#003B2C] text-[#00E599]' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                      }`}
                   >
                     All Rows
                   </button>
@@ -552,9 +541,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                       setAnomalyFilter('Anomalies');
                       setIsAnomalyOpen(false);
                     }}
-                    className={`text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      anomalyFilter === 'Anomalies' ? 'bg-[#003B2C] text-[#00E599]' : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                    }`}
+                    className={`text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${anomalyFilter === 'Anomalies' ? 'bg-[#003B2C] text-[#00E599]' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                      }`}
                   >
                     Flagged Anomalies Only
                   </button>
@@ -569,9 +557,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             {/* Apply Filters Button */}
             <button
               onClick={handleApplyClick}
-              className={`bg-[#008B6B] hover:bg-[#00A37D] text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-[#008B6B]/30 transition-all cursor-pointer ${
-                filterApplied ? 'ring-2 ring-[#00E599] scale-95' : ''
-              }`}
+              className={`bg-[#008B6B] hover:bg-[#00A37D] text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-[#008B6B]/30 transition-all cursor-pointer ${filterApplied ? 'ring-2 ring-[#00E599] scale-95' : ''
+                }`}
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />

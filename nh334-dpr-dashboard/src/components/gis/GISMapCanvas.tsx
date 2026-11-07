@@ -93,6 +93,7 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
     lon: number;
     x: number;
     y: number;
+    segment?: RoadSegmentGeo;
   } | null>(null);
 
   const milestones = React.useMemo(() => getMilestoneMarkers(5000), []);
@@ -246,21 +247,102 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
     }
 
     // 4. Render Maintenance Activity & Work Zone Segments
+    const hasLHS = segments.some(s => s.side === 'LHS');
+    const hasRHS = segments.some(s => s.side === 'RHS');
+    const isDual = hasLHS && hasRHS;
+
+    // Helper to calculate normal offset in screen coordinates for parallel dual carriageways
+    const computeOffsetPoints = (coords: [number, number][], offsetPx: number): [number, number][] => {
+      const screenPts = coords.map(c => toScreen(c[0], c[1]));
+      if (offsetPx === 0 || screenPts.length < 2) return screenPts;
+
+      const res: [number, number][] = [];
+      for (let i = 0; i < screenPts.length; i++) {
+        let dx = 0;
+        let dy = 0;
+        if (i === 0) {
+          dx = screenPts[1][0] - screenPts[0][0];
+          dy = screenPts[1][1] - screenPts[0][1];
+        } else if (i === screenPts.length - 1) {
+          dx = screenPts[i][0] - screenPts[i - 1][0];
+          dy = screenPts[i][1] - screenPts[i - 1][1];
+        } else {
+          dx = screenPts[i + 1][0] - screenPts[i - 1][0];
+          dy = screenPts[i + 1][1] - screenPts[i - 1][1];
+        }
+        const len = Math.hypot(dx, dy) || 1;
+        // Perpendicular normal: (-dy/len, dx/len)
+        const nx = -dy / len;
+        const ny = dx / len;
+        res.push([screenPts[i][0] + nx * offsetPx, screenPts[i][1] + ny * offsetPx]);
+      }
+      return res;
+    };
+
     segments.forEach((seg) => {
       if (!seg.coordinates || seg.coordinates.length < 2) return;
 
+      const offsetDist = isDual ? (seg.side === 'LHS' ? -3.5 : seg.side === 'RHS' ? 3.5 : 0) : 0;
+      const pts = computeOffsetPoints(seg.coordinates, offsetDist);
+
       ctx.beginPath();
-      seg.coordinates.forEach((c, idx) => {
-        const [sx, sy] = toScreen(c[0], c[1]);
-        if (idx === 0) ctx.moveTo(sx, sy);
-        else ctx.lineTo(sx, sy);
+      pts.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p[0], p[1]);
+        else ctx.lineTo(p[0], p[1]);
       });
 
       ctx.strokeStyle = seg.color || '#10B981';
-      ctx.lineWidth = zoom > 12 ? 6 : 4;
+      ctx.lineWidth = zoom > 12 ? (isDual ? 5 : 7) : (isDual ? 3.5 : 5);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.stroke();
+
+      // Render status labels directly on road at suitable zoom levels
+      if (zoom >= 12.2 && pts.length >= 2) {
+        // Calculate total screen length of this segment
+        let totalLen = 0;
+        for (let i = 1; i < pts.length; i++) {
+          totalLen += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+        }
+
+        // Only draw if segment has enough visual length on screen
+        if (totalLen >= 30) {
+          const midIdx = Math.floor(pts.length / 2);
+          const midPt = pts[midIdx];
+
+          // Check if midPt is inside visible canvas area
+          if (midPt[0] >= -50 && midPt[0] <= width + 50 && midPt[1] >= -50 && midPt[1] <= height + 50) {
+            let badgeText = '';
+            if (seg.statusCategory === 'completed') badgeText = 'COMPLETED';
+            else if (seg.statusCategory === 'dps') badgeText = 'DPS';
+            else if (seg.statusCategory === 'under_construction') badgeText = 'U/C';
+            else if (seg.statusCategory === 'himalayan') badgeText = 'HIMALAYAN';
+            else if (seg.statusCategory === 'eligible_scope') badgeText = 'REMAINING';
+
+            if (badgeText) {
+              ctx.font = 'bold 9px monospace';
+              const textWidth = ctx.measureText(badgeText).width;
+              const pillW = textWidth + 8;
+              const pillH = 14;
+
+              ctx.fillStyle = 'rgba(10, 14, 20, 0.90)';
+              ctx.beginPath();
+              ctx.roundRect(midPt[0] - pillW / 2, midPt[1] - pillH / 2, pillW, pillH, 3);
+              ctx.fill();
+
+              ctx.strokeStyle = seg.color;
+              ctx.lineWidth = 1;
+              ctx.stroke();
+
+              ctx.fillStyle = seg.color;
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(badgeText, midPt[0], midPt[1]);
+              ctx.textBaseline = 'alphabetic'; // reset
+            }
+          }
+        }
+      }
     });
 
     // 5. Render Milestone Markers (Regular 5km / 10km intervals)
@@ -398,13 +480,32 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
 
       const closest = getChainageAtCoordinates(mouseLat, mouseLon);
       if (closest.distanceM <= (zoom > 12 ? 300 : 1500)) {
+        // Find matching candidate segment
+        const matchingSegs = segments.filter(
+          s => closest.chainageM >= s.fromChainageM && closest.chainageM <= s.toChainageM
+        );
+        let activeSeg = matchingSegs[0];
+        if (matchingSegs.length > 1) {
+          let minDist = Infinity;
+          for (const cand of matchingSegs) {
+            for (const pt of cand.coordinates) {
+              const d = (pt[0] - mouseLat) ** 2 + (pt[1] - mouseLon) ** 2;
+              if (d < minDist) {
+                minDist = d;
+                activeSeg = cand;
+              }
+            }
+          }
+        }
+
         setHoverInfo({
           chainageM: closest.chainageM,
           chainageFmt: closest.chainageFmt,
           lat: mouseLat,
           lon: mouseLon,
           x: mouseX,
-          y: mouseY
+          y: mouseY,
+          segment: activeSeg
         });
       } else {
         setHoverInfo(null);
@@ -473,10 +574,23 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
 
     // Check if clicked segment matches any active road segment
     if (onSelectSegment) {
-      const matching = segments.find(
+      const candidates = segments.filter(
         s => closest.chainageM >= s.fromChainageM && closest.chainageM <= s.toChainageM
       );
-      if (matching) onSelectSegment(matching);
+      let bestSeg = candidates[0];
+      if (candidates.length > 1) {
+        let minDist = Infinity;
+        for (const cand of candidates) {
+          for (const pt of cand.coordinates) {
+            const d = (pt[0] - clickLat) ** 2 + (pt[1] - clickLon) ** 2;
+            if (d < minDist) {
+              minDist = d;
+              bestSeg = cand;
+            }
+          }
+        }
+      }
+      if (bestSeg) onSelectSegment(bestSeg);
     }
   };
 
@@ -498,12 +612,38 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
       {/* Floating Hover Tooltip */}
       {hoverInfo && !isDragging && (
         <div
-          style={{ left: hoverInfo.x + 12, top: hoverInfo.y - 36 }}
-          className="absolute pointer-events-none z-30 px-3 py-1.5 rounded-lg bg-[#14171C]/95 backdrop-blur-md border border-cyan-500/40 text-cyan-300 font-mono text-xs shadow-xl flex items-center gap-2"
+          style={{ left: hoverInfo.x + 12, top: hoverInfo.y - 48 }}
+          className="absolute pointer-events-none z-30 px-3 py-2 rounded-xl bg-[#10141C]/95 backdrop-blur-md border border-cyan-500/40 text-xs font-mono shadow-2xl flex flex-col gap-1 max-w-xs animate-fade-in"
         >
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-          <span className="font-bold text-white">{hoverInfo.chainageFmt}</span>
-          <span className="text-[10px] text-slate-400">Click to inspect</span>
+          <div className="flex items-center gap-2">
+            <span
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ backgroundColor: hoverInfo.segment?.color || '#06B6D4' }}
+            />
+            <span className="font-bold text-white">{hoverInfo.chainageFmt}</span>
+            {hoverInfo.segment && (
+              <span
+                className="px-1.5 py-0.2 rounded text-[10px] font-bold"
+                style={{
+                  backgroundColor: `${hoverInfo.segment.color}20`,
+                  color: hoverInfo.segment.color,
+                  border: `1px solid ${hoverInfo.segment.color}40`,
+                }}
+              >
+                {hoverInfo.segment.statusLabel}
+              </span>
+            )}
+          </div>
+          {hoverInfo.segment && (
+            <div className="text-[11px] text-slate-300 flex items-center gap-2">
+              <span className="text-cyan-400 font-semibold">{hoverInfo.segment.side}</span>
+              <span>•</span>
+              <span className="truncate">{hoverInfo.segment.activity}</span>
+              <span>•</span>
+              <span className="text-slate-400">{hoverInfo.segment.lengthM}m</span>
+            </div>
+          )}
+          <span className="text-[10px] text-slate-400">Click road section to inspect</span>
         </div>
       )}
 
@@ -549,6 +689,31 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
         >
           <Crosshair className="w-4 h-4" />
         </button>
+      </div>
+
+      {/* Floating Bottom Legend Overlay */}
+      <div className="absolute bottom-4 right-4 z-20 bg-[#12161D]/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 font-mono text-[11px] text-slate-300 shadow-xl flex items-center gap-3.5 flex-wrap">
+        <span className="text-slate-400 font-bold uppercase text-[10px]">Classification:</span>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
+          <span>Completed</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6]" />
+          <span>DPS</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#D97706]" />
+          <span>Under Construction</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#EC4899]" />
+          <span>Himalayan</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#0284C7]" />
+          <span>Remaining Scope</span>
+        </div>
       </div>
 
       {/* Pegman Mode Active Notification Banner */}

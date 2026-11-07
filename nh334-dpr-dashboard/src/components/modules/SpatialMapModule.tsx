@@ -22,7 +22,7 @@ export const SpatialMapModule: React.FC<SpatialMapModuleProps> = ({
   const [dataset, setDataset] = useState<StripChartDataset | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedActivityId, setSelectedActivityId] = useState<string>('all');
-  const [colorMode, setColorMode] = useState<'completion' | 'activity'>('completion');
+  const [selectedDate, setSelectedDate] = useState<string | null>('all');
   const [scrollRatio, setScrollRatio] = useState<number>(0);
   const [currentStartCh, setCurrentStartCh] = useState<string>('130+560');
   const [currentEndCh, setCurrentEndCh] = useState<string>('140+000');
@@ -134,8 +134,12 @@ export const SpatialMapModule: React.FC<SpatialMapModuleProps> = ({
       {/* 1. Header Section with Highway Graphic Banner */}
       <StripMapHeader dataset={dataset} />
 
-      {/* 2. Top Summary KPI Metrics Bar (6 Cards) */}
-      <StripMapMetricsBar dataset={dataset} />
+      {/* 2. Top Summary KPI Metrics Bar (6 Cards dynamically calculated) */}
+      <StripMapMetricsBar
+        dataset={dataset}
+        selectedDate={selectedDate}
+        selectedActivityId={selectedActivityId}
+      />
 
       {/* 3. Main Composition: Left Dedicated Activity Filter Sidebar + Right Progression Grid */}
       <div className="flex flex-col lg:flex-row items-stretch gap-4">
@@ -150,16 +154,18 @@ export const SpatialMapModule: React.FC<SpatialMapModuleProps> = ({
         <StripMapGrid
           dataset={dataset}
           selectedActivityId={selectedActivityId}
-          colorMode={colorMode}
-          onColorModeChange={setColorMode}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
           scrollRatio={scrollRatio}
           onScrollRatioChange={handleScrollRatioChange}
           scrollTrigger={scrollTrigger}
           targetRatio={targetRatio}
+          onSelectChainage={onSelectChainage}
+          targetChainageM={targetChainageM}
         />
       </div>
 
-      {/* 4. Bottom Horizontal Navigation Bar with Slider */}
+      {/* 4. Full Highway Corridor Progression Scroller Navigation Band */}
       <StripMapNavigation
         currentStartCh={currentStartCh}
         currentEndCh={currentEndCh}
