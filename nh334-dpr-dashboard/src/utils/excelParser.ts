@@ -14,7 +14,11 @@ import type {
   SectionQuantityScope,
   ConsolidatedQuantityScope,
   CumulativeAchievedQuantities,
-  BOQCardMetric
+  BOQCardMetric,
+  StretchWiseSummaryRow,
+  StretchData,
+  StretchWiseSummaryTableData,
+  DailyGroupedExecutionRow
 } from '../types/dpr';
 
 /**
@@ -252,6 +256,90 @@ export function calculateUniqueLinearLength(
 }
 
 /**
+ * Calculates executed lane length by summing valid Length (m) values
+ * (or |To Ch - From Ch| if blank/invalid) preserving separate lanes.
+ */
+export function calculateExecutedLaneLength(
+  rows: ActualDPRRow[],
+  activity: ActivityType,
+  sideFilter: HighwaySide = 'Both',
+  laneFilter: string = 'All'
+): { meters: number; km: number } {
+  const actRows = rows.filter(r => r.activity === activity);
+  const sideMatchingRows = actRows.filter(r => {
+    if (sideFilter === 'Both' || sideFilter === 'ALL' || sideFilter === 'BHS') return true;
+    return r.side === sideFilter;
+  });
+  const laneMatchingRows = sideMatchingRows.filter(r => {
+    if (!laneFilter || laneFilter === 'All') return true;
+    if (laneFilter === 'FW' || laneFilter === 'SR') {
+      return r.lane === laneFilter || r.lane.includes(laneFilter);
+    }
+    return r.lane.includes(laneFilter);
+  });
+
+  const totalMeters = laneMatchingRows.reduce((sum, r) => {
+    const len = r.lengthM > 0 ? r.lengthM : Math.round(Math.abs(r.toChainage - r.fromChainage) * 1000);
+    return sum + len;
+  }, 0);
+
+  return {
+    meters: Math.round(totalMeters),
+    km: Number((totalMeters / 1000).toFixed(3))
+  };
+}
+
+export interface StretchWiseTemplateRow {
+  rowNum: number;
+  side: HighwaySide;
+  activity: string;
+  normalizedActivity: string;
+  lane: string;
+  stretch1PlannedKm: number;
+  stretch2PlannedKm: number;
+  stretch3PlannedKm: number;
+  totalPlannedKm: number;
+}
+
+/**
+ * Authoritative Stretch-wise programmed baseline rows from 'Stretch-wise Summary' in final_sheet.xlsx
+ */
+export const DEFAULT_STRETCH_WISE_TEMPLATE: StretchWiseTemplateRow[] = [
+  { rowNum: 6, side: 'LHS', activity: 'Road Marking', normalizedActivity: 'Road Marking', lane: 'All', stretch1PlannedKm: 8.217, stretch2PlannedKm: 16.119, stretch3PlannedKm: 8.744, totalPlannedKm: 33.080 },
+  { rowNum: 7, side: 'LHS', activity: 'Earthen Shoulder', normalizedActivity: 'Earthen Shoulder', lane: 'All', stretch1PlannedKm: 26.083, stretch2PlannedKm: 11.035, stretch3PlannedKm: 6.822, totalPlannedKm: 43.940 },
+  { rowNum: 8, side: 'LHS', activity: 'SR DBM', normalizedActivity: 'DBM', lane: 'SR', stretch1PlannedKm: 7.678, stretch2PlannedKm: 16.092, stretch3PlannedKm: 8.730, totalPlannedKm: 32.500 },
+  { rowNum: 9, side: 'LHS', activity: 'SR BC', normalizedActivity: 'BC', lane: 'SR', stretch1PlannedKm: 8.217, stretch2PlannedKm: 16.119, stretch3PlannedKm: 8.744, totalPlannedKm: 33.080 },
+  { rowNum: 10, side: 'LHS', activity: 'Milling', normalizedActivity: 'Milling', lane: 'F/L', stretch1PlannedKm: 23.563, stretch2PlannedKm: 12.594, stretch3PlannedKm: 6.602, totalPlannedKm: 42.758 },
+  { rowNum: 11, side: 'LHS', activity: 'Milling', normalizedActivity: 'Milling', lane: 'S/L', stretch1PlannedKm: 15.977, stretch2PlannedKm: 11.061, stretch3PlannedKm: 2.560, totalPlannedKm: 29.599 },
+  { rowNum: 12, side: 'LHS', activity: 'Tack Coat (DBM)', normalizedActivity: 'Tackcoat', lane: 'F/L', stretch1PlannedKm: 23.563, stretch2PlannedKm: 12.594, stretch3PlannedKm: 6.602, totalPlannedKm: 42.758 },
+  { rowNum: 13, side: 'LHS', activity: 'Tack Coat (DBM)', normalizedActivity: 'Tackcoat', lane: 'S/L', stretch1PlannedKm: 15.977, stretch2PlannedKm: 11.061, stretch3PlannedKm: 2.560, totalPlannedKm: 29.599 },
+  { rowNum: 14, side: 'LHS', activity: 'DBM', normalizedActivity: 'DBM', lane: 'F/L', stretch1PlannedKm: 23.563, stretch2PlannedKm: 12.594, stretch3PlannedKm: 6.602, totalPlannedKm: 42.758 },
+  { rowNum: 15, side: 'LHS', activity: 'DBM', normalizedActivity: 'DBM', lane: 'S/L', stretch1PlannedKm: 15.977, stretch2PlannedKm: 11.061, stretch3PlannedKm: 2.560, totalPlannedKm: 29.599 },
+  { rowNum: 16, side: 'LHS', activity: 'GlasGrid', normalizedActivity: 'GlasGrid', lane: 'F/L', stretch1PlannedKm: 0, stretch2PlannedKm: 0, stretch3PlannedKm: 0, totalPlannedKm: 0 },
+  { rowNum: 17, side: 'LHS', activity: 'GlasGrid', normalizedActivity: 'GlasGrid', lane: 'S/L', stretch1PlannedKm: 0, stretch2PlannedKm: 0, stretch3PlannedKm: 0, totalPlannedKm: 0 },
+  { rowNum: 18, side: 'LHS', activity: 'Crack Sealing', normalizedActivity: 'Crack Sealing', lane: 'F/L', stretch1PlannedKm: 0, stretch2PlannedKm: 0, stretch3PlannedKm: 0, totalPlannedKm: 0 },
+  { rowNum: 19, side: 'LHS', activity: 'Crack Sealing', normalizedActivity: 'Crack Sealing', lane: 'S/L', stretch1PlannedKm: 0, stretch2PlannedKm: 0, stretch3PlannedKm: 0, totalPlannedKm: 0 },
+  { rowNum: 20, side: 'LHS', activity: 'Tack Coat (BC)', normalizedActivity: 'Tackcoat', lane: 'FW', stretch1PlannedKm: 22.241, stretch2PlannedKm: 11.892, stretch3PlannedKm: 8.624, totalPlannedKm: 42.758 },
+  { rowNum: 21, side: 'LHS', activity: 'BC', normalizedActivity: 'BC', lane: 'FW', stretch1PlannedKm: 25.675, stretch2PlannedKm: 13.728, stretch3PlannedKm: 9.955, totalPlannedKm: 49.358 },
+  { rowNum: 22, side: 'RHS', activity: 'BC', normalizedActivity: 'BC', lane: 'FW', stretch1PlannedKm: 26.441, stretch2PlannedKm: 13.691, stretch3PlannedKm: 13.796, totalPlannedKm: 53.928 },
+  { rowNum: 23, side: 'RHS', activity: 'Tack Coat (BC)', normalizedActivity: 'Tackcoat', lane: 'FW', stretch1PlannedKm: 22.127, stretch2PlannedKm: 11.457, stretch3PlannedKm: 11.544, totalPlannedKm: 45.128 },
+  { rowNum: 24, side: 'RHS', activity: 'GlasGrid', normalizedActivity: 'GlasGrid', lane: 'S/L', stretch1PlannedKm: 0, stretch2PlannedKm: 0, stretch3PlannedKm: 0, totalPlannedKm: 0 },
+  { rowNum: 25, side: 'RHS', activity: 'GlasGrid', normalizedActivity: 'GlasGrid', lane: 'F/L', stretch1PlannedKm: 0, stretch2PlannedKm: 0, stretch3PlannedKm: 0, totalPlannedKm: 0 },
+  { rowNum: 26, side: 'RHS', activity: 'Crack Sealing', normalizedActivity: 'Crack Sealing', lane: 'S/L', stretch1PlannedKm: 0, stretch2PlannedKm: 0, stretch3PlannedKm: 0, totalPlannedKm: 0 },
+  { rowNum: 27, side: 'RHS', activity: 'Crack Sealing', normalizedActivity: 'Crack Sealing', lane: 'F/L', stretch1PlannedKm: 0, stretch2PlannedKm: 0, stretch3PlannedKm: 0, totalPlannedKm: 0 },
+  { rowNum: 28, side: 'RHS', activity: 'DBM', normalizedActivity: 'DBM', lane: 'S/L', stretch1PlannedKm: 12.700, stretch2PlannedKm: 13.569, stretch3PlannedKm: 3.474, totalPlannedKm: 29.743 },
+  { rowNum: 29, side: 'RHS', activity: 'DBM', normalizedActivity: 'DBM', lane: 'F/L', stretch1PlannedKm: 23.779, stretch2PlannedKm: 13.845, stretch3PlannedKm: 7.504, totalPlannedKm: 45.128 },
+  { rowNum: 30, side: 'RHS', activity: 'Tack Coat (DBM)', normalizedActivity: 'Tackcoat', lane: 'S/L', stretch1PlannedKm: 12.700, stretch2PlannedKm: 13.569, stretch3PlannedKm: 3.474, totalPlannedKm: 29.743 },
+  { rowNum: 31, side: 'RHS', activity: 'Tack Coat (DBM)', normalizedActivity: 'Tackcoat', lane: 'F/L', stretch1PlannedKm: 23.779, stretch2PlannedKm: 13.845, stretch3PlannedKm: 7.504, totalPlannedKm: 45.128 },
+  { rowNum: 32, side: 'RHS', activity: 'Milling', normalizedActivity: 'Milling', lane: 'S/L', stretch1PlannedKm: 12.700, stretch2PlannedKm: 13.569, stretch3PlannedKm: 3.474, totalPlannedKm: 29.743 },
+  { rowNum: 33, side: 'RHS', activity: 'Milling', normalizedActivity: 'Milling', lane: 'F/L', stretch1PlannedKm: 23.779, stretch2PlannedKm: 13.845, stretch3PlannedKm: 7.504, totalPlannedKm: 45.128 },
+  { rowNum: 34, side: 'RHS', activity: 'SR BC', normalizedActivity: 'BC', lane: 'SR', stretch1PlannedKm: 9.201, stretch2PlannedKm: 14.784, stretch3PlannedKm: 10.855, totalPlannedKm: 34.840 },
+  { rowNum: 35, side: 'RHS', activity: 'SR DBM', normalizedActivity: 'DBM', lane: 'SR', stretch1PlannedKm: 5.747, stretch2PlannedKm: 14.942, stretch3PlannedKm: 10.971, totalPlannedKm: 31.660 },
+  { rowNum: 36, side: 'RHS', activity: 'Earthen Shoulder', normalizedActivity: 'Earthen Shoulder', lane: 'All', stretch1PlannedKm: 25.581, stretch2PlannedKm: 11.536, stretch3PlannedKm: 7.323, totalPlannedKm: 44.440 },
+  { rowNum: 37, side: 'RHS', activity: 'Road Marking', normalizedActivity: 'Road Marking', lane: 'All', stretch1PlannedKm: 9.201, stretch2PlannedKm: 14.784, stretch3PlannedKm: 10.855, totalPlannedKm: 34.840 }
+];
+
+/**
  * Default Schedule Milestones for NH-334 DPR executive tracking from WP-R1
  * Corridor: Ch. 130+560 to Ch. 206+220 (75.660 km)
  * Period: 02.11.2026 to 10.01.2027 (70 calendar days across 10 weekly phases)
@@ -380,27 +468,29 @@ export const DEFAULT_PROJECT_BASELINE: ProjectBaseline = {
   minChainage: 130.560,
   maxChainage: 206.220,
   totalScopeKm: 75.660,
-  totalPlannedLengthM: 91176,
-  millingPlannedLengthM: 91176,
-  dbmPlannedLengthM: 91176,
-  tackcoatPlannedLengthM: 103286,
+  totalPlannedLengthM: 147228,
+  millingPlannedLengthM: 147228,
+  dbmPlannedLengthM: 147228,
+  tackcoatPlannedLengthM: 235114,
   lhs: {
     millingTargetSqm: 334999.5,
     dbmTargetMT: 18388.0,
     dbmTargetCum: 18388.0,
     tackcoatTargetSqm: 871827.0,
-    millingLengthM: 43758,
-    dbmLengthM: 43758,
-    tackcoatLengthM: 49358
+    millingLengthM: 72357,
+    dbmLengthM: 72357,
+    tackcoatLengthM: 115115,
+    bcLengthM: 49358
   },
   rhs: {
     millingTargetSqm: 346284.5,
     dbmTargetMT: 18638.0,
     dbmTargetCum: 18638.0,
     tackcoatTargetSqm: 976444.0,
-    millingLengthM: 47418,
-    dbmLengthM: 47418,
-    tackcoatLengthM: 53928
+    millingLengthM: 74871,
+    dbmLengthM: 74871,
+    tackcoatLengthM: 119999,
+    bcLengthM: 53928
   },
   dailyPhases: [
     {
@@ -1571,6 +1661,7 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
   sectionScopes: SectionQuantityScope[];
   consolidatedScope: ConsolidatedQuantityScope;
   cumulativeAchieved: CumulativeAchievedQuantities;
+  stretchWiseTemplate?: StretchWiseTemplateRow[];
   source: 'live_excel';
   availableDates: string[];
   dataQualityWarnings: string[];
@@ -1689,6 +1780,35 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
     });
   }
 
+  // Compute dynamic contractual targets from stretchWiseTemplate
+  const getTargetSumKm = (actNorm: string, sFilter?: 'LHS' | 'RHS') => {
+    return stretchWiseTemplate
+      .filter(r => {
+        const matchAct = actNorm === 'Tackcoat'
+          ? r.activity.toLowerCase().includes('tack')
+          : r.activity.toLowerCase() === actNorm.toLowerCase();
+        const matchSide = !sFilter || r.side === sFilter;
+        return matchAct && matchSide;
+      })
+      .reduce((sum, r) => sum + r.totalPlannedKm, 0);
+  };
+
+  const millingBothKm = getTargetSumKm('Milling');
+  const millingLhsKm = getTargetSumKm('Milling', 'LHS');
+  const millingRhsKm = getTargetSumKm('Milling', 'RHS');
+
+  const dbmBothKm = getTargetSumKm('DBM');
+  const dbmLhsKm = getTargetSumKm('DBM', 'LHS');
+  const dbmRhsKm = getTargetSumKm('DBM', 'RHS');
+
+  const tackBothKm = getTargetSumKm('Tackcoat');
+  const tackLhsKm = getTargetSumKm('Tackcoat', 'LHS');
+  const tackRhsKm = getTargetSumKm('Tackcoat', 'RHS');
+
+  const bcBothKm = getTargetSumKm('BC');
+  const bcLhsKm = getTargetSumKm('BC', 'LHS');
+  const bcRhsKm = getTargetSumKm('BC', 'RHS');
+
   const baseline: ProjectBaseline = {
     ...DEFAULT_PROJECT_BASELINE,
     totalMillingTargetSqm: targets.Both.Milling,
@@ -1697,6 +1817,11 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
     totalDbmTargetMT: Number((targets.Both.DBM * 2.38).toFixed(2)),
     totalBcTargetCum: targets.Both.BC,
     totalBcTargetMT: Number((targets.Both.BC * 2.35).toFixed(2)),
+    totalPlannedLengthM: Math.round(millingBothKm * 1000) || 147228,
+    millingPlannedLengthM: Math.round(millingBothKm * 1000) || 147228,
+    dbmPlannedLengthM: Math.round(dbmBothKm * 1000) || 147228,
+    tackcoatPlannedLengthM: Math.round(tackBothKm * 1000) || 235114,
+    totalBcTargetLengthM: Math.round(bcBothKm * 1000) || 103286,
     lhs: {
       millingTargetSqm: targets.LHS.Milling,
       dbmTargetMT: Number((targets.LHS.DBM * 2.38).toFixed(2)),
@@ -1704,10 +1829,10 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
       tackcoatTargetSqm: targets.LHS.Tackcoat,
       bcTargetCum: targets.LHS.BC,
       bcTargetMT: Number((targets.LHS.BC * 2.35).toFixed(2)),
-      millingLengthM: 43758,
-      dbmLengthM: 43758,
-      tackcoatLengthM: 49358,
-      bcLengthM: 49358
+      millingLengthM: Math.round(millingLhsKm * 1000) || 72357,
+      dbmLengthM: Math.round(dbmLhsKm * 1000) || 72357,
+      tackcoatLengthM: Math.round(tackLhsKm * 1000) || 115115,
+      bcLengthM: Math.round(bcLhsKm * 1000) || 49358
     },
     rhs: {
       millingTargetSqm: targets.RHS.Milling,
@@ -1716,10 +1841,10 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
       tackcoatTargetSqm: targets.RHS.Tackcoat,
       bcTargetCum: targets.RHS.BC,
       bcTargetMT: Number((targets.RHS.BC * 2.35).toFixed(2)),
-      millingLengthM: 47418,
-      dbmLengthM: 47418,
-      tackcoatLengthM: 53928,
-      bcLengthM: 53928
+      millingLengthM: Math.round(millingRhsKm * 1000) || 74871,
+      dbmLengthM: Math.round(dbmRhsKm * 1000) || 74871,
+      tackcoatLengthM: Math.round(tackRhsKm * 1000) || 119999,
+      bcLengthM: Math.round(bcRhsKm * 1000) || 53928
     },
     source: 'work_program_excel'
   };
@@ -1888,6 +2013,42 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
     bcCum: cumBc
   };
 
+  // 3. Stretch-wise Summary parsing (if worksheet exists)
+  const ssSheetName = wb.SheetNames.find(n => n.toLowerCase().includes('stretch-wise') || n.toLowerCase().includes('stretchwise')) || 'Stretch-wise Summary';
+  const wsSS = wb.Sheets[ssSheetName];
+  let stretchWiseTemplate: StretchWiseTemplateRow[] = DEFAULT_STRETCH_WISE_TEMPLATE;
+
+  if (wsSS) {
+    const parsedTemplate: StretchWiseTemplateRow[] = [];
+    for (let r = 5; r <= 36; r++) {
+      const rowNum = r + 1;
+      const side = String(wsSS['A' + rowNum]?.v || '').trim() as HighwaySide;
+      const activity = String(wsSS['B' + rowNum]?.v || '').trim();
+      const lane = String(wsSS['C' + rowNum]?.v || '').trim();
+      if (!side || !activity) continue;
+
+      const s1P = Number(wsSS['D' + rowNum]?.v) || 0;
+      const s2P = Number(wsSS['H' + rowNum]?.v) || 0;
+      const s3P = Number(wsSS['L' + rowNum]?.v) || 0;
+      const totP = Number(wsSS['P' + rowNum]?.v) || (s1P + s2P + s3P);
+
+      parsedTemplate.push({
+        rowNum,
+        side,
+        activity,
+        normalizedActivity: normalizeActivity(activity),
+        lane,
+        stretch1PlannedKm: s1P,
+        stretch2PlannedKm: s2P,
+        stretch3PlannedKm: s3P,
+        totalPlannedKm: totP
+      });
+    }
+    if (parsedTemplate.length > 0) {
+      stretchWiseTemplate = parsedTemplate;
+    }
+  }
+
   const metadata: DPRMetadata = {
     projectName: 'Muzaffarnagar - Haridwar Section, NH-334 (Ch. 130+560KM to 206+220KM)',
     contractor: 'M/s Atcons India Limited',
@@ -1920,6 +2081,7 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
       earthenShoulderCum: 159084.0
     },
     cumulativeAchieved,
+    stretchWiseTemplate,
     source: 'live_excel',
     availableDates,
     dataQualityWarnings: warnings
@@ -1934,7 +2096,8 @@ export function computeBOQProgressMetrics(
   actualRows: ActualDPRRow[],
   baseline: ProjectBaseline,
   selectedDate: string,
-  sideFilter: HighwaySide = 'Both'
+  sideFilter: HighwaySide = 'Both',
+  laneFilter: string = 'All'
 ): {
   milling: BOQCardMetric;
   tackcoat: BOQCardMetric;
@@ -1991,24 +2154,40 @@ export function computeBOQProgressMetrics(
 
     let targetQty = 0;
     let unit = 'Sqm';
-    let targetLengthM = 91176;
+    let targetLengthM = 147228;
 
     if (act === 'Milling') {
       targetQty = targetMilling;
       unit = 'Sqm';
-      targetLengthM = sideFilter === 'LHS' ? 43758 : sideFilter === 'RHS' ? 47418 : 91176;
+      targetLengthM = sideFilter === 'LHS'
+        ? (baseline.lhs?.millingLengthM || 72357)
+        : sideFilter === 'RHS'
+        ? (baseline.rhs?.millingLengthM || 74871)
+        : (baseline.millingPlannedLengthM || 147228);
     } else if (act === 'Tackcoat') {
       targetQty = targetTackcoat;
       unit = 'Sqm';
-      targetLengthM = sideFilter === 'LHS' ? 49358 : sideFilter === 'RHS' ? 53928 : 103286;
+      targetLengthM = sideFilter === 'LHS'
+        ? (baseline.lhs?.tackcoatLengthM || 115115)
+        : sideFilter === 'RHS'
+        ? (baseline.rhs?.tackcoatLengthM || 119999)
+        : (baseline.tackcoatPlannedLengthM || 235114);
     } else if (act === 'DBM') {
       targetQty = targetDbm;
       unit = 'Cum';
-      targetLengthM = sideFilter === 'LHS' ? 43758 : sideFilter === 'RHS' ? 47418 : 91176;
+      targetLengthM = sideFilter === 'LHS'
+        ? (baseline.lhs?.dbmLengthM || 72357)
+        : sideFilter === 'RHS'
+        ? (baseline.rhs?.dbmLengthM || 74871)
+        : (baseline.dbmPlannedLengthM || 147228);
     } else if (act === 'BC') {
       targetQty = targetBc;
       unit = 'Cum';
-      targetLengthM = sideFilter === 'LHS' ? 49358 : sideFilter === 'RHS' ? 53928 : 103286;
+      targetLengthM = sideFilter === 'LHS'
+        ? (baseline.lhs?.bcLengthM || 49358)
+        : sideFilter === 'RHS'
+        ? (baseline.rhs?.bcLengthM || 53928)
+        : (baseline.totalBcTargetLengthM || 103286);
     }
 
     const balanceQuantity = targetQty - cumulativeAchieved;
@@ -2016,11 +2195,17 @@ export function computeBOQProgressMetrics(
     const isOverachieved = cumulativeAchieved > targetQty;
     const overachievementPercent = isOverachieved ? Math.max(0, progressPercent - 100) : 0;
 
-    // Physical linear length calculations using merged non-overlapping intervals
-    const dailyLen = calculateUniqueLinearLength(dailyRows, act, sideFilter);
-    const cumLen = calculateUniqueLinearLength(cumRows, act, sideFilter);
-    const balanceLengthM = targetLengthM - cumLen.meters;
-    const linearProgressPercent = targetLengthM > 0 ? (cumLen.meters / targetLengthM) * 100 : 0;
+    // Physical linear length calculations (Master Prompt Length Priority)
+    // 1. Executed lane length (sum of valid Length (m), preserving separate lanes)
+    const dailyLaneLen = calculateExecutedLaneLength(dailyRows, act, sideFilter, laneFilter);
+    const cumLaneLen = calculateExecutedLaneLength(cumRows, act, sideFilter, laneFilter);
+
+    // 2. Unique chainage coverage (merged non-overlapping intervals per side)
+    const dailyUniqLen = calculateUniqueLinearLength(dailyRows, act, sideFilter);
+    const cumUniqLen = calculateUniqueLinearLength(cumRows, act, sideFilter);
+
+    const balanceLengthM = targetLengthM - cumLaneLen.meters;
+    const linearProgressPercent = targetLengthM > 0 ? (cumLaneLen.meters / targetLengthM) * 100 : 0;
 
     results[act] = {
       activity: act,
@@ -2032,13 +2217,25 @@ export function computeBOQProgressMetrics(
       progressPercent,
       isOverachieved,
       overachievementPercent,
-      dailyCompletedLengthM: dailyLen.meters,
-      dailyCompletedLengthKm: dailyLen.km,
-      cumulativeCompletedLengthM: cumLen.meters,
-      cumulativeCompletedLengthKm: cumLen.km,
+      // Default linear metrics (Executed completed length per Master Prompt)
+      dailyCompletedLengthM: dailyLaneLen.meters,
+      dailyCompletedLengthKm: dailyLaneLen.km,
+      cumulativeCompletedLengthM: cumLaneLen.meters,
+      cumulativeCompletedLengthKm: cumLaneLen.km,
       balanceLengthM,
       balanceLengthKm: Number((balanceLengthM / 1000).toFixed(3)),
-      linearProgressPercent
+      linearProgressPercent,
+      dailyEntriesCount: dailyRows.length,
+      cumulativeEntriesCount: cumRows.length,
+      // Explicit dual measurements (Requirement 2)
+      dailyExecutedLaneLengthM: dailyLaneLen.meters,
+      dailyExecutedLaneLengthKm: dailyLaneLen.km,
+      cumulativeExecutedLaneLengthM: cumLaneLen.meters,
+      cumulativeExecutedLaneLengthKm: cumLaneLen.km,
+      dailyUniqueCoverageM: dailyUniqLen.meters,
+      dailyUniqueCoverageKm: dailyUniqLen.km,
+      cumulativeUniqueCoverageM: cumUniqLen.meters,
+      cumulativeUniqueCoverageKm: cumUniqLen.km
     };
   }
 
@@ -2062,6 +2259,446 @@ export function computeBOQProgressMetrics(
 }
 
 /**
+ * Computes authoritative Stretch-wise Planned vs Actual Summary Table (Requirement 1)
+ * strictly using 'Stretch-wise Summary' baseline and 'Chainage Log(input)' records from final_sheet.xlsx
+ */
+export function computeStretchWiseSummary(
+  actualRows: ActualDPRRow[],
+  templateRows: StretchWiseTemplateRow[] = DEFAULT_STRETCH_WISE_TEMPLATE,
+  options?: {
+    activityFilter?: string;
+    sideFilter?: HighwaySide;
+    laneFilter?: string;
+    selectedDate?: string;
+  }
+): StretchWiseSummaryTableData {
+  const stretches = [
+    { name: 'Stretch 1', fromM: 130560, toM: 167250, lengthKm: 36.69 },
+    { name: 'Stretch 2', fromM: 167250, toM: 190000, lengthKm: 22.75 },
+    { name: 'Stretch 3', fromM: 190000, toM: 206220, lengthKm: 16.22 }
+  ];
+
+  const activityFilter = options?.activityFilter || 'ALL';
+  const sideFilter = options?.sideFilter || 'Both';
+  const laneFilter = options?.laneFilter || 'All';
+  const selectedDate = options?.selectedDate;
+  const selectedIso = selectedDate ? (serialToIsoDate(selectedDate) || dmyToIso(selectedDate)) : null;
+
+  // Filter actual DPR rows by date if selected
+  const eligibleActualRows = selectedIso
+    ? actualRows.filter(r => {
+        const rIso = r.isoDate || serialToIsoDate(r.date) || dmyToIso(r.date);
+        return rIso !== '' && rIso <= selectedIso;
+      })
+    : actualRows;
+
+  // Filter template rows by activity, side, lane
+  const filteredTemplate = templateRows.filter(r => {
+    // Side filter
+    if (sideFilter !== 'Both' && sideFilter !== 'ALL' && sideFilter !== 'BHS') {
+      if (r.side !== sideFilter) return false;
+    }
+    // Lane filter
+    if (laneFilter && laneFilter !== 'All') {
+      if (r.lane !== laneFilter) return false;
+    }
+    // Activity filter
+    if (activityFilter && activityFilter !== 'ALL') {
+      const fNorm = activityFilter.toLowerCase().trim();
+      const rNorm = r.activity.toLowerCase().trim();
+      if (fNorm.includes('milling') && !rNorm.includes('milling')) return false;
+      if (fNorm.includes('tack') && !rNorm.includes('tack')) return false;
+      if (fNorm.includes('dbm') && !rNorm.includes('dbm')) return false;
+      if (fNorm.includes('bc') && !rNorm.includes('bc')) return false;
+      if (fNorm.includes('marking') && !rNorm.includes('marking')) return false;
+      if (fNorm.includes('shoulder') && !rNorm.includes('shoulder')) return false;
+      if (fNorm.includes('grid') && !rNorm.includes('grid')) return false;
+      if (fNorm.includes('crack') && !rNorm.includes('crack')) return false;
+    }
+    return true;
+  });
+
+  const computedRows: StretchWiseSummaryRow[] = filteredTemplate.map(tmpl => {
+    let s1ActM = 0, s2ActM = 0, s3ActM = 0;
+
+    eligibleActualRows.forEach(cl => {
+      // Side matching: SR rows read Side = BHS with Lane = LHS/RHS
+      const isSR = tmpl.activity.startsWith('SR ');
+      const sideMatch = isSR
+        ? (cl.side === 'BHS' && cl.lane === tmpl.side)
+        : (cl.side === tmpl.side);
+      if (!sideMatch) return;
+
+      // Activity matching: Tackcoat is read as Tack Coat (DBM)
+      let actMatch = false;
+      const clActStr = String(cl.activity || '');
+      if (tmpl.activity === 'Tack Coat (DBM)') {
+        actMatch = clActStr === 'Tack Coat (DBM)' || clActStr === 'Tackcoat' || clActStr.toLowerCase().includes('tackcoat');
+      } else if (tmpl.activity === 'Tack Coat (BC)') {
+        actMatch = clActStr === 'Tack Coat (BC)' || clActStr.toLowerCase().includes('tack coat (bc)');
+      } else {
+        actMatch = clActStr === tmpl.activity || normalizeActivity(clActStr) === normalizeActivity(tmpl.activity);
+      }
+      if (!actMatch) return;
+
+      // Lane matching: All, FW, SR match all; otherwise includes lane (e.g. 'F/L& S/L' counts for both)
+      let laneMatch = false;
+      if (tmpl.lane === 'All' || tmpl.lane === 'FW' || tmpl.lane === 'SR') {
+        laneMatch = true;
+      } else {
+        laneMatch = cl.lane.includes(tmpl.lane);
+      }
+      if (!laneMatch) return;
+
+      const rawFrom = cl.rawFromChainage || Math.round(cl.fromChainage * 1000);
+      const rawTo = cl.rawToChainage || Math.round(cl.toChainage * 1000);
+      const minCh = Math.min(rawFrom, rawTo);
+      const maxCh = Math.max(rawFrom, rawTo);
+
+      // Clamp to each stretch
+      stretches.forEach((st, idx) => {
+        const overlapStart = Math.max(minCh, st.fromM);
+        const overlapEnd = Math.min(maxCh, st.toM);
+        if (overlapEnd > overlapStart) {
+          const m = overlapEnd - overlapStart;
+          if (idx === 0) s1ActM += m;
+          if (idx === 1) s2ActM += m;
+          if (idx === 2) s3ActM += m;
+        }
+      });
+    });
+
+    const s1ActKm = Number((s1ActM / 1000).toFixed(3));
+    const s2ActKm = Number((s2ActM / 1000).toFixed(3));
+    const s3ActKm = Number((s3ActM / 1000).toFixed(3));
+    const totalActKm = Number(((s1ActM + s2ActM + s3ActM) / 1000).toFixed(3));
+
+    const s1PlanKm = Number(tmpl.stretch1PlannedKm.toFixed(3));
+    const s2PlanKm = Number(tmpl.stretch2PlannedKm.toFixed(3));
+    const s3PlanKm = Number(tmpl.stretch3PlannedKm.toFixed(3));
+    const totalPlanKm = Number((s1PlanKm + s2PlanKm + s3PlanKm).toFixed(3));
+
+    return {
+      rowNum: tmpl.rowNum,
+      side: tmpl.side,
+      activity: tmpl.activity,
+      normalizedActivity: tmpl.normalizedActivity || normalizeActivity(tmpl.activity),
+      lane: tmpl.lane,
+      stretch1: {
+        plannedKm: s1PlanKm,
+        actualKm: s1ActKm,
+        remainingKm: Number((s1PlanKm - s1ActKm).toFixed(3)),
+        percentDone: s1PlanKm > 0 ? Number(((s1ActKm / s1PlanKm) * 100).toFixed(1)) : 0
+      },
+      stretch2: {
+        plannedKm: s2PlanKm,
+        actualKm: s2ActKm,
+        remainingKm: Number((s2PlanKm - s2ActKm).toFixed(3)),
+        percentDone: s2PlanKm > 0 ? Number(((s2ActKm / s2PlanKm) * 100).toFixed(1)) : 0
+      },
+      stretch3: {
+        plannedKm: s3PlanKm,
+        actualKm: s3ActKm,
+        remainingKm: Number((s3PlanKm - s3ActKm).toFixed(3)),
+        percentDone: s3PlanKm > 0 ? Number(((s3ActKm / s3PlanKm) * 100).toFixed(1)) : 0
+      },
+      total: {
+        plannedKm: totalPlanKm,
+        actualKm: totalActKm,
+        remainingKm: Number((totalPlanKm - totalActKm).toFixed(3)),
+        percentDone: totalPlanKm > 0 ? Number(((totalActKm / totalPlanKm) * 100).toFixed(1)) : 0
+      }
+    };
+  });
+
+  // Calculate totals across all computed rows
+  const s1TotalPlan = Number(computedRows.reduce((sum, r) => sum + r.stretch1.plannedKm, 0).toFixed(3));
+  const s1TotalAct = Number(computedRows.reduce((sum, r) => sum + r.stretch1.actualKm, 0).toFixed(3));
+  const s2TotalPlan = Number(computedRows.reduce((sum, r) => sum + r.stretch2.plannedKm, 0).toFixed(3));
+  const s2TotalAct = Number(computedRows.reduce((sum, r) => sum + r.stretch2.actualKm, 0).toFixed(3));
+  const s3TotalPlan = Number(computedRows.reduce((sum, r) => sum + r.stretch3.plannedKm, 0).toFixed(3));
+  const s3TotalAct = Number(computedRows.reduce((sum, r) => sum + r.stretch3.actualKm, 0).toFixed(3));
+
+  const grandTotalPlan = Number((s1TotalPlan + s2TotalPlan + s3TotalPlan).toFixed(3));
+  const grandTotalAct = Number((s1TotalAct + s2TotalAct + s3TotalAct).toFixed(3));
+
+  return {
+    stretches: {
+      stretch1: { name: 'Stretch 1', fromM: 130560, toM: 167250, lengthKm: 36.69 },
+      stretch2: { name: 'Stretch 2', fromM: 167250, toM: 190000, lengthKm: 22.75 },
+      stretch3: { name: 'Stretch 3', fromM: 190000, toM: 206220, lengthKm: 16.22 },
+      total: { name: 'Total Corridor', fromM: 130560, toM: 206220, lengthKm: 75.66 }
+    },
+    rows: computedRows,
+    totals: {
+      stretch1: {
+        plannedKm: s1TotalPlan,
+        actualKm: s1TotalAct,
+        remainingKm: Number((s1TotalPlan - s1TotalAct).toFixed(3)),
+        percentDone: s1TotalPlan > 0 ? Number(((s1TotalAct / s1TotalPlan) * 100).toFixed(1)) : 0
+      },
+      stretch2: {
+        plannedKm: s2TotalPlan,
+        actualKm: s2TotalAct,
+        remainingKm: Number((s2TotalPlan - s2TotalAct).toFixed(3)),
+        percentDone: s2TotalPlan > 0 ? Number(((s2TotalAct / s2TotalPlan) * 100).toFixed(1)) : 0
+      },
+      stretch3: {
+        plannedKm: s3TotalPlan,
+        actualKm: s3TotalAct,
+        remainingKm: Number((s3TotalPlan - s3TotalAct).toFixed(3)),
+        percentDone: s3TotalPlan > 0 ? Number(((s3TotalAct / s3TotalPlan) * 100).toFixed(1)) : 0
+      },
+      total: {
+        plannedKm: grandTotalPlan,
+        actualKm: grandTotalAct,
+        remainingKm: Number((grandTotalPlan - grandTotalAct).toFixed(3)),
+        percentDone: grandTotalPlan > 0 ? Number(((grandTotalAct / grandTotalPlan) * 100).toFixed(1)) : 0
+      }
+    }
+  };
+}
+
+/**
+ * REQUIREMENT 2: Computes Daily Completed Length & Activity Breakdown from Chainage Log
+ * Groups by Date, Activity, Side, Lane.
+ * Calculates both:
+ * 1. Executed Lane Length: sum of valid Length (m) records
+ * 2. Unique Chainage Coverage: merged non-overlapping 1D chainage intervals per side
+ * Keeps Daily Completed Length and Cumulative Completed Length completely separate.
+ */
+export function computeDailyGroupedExecution(
+  actualRows: ActualDPRRow[],
+  options?: {
+    selectedDate?: string;
+    activityFilter?: string;
+    sideFilter?: HighwaySide;
+    laneFilter?: string;
+  }
+): {
+  selectedDate: string;
+  rows: DailyGroupedExecutionRow[];
+  totals: {
+    recordCount: number;
+    dailyExecutedLaneLengthM: number;
+    dailyExecutedLaneLengthKm: number;
+    dailyUniqueCoverageM: number;
+    dailyUniqueCoverageKm: number;
+    cumulativeExecutedLaneLengthM: number;
+    cumulativeExecutedLaneLengthKm: number;
+    cumulativeUniqueCoverageM: number;
+    cumulativeUniqueCoverageKm: number;
+  };
+  activitySummaries: {
+    milling: { dailyLaneM: number; dailyLaneKm: number; dailyUniqueM: number; dailyUniqueKm: number; cumLaneM: number; cumLaneKm: number; cumUniqueM: number; cumUniqueKm: number; };
+    tackCoat: { dailyLaneM: number; dailyLaneKm: number; dailyUniqueM: number; dailyUniqueKm: number; cumLaneM: number; cumLaneKm: number; cumUniqueM: number; cumUniqueKm: number; };
+    dbm: { dailyLaneM: number; dailyLaneKm: number; dailyUniqueM: number; dailyUniqueKm: number; cumLaneM: number; cumLaneKm: number; cumUniqueM: number; cumUniqueKm: number; };
+    bc: { dailyLaneM: number; dailyLaneKm: number; dailyUniqueM: number; dailyUniqueKm: number; cumLaneM: number; cumLaneKm: number; cumUniqueM: number; cumUniqueKm: number; };
+  };
+} {
+  // 1. Determine target date (default to latest available date)
+  let targetDate = options?.selectedDate || '';
+  if (!targetDate) {
+    const dates = Array.from(new Set(actualRows.map(r => r.date).filter(Boolean))).sort((a, b) => {
+      const [ad, am, ay] = a.split('.').map(Number);
+      const [bd, bm, by] = b.split('.').map(Number);
+      return new Date(ay, am - 1, ad).getTime() - new Date(by, bm - 1, bd).getTime();
+    });
+    targetDate = dates[dates.length - 1] || '01.11.2026';
+  }
+
+  const targetIso = dmyToIso(targetDate);
+
+  // 2. Filter daily rows for the target date
+  const dayRows = actualRows.filter(r => {
+    const rIso = r.isoDate || dmyToIso(r.date);
+    return r.date === targetDate || (rIso !== '' && targetIso !== '' && rIso === targetIso);
+  });
+
+  // Cumulative rows up to and including targetDate
+  const cumRows = actualRows.filter(r => {
+    const rIso = r.isoDate || dmyToIso(r.date);
+    return (rIso !== '' && targetIso !== '' && rIso <= targetIso) || r.date === targetDate;
+  });
+
+  // 3. Helper to merge intervals
+  const mergeIntervals = (ints: [number, number][]): number => {
+    if (ints.length === 0) return 0;
+    const sorted = [...ints].sort((a, b) => a[0] - b[0]);
+    const merged: [number, number][] = [sorted[0]];
+    for (let i = 1; i < sorted.length; i++) {
+      const cur = sorted[i];
+      const prev = merged[merged.length - 1];
+      if (cur[0] <= prev[1]) {
+        prev[1] = Math.max(prev[1], cur[1]);
+      } else {
+        merged.push(cur);
+      }
+    }
+    return merged.reduce((sum, int) => sum + (int[1] - int[0]), 0);
+  };
+
+  // 4. Group day rows by Activity + Side + Lane
+  const groupMap = new Map<string, {
+    activity: string;
+    side: HighwaySide;
+    lane: string;
+    records: ActualDPRRow[];
+    intervals: [number, number][];
+  }>();
+
+  dayRows.forEach(r => {
+    let actDisplay = r.activity as string;
+    if (actDisplay === 'Tackcoat') actDisplay = 'Tack Coat';
+    const sideDisplay = r.side || 'LHS';
+    const laneDisplay = r.lane || 'F/L';
+
+    const key = `${actDisplay}__${sideDisplay}__${laneDisplay}`;
+    if (!groupMap.has(key)) {
+      groupMap.set(key, {
+        activity: actDisplay,
+        side: sideDisplay,
+        lane: laneDisplay,
+        records: [],
+        intervals: []
+      });
+    }
+    const g = groupMap.get(key)!;
+    g.records.push(r);
+    const minM = Math.round(Math.min(r.fromChainage, r.toChainage) * 1000);
+    const maxM = Math.round(Math.max(r.fromChainage, r.toChainage) * 1000);
+    g.intervals.push([minM, maxM]);
+  });
+
+  // 5. Construct rows
+  const allRows: DailyGroupedExecutionRow[] = [];
+
+  groupMap.forEach(g => {
+    // Activity filter
+    if (options?.activityFilter && options.activityFilter !== 'ALL') {
+      const f = options.activityFilter.toLowerCase().replace(/[\s-]/g, '');
+      const a = g.activity.toLowerCase().replace(/[\s-]/g, '');
+      if (!a.includes(f) && !f.includes(a)) return;
+    }
+
+    // Side filter
+    if (options?.sideFilter && options.sideFilter !== 'Both') {
+      if (g.side !== options.sideFilter && g.side !== 'BHS') return;
+    }
+
+    // Lane filter
+    if (options?.laneFilter && options.laneFilter !== 'All') {
+      const lf = options.laneFilter.toLowerCase();
+      const gl = g.lane.toLowerCase();
+      if (lf === 'f/l' && !gl.includes('f/l')) return;
+      if (lf === 's/l' && !gl.includes('s/l')) return;
+      if (lf === 'fw' && !gl.includes('fw') && !gl.includes('f/l &s/l')) return;
+      if (lf === 'sr' && !gl.includes('sr')) return;
+    }
+
+    const dayLaneM = g.records.reduce((sum, r) => sum + (r.lengthM || 0), 0);
+    const dayUniqueM = mergeIntervals(g.intervals);
+    const minM = Math.min(...g.intervals.map(int => int[0]));
+    const maxM = Math.max(...g.intervals.map(int => int[1]));
+
+    const chainageSpan = `Ch. ${Math.floor(minM / 1000)}+${String(minM % 1000).padStart(3, '0')} to ${Math.floor(maxM / 1000)}+${String(maxM % 1000).padStart(3, '0')}`;
+
+    // Cumulative for this exact activity + side + lane
+    const actKey = g.activity === 'Tack Coat' ? 'Tackcoat' : g.activity;
+    const cumMatching = cumRows.filter(r => {
+      const matchAct = r.activity === actKey || (actKey === 'Tackcoat' && r.activity === 'Tackcoat');
+      const matchSide = r.side === g.side || (g.side === 'BHS' && r.side === 'BHS');
+      const matchLane = r.lane === g.lane || (g.lane.includes('&') && (r.lane.includes('F/L') || r.lane.includes('S/L')));
+      return matchAct && matchSide && matchLane;
+    });
+
+    const cumLaneM = cumMatching.reduce((sum, r) => sum + (r.lengthM || 0), 0);
+    const cumIntervals: [number, number][] = cumMatching.map(r => [
+      Math.round(Math.min(r.fromChainage, r.toChainage) * 1000),
+      Math.round(Math.max(r.fromChainage, r.toChainage) * 1000)
+    ]);
+    const cumUniqueM = mergeIntervals(cumIntervals);
+
+    allRows.push({
+      date: targetDate,
+      isoDate: targetIso,
+      activity: g.activity,
+      side: g.side,
+      lane: g.lane,
+      chainageSpan,
+      minChainageM: minM,
+      maxChainageM: maxM,
+      recordCount: g.records.length,
+      dailyExecutedLaneLengthM: dayLaneM,
+      dailyExecutedLaneLengthKm: Number((dayLaneM / 1000).toFixed(3)),
+      dailyUniqueCoverageM: dayUniqueM,
+      dailyUniqueCoverageKm: Number((dayUniqueM / 1000).toFixed(3)),
+      cumulativeExecutedLaneLengthM: cumLaneM,
+      cumulativeExecutedLaneLengthKm: Number((cumLaneM / 1000).toFixed(3)),
+      cumulativeUniqueCoverageM: cumUniqueM,
+      cumulativeUniqueCoverageKm: Number((cumUniqueM / 1000).toFixed(3)),
+      hasMultiLaneOrOverlap: dayLaneM > dayUniqueM
+    });
+  });
+
+  // Sort rows: Milling -> Tack Coat -> DBM -> BC
+  const actOrder: Record<string, number> = { 'Milling': 1, 'Tack Coat': 2, 'DBM': 3, 'BC': 4 };
+  allRows.sort((a, b) => {
+    const oA = actOrder[a.activity] || 99;
+    const oB = actOrder[b.activity] || 99;
+    if (oA !== oB) return oA - oB;
+    return a.side.localeCompare(b.side);
+  });
+
+  // Calculate totals
+  const totalRecordCount = allRows.reduce((sum, r) => sum + r.recordCount, 0);
+  const totalDayLaneM = allRows.reduce((sum, r) => sum + r.dailyExecutedLaneLengthM, 0);
+  const totalDayUniqueM = allRows.reduce((sum, r) => sum + r.dailyUniqueCoverageM, 0);
+  const totalCumLaneM = allRows.reduce((sum, r) => sum + r.cumulativeExecutedLaneLengthM, 0);
+  const totalCumUniqueM = allRows.reduce((sum, r) => sum + r.cumulativeUniqueCoverageM, 0);
+
+  // Calculate 4 activity summaries
+  const getActSummary = (act: ActivityType) => {
+    const dLane = calculateExecutedLaneLength(dayRows, act, options?.sideFilter, options?.laneFilter);
+    const dUniq = calculateUniqueLinearLength(dayRows, act, options?.sideFilter);
+    const cLane = calculateExecutedLaneLength(cumRows, act, options?.sideFilter, options?.laneFilter);
+    const cUniq = calculateUniqueLinearLength(cumRows, act, options?.sideFilter);
+    return {
+      dailyLaneM: dLane.meters,
+      dailyLaneKm: dLane.km,
+      dailyUniqueM: dUniq.meters,
+      dailyUniqueKm: dUniq.km,
+      cumLaneM: cLane.meters,
+      cumLaneKm: cLane.km,
+      cumUniqueM: cUniq.meters,
+      cumUniqueKm: cUniq.km
+    };
+  };
+
+  return {
+    selectedDate: targetDate,
+    rows: allRows,
+    totals: {
+      recordCount: totalRecordCount,
+      dailyExecutedLaneLengthM: totalDayLaneM,
+      dailyExecutedLaneLengthKm: Number((totalDayLaneM / 1000).toFixed(3)),
+      dailyUniqueCoverageM: totalDayUniqueM,
+      dailyUniqueCoverageKm: Number((totalDayUniqueM / 1000).toFixed(3)),
+      cumulativeExecutedLaneLengthM: totalCumLaneM,
+      cumulativeExecutedLaneLengthKm: Number((totalCumLaneM / 1000).toFixed(3)),
+      cumulativeUniqueCoverageM: totalCumUniqueM,
+      cumulativeUniqueCoverageKm: Number((totalCumUniqueM / 1000).toFixed(3))
+    },
+    activitySummaries: {
+      milling: getActSummary('Milling'),
+      tackCoat: getActSummary('Tackcoat'),
+      dbm: getActSummary('DBM'),
+      bc: getActSummary('BC')
+    }
+  };
+}
+
+/**
  * Loads Authoritative Planned Work Program and Daily DPR execution data from final_sheet.xlsx
  */
 export async function loadDashboardData(): Promise<{
@@ -2074,6 +2711,7 @@ export async function loadDashboardData(): Promise<{
   sectionScopes: SectionQuantityScope[];
   consolidatedScope: ConsolidatedQuantityScope;
   cumulativeAchieved: CumulativeAchievedQuantities;
+  stretchWiseTemplate?: StretchWiseTemplateRow[];
   source: 'live_excel' | 'fallback';
   availableDates: string[];
   dataQualityWarnings: string[];

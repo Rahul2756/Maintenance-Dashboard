@@ -56,6 +56,7 @@ export const CHAINAGE_PRESETS: Record<'All' | 'DPR' | 'Sec1' | 'Sec2', ChainageP
 
 export const DEFAULT_FILTER_STATE: GlobalFilterState = {
   side: 'Both',
+  lane: 'All',
   selectedActivities: ['Milling', 'Tackcoat', 'DBM', 'BC'],
   dateRange: { start: '14.10.2026', end: '01.11.2026' },
   selectedSingleDate: '01.11.2026',
@@ -72,6 +73,8 @@ interface FilterContextType {
   setActiveModule: (module: ModuleTab) => void;
   scrollToModule: (module: ModuleTab) => void;
   setSide: (side: 'LHS' | 'RHS' | 'Both') => void;
+  setLane: (lane: 'All' | 'F/L' | 'S/L' | 'FW' | 'SR') => void;
+  lane: 'All' | 'F/L' | 'S/L' | 'FW' | 'SR';
   toggleActivity: (activity: ActivityType, singleMode?: boolean) => void;
   setSelectedActivities: (activities: ActivityType[]) => void;
   selectAllActivities: () => void;
@@ -138,6 +141,10 @@ export const FilterProvider: React.FC<{
   // Filter setters with bi-directional safety
   const setSide = useCallback((side: 'LHS' | 'RHS' | 'Both') => {
     setFilters(prev => ({ ...prev, side }));
+  }, []);
+
+  const setLane = useCallback((lane: 'All' | 'F/L' | 'S/L' | 'FW' | 'SR') => {
+    setFilters(prev => ({ ...prev, lane }));
   }, []);
 
   const toggleActivity = useCallback((activity: ActivityType, singleMode: boolean = false) => {
@@ -289,6 +296,7 @@ export const FilterProvider: React.FC<{
       setActiveModule,
       scrollToModule,
       setSide,
+      setLane,
       toggleActivity,
       setSelectedActivities,
       selectAllActivities,
@@ -305,6 +313,7 @@ export const FilterProvider: React.FC<{
       filterStats,
       // Convenience properties
       side: filters.side,
+      lane: filters.lane || 'All',
       selectedActivities: filters.selectedActivities,
       scope: filters.chainageScope,
       setScope: setChainageScope,
@@ -322,6 +331,7 @@ export const FilterProvider: React.FC<{
       activeModule,
       scrollToModule,
       setSide,
+      setLane,
       toggleActivity,
       setSelectedActivities,
       selectAllActivities,
@@ -379,6 +389,16 @@ export function rowMatchesGlobalFilter(row: ActualDPRRow, filters: GlobalFilterS
   // 2. Side filter ('Both' accepts all, otherwise must match 'LHS' or 'RHS')
   if (filters.side !== 'Both') {
     if (row.side !== filters.side) return false;
+  }
+
+  // 2.5 Lane filter ('All' accepts all)
+  if (filters.lane && filters.lane !== 'All') {
+    const targetLane = filters.lane;
+    if (targetLane === 'FW' || targetLane === 'SR') {
+      if (row.lane !== targetLane && !row.lane.includes(targetLane)) return false;
+    } else {
+      if (!row.lane.includes(targetLane)) return false;
+    }
   }
 
   // 3. Activity filter

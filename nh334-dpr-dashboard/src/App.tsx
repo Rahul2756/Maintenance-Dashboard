@@ -22,7 +22,8 @@ import {
   DEFAULT_CONSOLIDATED_SCOPE,
   DEFAULT_CUMULATIVE_ACHIEVED,
   getPhasedTargetForDate,
-  getPhasedMillingTargetForDate
+  getPhasedMillingTargetForDate,
+  StretchWiseTemplateRow
 } from './utils/excelParser';
 import {
   FilterProvider,
@@ -33,6 +34,7 @@ import { HeaderFilterBar } from './components/dashboard/HeaderFilterBar';
 import { TopHeader } from './components/layout/TopHeader';
 import { KPICards } from './components/dashboard/KPICards';
 import { LinearKPICards } from './components/dashboard/LinearKPICards';
+import { StretchWiseSummaryModule } from './components/dashboard/StretchWiseSummaryModule';
 import { PlannedVsActualChart } from './components/dashboard/PlannedVsActualChart';
 import { SCurveForecastChart } from './components/dashboard/SCurveForecastChart';
 import { SCurveActualChart } from './components/dashboard/SCurveActualChart';
@@ -58,7 +60,15 @@ import { Loader2, CheckCircle2, Layers, BarChart3, Compass, FileSpreadsheet, Cal
 import { ModuleSeparator } from './components/dashboard/ModuleSeparator';
 
 function DashboardContent() {
-  const { filters, setDateRange, activeModule } = useFilters();
+  const {
+    filters,
+    setDateRange,
+    activeModule,
+    setSelectedSingleDate,
+    setSelectedActivities,
+    selectAllActivities,
+    toggleActivity
+  } = useFilters();
 
   const [actualRows, setActualRows] = useState<ActualDPRRow[]>([]);
   const [plannedRecords, setPlannedRecords] = useState<PlannedRecord[]>([]);
@@ -557,7 +567,16 @@ function DashboardContent() {
               selectedActivities={filters.selectedActivities}
               side={filters.side}
               selectedDate={selectedDate}
+              availableDates={availableDates}
               boqMetrics={boqMetrics}
+              onDateChange={(d) => setSelectedSingleDate(d)}
+              onActivitySelect={(act) => {
+                if (act === 'All') {
+                  selectAllActivities();
+                } else {
+                  toggleActivity(act, true);
+                }
+              }}
             />
 
             {/* Row 2: Volumetric KPI Summary Cards (BoQ Quantities & Material Volumes) */}
