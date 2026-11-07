@@ -1,7 +1,8 @@
 import gpsData from '../data/nh334GpsAlignment.json';
+import defaultStripData from '../data/stripChartData.json';
 import { GpsPoint, Landmark, RoadSegmentGeo } from '../types/gis';
 import { ActualDPRRow, PlannedRecord, HighwaySide } from '../types/dpr';
-import { StripChartDataset, WorkZoneAnnotation } from '../types/stripChart';
+import { StripChartDataset, WorkZoneAnnotation, CompletedWorkSubInterval, RoadStatusCategory } from '../types/stripChart';
 
 export const GPS_POINTS: GpsPoint[] = gpsData.points as GpsPoint[];
 
@@ -74,28 +75,47 @@ export const NH334_LANDMARKS: Landmark[] = [
   }
 ];
 
+// Exact colors matching the Highway Strip Chart taxonomy
 export const STATUS_COLORS = {
-  completed: '#10B981',       // Emerald
-  in_progress: '#F59E0B',     // Amber
-  delayed: '#EF4444',         // Red
-  planned: '#06B6D4',         // Cyan
-  dps: '#6366F1',             // Indigo
-  under_construction: '#F97316', // Orange
-  himalayan: '#E11D48'        // Rose
+  completed: '#10B981',           // Emerald Green (Completed by Our Team)
+  dps: '#8B5CF6',                 // Purple / Indigo (Work Done by DPS)
+  under_construction: '#D97706',  // Amber / Warm Gold (Under Construction)
+  himalayan: '#EC4899',           // Pink / Rose (Himalayan)
+  eligible_scope: '#0284C7',      // Sky Blue (Remaining Eligible Scope)
+  in_progress: '#F59E0B',
+  delayed: '#EF4444',
+  planned: '#0284C7',
 };
+
+export const STRIP_ACTIVITIES = [
+  { id: 'all', name: 'All Activities' },
+  { id: 'road_marking', name: 'Road Marking' },
+  { id: 'earthen_shoulder', name: 'Earthen Shoulder' },
+  { id: 'bc_fw', name: 'BC (FW)' },
+  { id: 'composite_glass_grid', name: 'Composite Glass Grid/Crack Sealing' },
+  { id: 'dbm', name: 'DBM' },
+  { id: 'milling_dbm', name: 'Milling DBM' },
+];
 
 export const ACTIVITY_COLORS: Record<string, string> = {
   'Milling': '#F59E0B',
   'Milling DBM': '#F59E0B',
+  'milling_dbm': '#F59E0B',
   'Tackcoat': '#38BDF8',
   'Tack Coat': '#38BDF8',
   'DBM': '#10B981',
+  'dbm': '#10B981',
   'BC': '#818CF8',
   'BC (FW)': '#818CF8',
+  'bc_fw': '#818CF8',
   'Road Marking': '#F8FAFC',
+  'road_marking': '#F8FAFC',
   'Earthen Shoulder': '#D97706',
+  'earthen_shoulder': '#D97706',
   'Composite Glass Grid / Crack Sealing': '#A855F7',
-  'All': '#06B6D4'
+  'composite_glass_grid': '#A855F7',
+  'All': '#06B6D4',
+  'all': '#06B6D4',
 };
 
 /**
@@ -120,7 +140,7 @@ export function parseChainageStrToM(str: string | number): number {
  */
 export function formatChainageM(chainageM: number, prefix = 'Ch. '): string {
   const km = Math.floor(chainageM / 1000);
-  const m = Math.round(chainageM % 1000);
+  const m = Math.round(Math.abs(chainageM % 1000));
   return `${prefix}${km}+${m.toString().padStart(3, '0')}`;
 }
 
@@ -129,7 +149,7 @@ export function formatChainageM(chainageM: number, prefix = 'Ch. '): string {
  */
 export function getCoordinatesAtChainage(chainageM: number): [number, number] {
   if (!GPS_POINTS || GPS_POINTS.length === 0) return [29.8787, 77.9545];
-  
+
   if (chainageM <= GPS_POINTS[0].chainageM) {
     return [GPS_POINTS[0].lat, GPS_POINTS[0].lon];
   }
@@ -163,8 +183,9 @@ export function getCoordinatesAtChainage(chainageM: number): [number, number] {
 
 /**
  * Calculates a series of coordinate points along the highway between two chainages.
+ * If side is 'LHS' or 'RHS', applies a subtle lateral offset perpendicular to the road heading.
  */
-export function getCoordinatesSlice(fromM: number, toM: number): [number, number][] {
+export function getCoordinatesSlice(fromM: number, toM: number, side: HighwaySide = 'Both'): [number, number][] {
   const startM = Math.min(fromM, toM);
   const endM = Math.max(fromM, toM);
   const coords: [number, number][] = [];
@@ -179,11 +200,29 @@ export function getCoordinatesSlice(fromM: number, toM: number): [number, number
   }
 
   coords.push(getCoordinatesAtChainage(endM));
+
+  // If specific carriageway (LHS vs RHS), compute perpendicular offset
+  if (side === 'LHS' || side === 'RHS') {
+    const offsetMagnitude = side === 'LHS' ? -0.00004 : 0.00004; // ~4m lateral shift
+    return coords.map((c, i) => {
+      const next = coords[Math.min(i + 1, coords.length - 1)];
+      const prev = coords[Math.max(i - 1, 0)];
+      const dLat = next[0] - prev[0];
+      const dLon = next[1] - prev[1];
+      const len = Math.sqrt(dLat * dLat + dLon * dLon) || 1;
+      // Perpendicular vector (-dLon, dLat)
+      const pLat = (-dLon / len) * offsetMagnitude;
+      const pLon = (dLat / len) * offsetMagnitude;
+      return [c[0] + pLat, c[1] + pLon];
+    });
+  }
+
   return coords;
 }
 
 /**
- * Finds closest highway chainage and distance in meters to a given lat/lon.
+ * Finds exact highway chainage in meters along the road centerline for any given lat/lon
+ * using orthogonal projection onto adjacent road segments.
  */
 export function getChainageAtCoordinates(lat: number, lon: number): {
   chainageM: number;
@@ -192,27 +231,44 @@ export function getChainageAtCoordinates(lat: number, lon: number): {
   nearestLandmark?: string;
 } {
   let closestDistSq = Infinity;
-  let closestIdx = 0;
+  let bestChainageM = GPS_POINTS[0].chainageM;
 
-  for (let i = 0; i < GPS_POINTS.length; i++) {
-    const p = GPS_POINTS[i];
-    const dLat = p.lat - lat;
-    const dLon = (p.lon - lon) * Math.cos((lat * Math.PI) / 180);
-    const distSq = dLat * dLat + dLon * dLon;
+  const cosLat = Math.cos((lat * Math.PI) / 180);
+  const x = lon * cosLat;
+  const y = lat;
+
+  for (let i = 0; i < GPS_POINTS.length - 1; i++) {
+    const p1 = GPS_POINTS[i];
+    const p2 = GPS_POINTS[i + 1];
+
+    const x1 = p1.lon * cosLat;
+    const y1 = p1.lat;
+    const x2 = p2.lon * cosLat;
+    const y2 = p2.lat;
+
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const lenSq = dx * dx + dy * dy;
+    let t = lenSq === 0 ? 0 : ((x - x1) * dx + (y - y1) * dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+
+    const projX = x1 + t * dx;
+    const projY = y1 + t * dy;
+    const distSq = (x - projX) * (x - projX) + (y - projY) * (y - projY);
+
     if (distSq < closestDistSq) {
       closestDistSq = distSq;
-      closestIdx = i;
+      bestChainageM = Math.round(p1.chainageM + t * (p2.chainageM - p1.chainageM));
     }
   }
 
-  const pClosest = GPS_POINTS[closestIdx];
-  const distanceM = Math.sqrt(closestDistSq) * 111319.5; // ~meters per degree
+  const distanceM = Math.sqrt(closestDistSq) * 111319.5;
 
   // Find nearest landmark
   let nearestLandmark: string | undefined;
   let landmarkDist = Infinity;
   for (const lm of NH334_LANDMARKS) {
-    const diff = Math.abs(lm.chainageM - pClosest.chainageM);
+    const diff = Math.abs(lm.chainageM - bestChainageM);
     if (diff < landmarkDist && diff <= 5000) {
       landmarkDist = diff;
       nearestLandmark = lm.name;
@@ -220,8 +276,8 @@ export function getChainageAtCoordinates(lat: number, lon: number): {
   }
 
   return {
-    chainageM: pClosest.chainageM,
-    chainageFmt: pClosest.chainageFmt,
+    chainageM: bestChainageM,
+    chainageFmt: formatChainageM(bestChainageM, ''),
     distanceM,
     nearestLandmark
   };
@@ -245,7 +301,6 @@ export function getMilestoneMarkers(intervalM = 5000): Array<{
     isMajor: boolean;
   }> = [];
 
-  // Always include project start
   const startM = CORRIDOR_EXTENT.projectStartM;
   const endM = CORRIDOR_EXTENT.projectEndM;
 
@@ -258,7 +313,6 @@ export function getMilestoneMarkers(intervalM = 5000): Array<{
     isMajor: true
   });
 
-  // Regular intervals (e.g. 135+000, 140+000, 145+000...)
   const firstTick = Math.ceil(startM / intervalM) * intervalM;
   for (let m = firstTick; m < endM; m += intervalM) {
     const [lat, lon] = getCoordinatesAtChainage(m);
@@ -271,7 +325,6 @@ export function getMilestoneMarkers(intervalM = 5000): Array<{
     });
   }
 
-  // Always include project end
   const [endLat, endLon] = getCoordinatesAtChainage(endM);
   milestones.push({
     chainageM: endM,
@@ -285,122 +338,271 @@ export function getMilestoneMarkers(intervalM = 5000): Array<{
 }
 
 /**
- * Builds geographical road segments matching the active DPR rows, Work Program, and Excel strip chart.
+ * Builds chainage-wise geographical road segments using the exact Strip Chart classification:
+ * 1. Work Done by DPS
+ * 2. Under Construction
+ * 3. Himalayan
+ * 4. Completed by Our Team
+ * 5. Remaining Eligible Scope
+ *
+ * Slices are computed per interval, preserving exact From Ch and To Ch,
+ * splitting road geometry down to the metre along the 798 GPS points.
+ */
+function normalizeActMatch(actName: string, filterAct: string): boolean {
+  if (filterAct === 'All' || filterAct === 'all') return true;
+  const f = filterAct.toLowerCase();
+  const a = actName.toLowerCase();
+  if (f.includes('milling') && a.includes('milling')) return true;
+  if (f.includes('dbm') && a.includes('dbm') && !f.includes('milling') && !a.includes('milling') && !f.includes('tack') && !a.includes('tack')) return true;
+  if ((f === 'bc' || f.includes('bc')) && (a === 'bc' || a.includes('bc')) && !f.includes('tack') && !a.includes('tack')) return true;
+  if ((f.includes('tack') || f.includes('tackcoat')) && (a.includes('tack') || a.includes('tackcoat'))) return true;
+  if ((f.includes('glass') || f.includes('grid')) && (a.includes('glass') || a.includes('grid'))) return true;
+  if (f.includes('earthen') && a.includes('earthen')) return true;
+  if (f.includes('marking') && a.includes('marking')) return true;
+  return a === f;
+}
+
+/**
+ * Builds geographical road segments matching the exact 5 status categories:
+ * DPS (Purple), Under Construction (Orange), Himalayan (Magenta), Completed (Green), Eligible Scope (Cyan).
  */
 export function buildGeoSegments(
   actualRows: ActualDPRRow[] = [],
   _plannedRecords: PlannedRecord[] = [],
   stripDataset: StripChartDataset | null = null,
-  selectedActivity: string = 'All',
-  sideFilter: HighwaySide = 'Both',
-  statusFilter: string = 'all'
+  selectedActivity: string = 'all', // 'all' or activity id like 'milling_dbm', 'dbm', 'bc_fw'...
+  sideFilter: HighwaySide = 'Both',  // 'Both' | 'LHS' | 'RHS'
+  selectedDate: string | null = 'all' // 'all' or specific date e.g. '01-Nov-2026'
 ): RoadSegmentGeo[] {
+  const dataset = stripDataset || (defaultStripData as unknown as StripChartDataset);
+  if (!dataset || !dataset.intervals || dataset.intervals.length === 0) {
+    return [];
+  }
+
+  const {
+    intervals = [],
+    lhsWorkZones = [],
+    rhsWorkZones = [],
+    completedLogs = [],
+  } = dataset;
+
   const segments: RoadSegmentGeo[] = [];
 
-  // 1. If we have actual DPR execution records, map them to geocoded highway segments
-  actualRows.forEach((row, idx) => {
-    // Activity filter
-    if (selectedActivity !== 'All' && row.activity.toLowerCase() !== selectedActivity.toLowerCase()) {
-      return;
-    }
-    // Side filter
-    if (sideFilter !== 'Both' && sideFilter !== 'ALL' && row.side !== sideFilter) {
-      return;
-    }
+  // Determine which carriageway sides to process
+  const sidesToProcess: ('LHS' | 'RHS')[] = 
+    sideFilter === 'LHS' ? ['LHS'] : sideFilter === 'RHS' ? ['RHS'] : ['LHS', 'RHS'];
 
-    const fromM = row.rawFromChainage || Math.round((row.fromChainage || 0) * 1000);
-    const toM = row.rawToChainage || Math.round((row.toChainage || 0) * 1000);
-    if (!fromM || !toM || fromM >= toM) return;
+  // Normalize activity filter
+  const normActId = selectedActivity.trim().toLowerCase();
+  const isAllActivities = normActId === 'all' || normActId === 'all activities';
 
-    // Status: executed rows are completed
-    const status: RoadSegmentGeo['status'] = 'completed';
-    if (statusFilter !== 'all' && statusFilter !== status) return;
+  sidesToProcess.forEach((side) => {
+    const workZones = side === 'LHS' ? lhsWorkZones : rhsWorkZones;
 
-    const coords = getCoordinatesSlice(fromM, toM);
-    const color = STATUS_COLORS[status];
+    intervals.forEach((inter) => {
+      // -----------------------------------------------------------------------
+      // Priority 1-3: Fixed Exclusions Check
+      // -----------------------------------------------------------------------
+      const ex = (workZones || []).find(
+        w => inter.fromM >= w.fromM && inter.toM <= w.toM
+      );
 
-    segments.push({
-      id: `actual-${row.id || idx}-${row.activity}-${fromM}-${toM}`,
-      fromChainageM: fromM,
-      toChainageM: toM,
-      fromChainageFmt: formatChainageM(fromM, ''),
-      toChainageFmt: formatChainageM(toM, ''),
-      lengthM: row.lengthM || (toM - fromM),
-      coordinates: coords,
-      side: row.side,
-      activity: row.activity,
-      status,
-      color,
-      actualRow: row,
-      label: `${row.activity} (${row.side}): ${row.achievedToday || ''} ${row.unit || ''}`
-    });
-  });
+      if (ex) {
+        const cat = ex.status as 'dps' | 'under_construction' | 'himalayan';
+        let statusLabel = 'Special Work Zone';
+        if (cat === 'dps') statusLabel = 'Work Done by DPS';
+        else if (cat === 'under_construction') statusLabel = 'Under Construction';
+        else if (cat === 'himalayan') statusLabel = 'Himalayan';
 
-  // 2. If stripDataset has workZone annotations (Work Done by DPS, Under Construction, Himalayan), add them as prominent overlays
-  if (stripDataset) {
-    const allWorkZones: WorkZoneAnnotation[] = [
-      ...(stripDataset.lhsWorkZones || []),
-      ...(stripDataset.rhsWorkZones || [])
-    ];
+        const coords = getCoordinatesSlice(inter.fromM, inter.toM);
+        const lenM = inter.toM - inter.fromM;
 
-    allWorkZones.forEach((wz) => {
-      const fromM = wz.fromM || parseChainageStrToM(wz.fromChainage);
-      const toM = wz.toM || parseChainageStrToM(wz.toChainage);
-      if (!fromM || !toM || fromM >= toM) return;
-
-      if (sideFilter !== 'Both' && sideFilter !== 'ALL' && wz.side !== sideFilter) {
+        segments.push({
+          id: `${side.toLowerCase()}-${cat}-${inter.fromM}-${inter.toM}`,
+          fromChainageM: inter.fromM,
+          toChainageM: inter.toM,
+          fromChainageFmt: formatChainageM(inter.fromM, ''),
+          toChainageFmt: formatChainageM(inter.toM, ''),
+          lengthM: lenM,
+          coordinates: coords,
+          side: side as HighwaySide,
+          activity: 'Fixed Exclusion',
+          activityId: 'exclusion',
+          status: cat,
+          statusCategory: cat,
+          statusLabel,
+          color: STATUS_COLORS[cat] || '#8B5CF6',
+          isExclusion: true,
+          exclusionType: cat,
+          isCompleted: false,
+          lane: 'MCW',
+          sourceWorkbook: 'MH Project Strip chart KM wise - Format.xlsx (MH Strip Chart)',
+          label: `${statusLabel} (${side}): Ch. ${formatChainageM(inter.fromM, '')} – ${formatChainageM(inter.toM, '')} (${lenM}m)`,
+        });
         return;
       }
 
-      let status: RoadSegmentGeo['status'] = 'dps';
-      let color = STATUS_COLORS.dps;
-      const type = (wz.type || wz.label || '').toLowerCase();
-      if (type.includes('himalayan')) {
-        status = 'himalayan';
-        color = STATUS_COLORS.himalayan;
-      } else if (type.includes('construction')) {
-        status = 'under_construction';
-        color = STATUS_COLORS.under_construction;
-      }
-
-      const coords = getCoordinatesSlice(fromM, toM);
-
-      segments.push({
-        id: `workzone-${wz.id}-${fromM}-${toM}`,
-        fromChainageM: fromM,
-        toChainageM: toM,
-        fromChainageFmt: wz.fromChainage,
-        toChainageFmt: wz.toChainage,
-        lengthM: wz.totalLengthM || (toM - fromM),
-        coordinates: coords,
-        side: wz.side as HighwaySide,
-        activity: 'All',
-        status,
-        color,
-        label: `${wz.label} (${wz.side}): Ch. ${wz.fromChainage} - ${wz.toChainage}`
+      // -----------------------------------------------------------------------
+      // Priority 4 & 5: Eligible Scope (Completed vs Remaining)
+      // -----------------------------------------------------------------------
+      const activeLogs = (completedLogs || []).filter(l => {
+        if (!l || !isFinite(l.fromM) || !isFinite(l.toM) || l.toM <= l.fromM) return false;
+        // Activity filter
+        if (!isAllActivities && l.mappedActivityId !== normActId) return false;
+        // Side filter
+        if (l.side !== 'BHS' && l.side !== side) return false;
+        // Date filter
+        if (selectedDate && selectedDate !== 'all' && l.date !== selectedDate) return false;
+        // Interval intersection
+        return Math.max(l.fromM, inter.fromM) < Math.min(l.toM, inter.toM);
       });
-    });
-  }
 
-  // 3. Fallback / Base Corridor scope if no segments match
-  if (segments.length === 0) {
-    const startM = CORRIDOR_EXTENT.projectStartM;
-    const endM = CORRIDOR_EXTENT.projectEndM;
-    segments.push({
-      id: 'base-corridor-extent',
-      fromChainageM: startM,
-      toChainageM: endM,
-      fromChainageFmt: '130+560',
-      toChainageFmt: '206+220',
-      lengthM: endM - startM,
-      coordinates: getCoordinatesSlice(startM, endM),
-      side: 'Both' as HighwaySide,
-      activity: 'All',
-      status: 'planned',
-      color: STATUS_COLORS.planned,
-      label: 'NH-334 Project Corridor Scope (Ch. 130+560 to 206+220)'
+      if (activeLogs.length === 0) {
+        // Entire interval is uncompleted eligible scope
+        const coords = getCoordinatesSlice(inter.fromM, inter.toM);
+        const lenM = inter.toM - inter.fromM;
+
+        segments.push({
+          id: `${side.toLowerCase()}-eligible-${inter.fromM}-${inter.toM}`,
+          fromChainageM: inter.fromM,
+          toChainageM: inter.toM,
+          fromChainageFmt: formatChainageM(inter.fromM, ''),
+          toChainageFmt: formatChainageM(inter.toM, ''),
+          lengthM: lenM,
+          coordinates: coords,
+          side: side as HighwaySide,
+          activity: isAllActivities ? 'Eligible Maintenance Scope' : (STRIP_ACTIVITIES.find(a => a.id === normActId)?.name || normActId),
+          activityId: normActId,
+          status: 'eligible_scope',
+          statusCategory: 'eligible_scope',
+          statusLabel: 'Remaining Eligible Scope',
+          color: STATUS_COLORS.eligible_scope,
+          isExclusion: false,
+          isCompleted: false,
+          lane: 'MCW',
+          sourceWorkbook: 'final_sheet.xlsx (Scope & Work Program)',
+          label: `Remaining Eligible Scope (${side}): Ch. ${formatChainageM(inter.fromM, '')} – ${formatChainageM(inter.toM, '')} (${lenM}m)`,
+        });
+      } else {
+        // Merge overlapping completed logs within this interval
+        const clamped = activeLogs
+          .map(l => ({
+            fromM: Math.max(l.fromM, inter.fromM),
+            toM: Math.min(l.toM, inter.toM),
+            log: l,
+          }))
+          .sort((a, b) => a.fromM - b.fromM);
+
+        const merged: { fromM: number; toM: number; logs: CompletedWorkSubInterval[] }[] = [];
+        clamped.forEach(c => {
+          if (merged.length === 0) {
+            merged.push({ fromM: c.fromM, toM: c.toM, logs: [c.log] });
+          } else {
+            const last = merged[merged.length - 1];
+            if (c.fromM <= last.toM) {
+              last.toM = Math.max(last.toM, c.toM);
+              last.logs.push(c.log);
+            } else {
+              merged.push({ fromM: c.fromM, toM: c.toM, logs: [c.log] });
+            }
+          }
+        });
+
+        let curM = inter.fromM;
+        merged.forEach((m, mIdx) => {
+          // Uncompleted gap before completed slice
+          if (m.fromM > curM) {
+            const gapLen = m.fromM - curM;
+            const gapCoords = getCoordinatesSlice(curM, m.fromM);
+            segments.push({
+              id: `${side.toLowerCase()}-eligible-${curM}-${m.fromM}`,
+              fromChainageM: curM,
+              toChainageM: m.fromM,
+              fromChainageFmt: formatChainageM(curM, ''),
+              toChainageFmt: formatChainageM(m.fromM, ''),
+              lengthM: gapLen,
+              coordinates: gapCoords,
+              side: side as HighwaySide,
+              activity: isAllActivities ? 'Eligible Maintenance Scope' : (STRIP_ACTIVITIES.find(a => a.id === normActId)?.name || normActId),
+              activityId: normActId,
+              status: 'eligible_scope',
+              statusCategory: 'eligible_scope',
+              statusLabel: 'Remaining Eligible Scope',
+              color: STATUS_COLORS.eligible_scope,
+              isExclusion: false,
+              isCompleted: false,
+              lane: 'MCW',
+              sourceWorkbook: 'final_sheet.xlsx (Scope & Work Program)',
+              label: `Remaining Eligible Scope (${side}): Ch. ${formatChainageM(curM, '')} – ${formatChainageM(m.fromM, '')} (${gapLen}m)`,
+            });
+          }
+
+          // Completed slice
+          const compLen = m.toM - m.fromM;
+          const compCoords = getCoordinatesSlice(m.fromM, m.toM);
+          const hasConflict = m.logs.some(l => l.hasConflict);
+          const distinctActivities = Array.from(new Set(m.logs.map(l => l.activity))).join(', ');
+          const distinctLanes = Array.from(new Set(m.logs.map(l => l.lane))).join(', ');
+          const latestLogDate = m.logs[m.logs.length - 1]?.date || 'Recent';
+
+          segments.push({
+            id: `${side.toLowerCase()}-completed-${m.fromM}-${m.toM}-${mIdx}`,
+            fromChainageM: m.fromM,
+            toChainageM: m.toM,
+            fromChainageFmt: formatChainageM(m.fromM, ''),
+            toChainageFmt: formatChainageM(m.toM, ''),
+            lengthM: compLen,
+            coordinates: compCoords,
+            side: side as HighwaySide,
+            activity: distinctActivities || 'Completed Maintenance',
+            activityId: normActId,
+            status: 'completed',
+            statusCategory: 'completed',
+            statusLabel: 'Completed by Our Team',
+            color: STATUS_COLORS.completed,
+            isExclusion: false,
+            isCompleted: true,
+            hasConflict,
+            conflictReason: m.logs.find(l => l.conflictReason)?.conflictReason,
+            lane: distinctLanes || 'MCW',
+            date: latestLogDate,
+            logRecords: m.logs,
+            sourceWorkbook: 'final_sheet.xlsx (Chainage Log(input))',
+            label: `Completed (${side} • ${distinctActivities}): Ch. ${formatChainageM(m.fromM, '')} – ${formatChainageM(m.toM, '')} (${compLen}m)`,
+          });
+
+          curM = m.toM;
+        });
+
+        // Remaining gap after last completed slice in this interval
+        if (curM < inter.toM) {
+          const tailLen = inter.toM - curM;
+          const tailCoords = getCoordinatesSlice(curM, inter.toM);
+          segments.push({
+            id: `${side.toLowerCase()}-eligible-${curM}-${inter.toM}`,
+            fromChainageM: curM,
+            toChainageM: inter.toM,
+            fromChainageFmt: formatChainageM(curM, ''),
+            toChainageFmt: formatChainageM(inter.toM, ''),
+            lengthM: tailLen,
+            coordinates: tailCoords,
+            side: side as HighwaySide,
+            activity: isAllActivities ? 'Eligible Maintenance Scope' : (STRIP_ACTIVITIES.find(a => a.id === normActId)?.name || normActId),
+            activityId: normActId,
+            status: 'eligible_scope',
+            statusCategory: 'eligible_scope',
+            statusLabel: 'Remaining Eligible Scope',
+            color: STATUS_COLORS.eligible_scope,
+            isExclusion: false,
+            isCompleted: false,
+            lane: 'MCW',
+            sourceWorkbook: 'final_sheet.xlsx (Scope & Work Program)',
+            label: `Remaining Eligible Scope (${side}): Ch. ${formatChainageM(curM, '')} – ${formatChainageM(inter.toM, '')} (${tailLen}m)`,
+          });
+        }
+      }
     });
-  }
+  });
 
   return segments;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { MapMode, RoadSegmentGeo, InspectionDetails, StreetViewLocation } from '../../types/gis';
 import { ActualDPRRow, PlannedRecord, HighwaySide, ActivityType, QCTestLogItem } from '../../types/dpr';
 import { StripChartDataset } from '../../types/stripChart';
@@ -10,7 +10,8 @@ import {
   getChainageAtCoordinates,
   parseChainageStrToM,
   formatChainageM,
-  STATUS_COLORS
+  STATUS_COLORS,
+  STRIP_ACTIVITIES
 } from '../../utils/gisUtils';
 import { GISMapCanvas } from './GISMapCanvas';
 import { RoadInspectionPanel } from './RoadInspectionPanel';
@@ -30,7 +31,8 @@ import {
   Info,
   SlidersHorizontal,
   ChevronDown,
-  Navigation
+  Navigation,
+  Calendar
 } from 'lucide-react';
 
 interface GeographicalGISModuleProps {
@@ -53,7 +55,7 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
   selectedChainageM: externalSelectedChainage,
   onSelectChainage,
   onHighlightStripChart,
-  availableDates = [],
+  availableDates: externalDates = [],
   qcLogs = [],
   selectedRow = null,
   onSelectRow
@@ -64,10 +66,20 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
   const [mapMode, setMapMode] = useState<MapMode>('hybrid');
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
-  // Filters
+  // Synchronized Filters
   const [sideFilter, setSideFilter] = useState<HighwaySide>('Both');
-  const [activityFilter, setActivityFilter] = useState<string>('All');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [activityFilter, setActivityFilter] = useState<string>('all');
+  
+  // Date View State (Overall View vs Selected Date View)
+  const allDates = stripDataset?.availableDates && stripDataset.availableDates.length > 0
+    ? stripDataset.availableDates
+    : externalDates && externalDates.length > 0
+    ? externalDates
+    : ['14-Oct-2026', '23-Oct-2026', '01-Nov-2026'];
+  const defaultLatestDate = allDates[allDates.length - 1] || '01-Nov-2026';
+
+  const [dateMode, setDateMode] = useState<'overall' | 'selected'>('overall');
+  const [activeDate, setActiveDate] = useState<string>(defaultLatestDate);
 
   // Search & Jump
   const [searchInput, setSearchInput] = useState<string>('');
@@ -83,24 +95,7 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
   const [streetViewLocation, setStreetViewLocation] = useState<StreetViewLocation | null>(null);
   const [pegmanActive, setPegmanActive] = useState<boolean>(false);
 
-  // Sync external selected chainage
-  React.useEffect(() => {
-    if (externalSelectedChainage !== undefined && externalSelectedChainage !== null) {
-      setSelectedChainage(externalSelectedChainage);
-      const [lat, lon] = getCoordinatesAtChainage(externalSelectedChainage);
-      const chainageFmt = formatChainageM(externalSelectedChainage);
-      const res = getChainageAtCoordinates(lat, lon);
-      setInspectionDetails({
-        chainageM: externalSelectedChainage,
-        chainageFmt,
-        lat,
-        lon,
-        nearestLandmark: res.nearestLandmark
-      });
-    }
-  }, [externalSelectedChainage]);
-
-  // Build geocoded segments based on filters
+  // Build geocoded segments based on filters (Exact Strip Chart Classification)
   const geoSegments = useMemo(() => {
     return buildGeoSegments(
       actualRows,
@@ -108,9 +103,51 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
       stripDataset,
       activityFilter,
       sideFilter,
-      statusFilter
+      dateMode === 'selected' ? activeDate : 'all'
     );
-  }, [actualRows, plannedRecords, stripDataset, activityFilter, sideFilter, statusFilter]);
+  }, [actualRows, plannedRecords, stripDataset, activityFilter, sideFilter, dateMode, activeDate]);
+
+  // Sync external selected chainage
+  useEffect(() => {
+    if (externalSelectedChainage !== undefined && externalSelectedChainage !== null) {
+      setSelectedChainage(externalSelectedChainage);
+      const [lat, lon] = getCoordinatesAtChainage(externalSelectedChainage);
+      const chainageFmt = formatChainageM(externalSelectedChainage);
+      const res = getChainageAtCoordinates(lat, lon);
+
+      const matchingSeg = geoSegments.find(
+        s => externalSelectedChainage >= s.fromChainageM && externalSelectedChainage <= s.toChainageM
+      );
+
+      setInspectionDetails({
+        chainageM: externalSelectedChainage,
+        chainageFmt,
+        lat,
+        lon,
+        nearestLandmark: res.nearestLandmark,
+        segment: matchingSeg,
+      });
+    }
+  }, [externalSelectedChainage, geoSegments]);
+
+  // Segment selection handler
+  const handleSelectSegment = (segment: RoadSegmentGeo) => {
+    setSelectedChainage(segment.fromChainageM);
+    const [lat, lon] = getCoordinatesAtChainage(segment.fromChainageM);
+    const res = getChainageAtCoordinates(lat, lon);
+
+    setInspectionDetails({
+      chainageM: segment.fromChainageM,
+      chainageFmt: segment.fromChainageFmt,
+      lat,
+      lon,
+      nearestLandmark: res.nearestLandmark,
+      segment,
+    });
+
+    if (onSelectChainage) onSelectChainage(segment.fromChainageM);
+    if (onHighlightStripChart) onHighlightStripChart(segment.fromChainageM);
+  };
 
   // Chainage selection handler
   const handleSelectChainage = (chainageM: number) => {
@@ -118,13 +155,6 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
     const [lat, lon] = getCoordinatesAtChainage(chainageM);
     const chainageFmt = formatChainageM(chainageM);
     const res = getChainageAtCoordinates(lat, lon);
-
-    // Find if matching actual DPR row
-    const matchingRow = actualRows.find(r => {
-      const fM = r.rawFromChainage || Math.round((r.fromChainage || 0) * 1000);
-      const tM = r.rawToChainage || Math.round((r.toChainage || 0) * 1000);
-      return chainageM >= fM && chainageM <= tM;
-    });
 
     const matchingSeg = geoSegments.find(
       s => chainageM >= s.fromChainageM && chainageM <= s.toChainageM
@@ -137,11 +167,10 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
       lon,
       nearestLandmark: res.nearestLandmark,
       segment: matchingSeg,
-      actualRow: matchingRow
     });
 
     if (onSelectChainage) onSelectChainage(chainageM);
-    if (matchingRow && onSelectRow) onSelectRow(matchingRow);
+    if (onHighlightStripChart) onHighlightStripChart(chainageM);
   };
 
   // Jump to Chainage search
@@ -385,41 +414,89 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
           ))}
         </div>
 
-        {/* Maintenance Activity Filter */}
-        <div className="flex items-center gap-2">
+        {/* Maintenance Activity Filter (Synchronized with Strip Chart) */}
+        <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-slate-400 font-semibold">Activity:</span>
-          {['All', 'Milling', 'Tackcoat', 'DBM', 'BC'].map(act => (
+          {STRIP_ACTIVITIES.map(act => (
             <button
-              key={act}
-              onClick={() => setActivityFilter(act)}
-              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-semibold ${
-                activityFilter === act
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+              key={act.id}
+              onClick={() => setActivityFilter(act.id)}
+              className={`px-2 py-0.8 rounded-lg transition-all cursor-pointer font-semibold text-[11px] ${
+                activityFilter === act.id
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
-              {act}
+              {act.name}
             </button>
           ))}
         </div>
 
+        {/* Date Mode Filter (Overall vs Selected Date) */}
+        <div className="flex items-center gap-2">
+          <span className="text-slate-400 font-semibold flex items-center gap-1">
+            <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Date View:</span>
+          </span>
+          <div className="flex items-center bg-[#0B0C0E] p-0.5 rounded-lg border border-white/10">
+            <button
+              onClick={() => setDateMode('overall')}
+              className={`px-2.5 py-1 rounded-md transition-all cursor-pointer font-semibold ${
+                dateMode === 'overall'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Overall View
+            </button>
+            <button
+              onClick={() => setDateMode('selected')}
+              className={`px-2.5 py-1 rounded-md transition-all cursor-pointer font-semibold ${
+                dateMode === 'selected'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Selected Date View
+            </button>
+          </div>
+
+          {dateMode === 'selected' && allDates.length > 0 && (
+            <select
+              value={activeDate}
+              onChange={e => setActiveDate(e.target.value)}
+              className="bg-[#0B0C0E] border border-emerald-500/40 text-emerald-300 text-xs font-mono rounded-lg px-2.5 py-1 focus:outline-none cursor-pointer"
+            >
+              {allDates.map(d => (
+                <option key={d} value={d} className="bg-[#12161D] text-white">
+                  {d}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
         {/* Status Legend Pills */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-slate-300">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5 text-slate-300" title="Completed by Our Team">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
             <span>Completed</span>
           </div>
-          <div className="flex items-center gap-1.5 text-slate-300">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-            <span>In Progress</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-slate-300">
-            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+          <div className="flex items-center gap-1.5 text-slate-300" title="Work Done by DPS">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6]" />
             <span>DPS Zone</span>
           </div>
-          <div className="flex items-center gap-1.5 text-slate-300">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-600" />
+          <div className="flex items-center gap-1.5 text-slate-300" title="Under Construction">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#D97706]" />
+            <span>Under Construction</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-slate-300" title="Himalayan">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#EC4899]" />
             <span>Himalayan</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-slate-300" title="Remaining Eligible Scope">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#0284C7]" />
+            <span>Remaining Scope</span>
           </div>
         </div>
       </div>
@@ -441,7 +518,7 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
               }}
               minChainage={130.560}
               maxChainage={206.220}
-              availableDates={availableDates}
+              availableDates={allDates}
               qcLogs={qcLogs}
             />
           </div>
@@ -451,6 +528,7 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
             segments={geoSegments}
             selectedChainageM={selectedChainage}
             onSelectChainage={handleSelectChainage}
+            onSelectSegment={handleSelectSegment}
             pegmanActive={pegmanActive}
             onPegmanDrop={handlePegmanDrop}
           />

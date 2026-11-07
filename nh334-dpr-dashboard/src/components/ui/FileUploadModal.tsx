@@ -141,7 +141,7 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
               fileName: meta?.actualFileName || actualData?.filename || 'Major_Maintenance_DPR.xlsx',
               timestamp: meta?.actualTimestamp || actualData?.updatedAt,
               rowCount: meta?.actualRowCount || actualData?.actualRows?.length || 0,
-              reportDate: meta?.reportDate || actualData?.metadata?.reportDate || '23.10.2026',
+              reportDate: meta?.reportDate || actualData?.metadata?.reportDate || '01.11.2026',
               verifiedSheets: ['Chainage Progress', 'Daily DPR'],
               isJustUpdated: false
             });
@@ -151,7 +151,7 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
               fileName: initialUploadMeta.actualFileName,
               timestamp: initialUploadMeta.actualTimestamp,
               rowCount: initialUploadMeta.actualRowCount || 0,
-              reportDate: initialUploadMeta.reportDate || '23.10.2026',
+              reportDate: initialUploadMeta.reportDate || '01.11.2026',
               verifiedSheets: ['Chainage Progress', 'Daily DPR'],
               isJustUpdated: false
             });
@@ -370,7 +370,7 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
         fileSize: fileSizeFormatted,
         timestamp: new Date().toISOString(),
         rowCount: rows.length,
-        reportDate: metadata?.reportDate || '23.10.2026',
+        reportDate: metadata?.reportDate || '01.11.2026',
         verifiedSheets: ['Chainage Progress', 'Daily DPR'],
         isJustUpdated: true
       });
@@ -428,11 +428,10 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
           {/* Module Card A: Planned Baseline Program                        */}
           {/* ============================================================== */}
           <div
-            className={`bg-[#0F131D] border rounded-xl p-5 flex flex-col justify-between transition-all duration-300 shadow-xl ${
-              plannedStatus.isJustUpdated
-                ? 'border-cyan-500/50 shadow-cyan-950/40 ring-1 ring-cyan-500/30'
-                : 'border-white/10 hover:border-cyan-500/30'
-            }`}
+            className={`bg-[#0F131D] border rounded-xl p-5 flex flex-col justify-between transition-all duration-300 shadow-xl ${plannedStatus.isJustUpdated
+              ? 'border-cyan-500/50 shadow-cyan-950/40 ring-1 ring-cyan-500/30'
+              : 'border-white/10 hover:border-cyan-500/30'
+              }`}
           >
             <div>
               {/* Header Tag with Dynamic Status Badge */}
@@ -507,15 +506,14 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
                     plannedInputRef.current?.click();
                   }
                 }}
-                className={`border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-all mt-4 relative overflow-hidden ${
-                  isDraggingPlanned
-                    ? 'border-cyan-400 bg-cyan-950/30 scale-[0.99]'
-                    : plannedStatus.state === 'processing'
+                className={`border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-all mt-4 relative overflow-hidden ${isDraggingPlanned
+                  ? 'border-cyan-400 bg-cyan-950/30 scale-[0.99]'
+                  : plannedStatus.state === 'processing'
                     ? 'border-cyan-500/50 bg-cyan-950/20 cursor-wait'
                     : plannedStatus.state === 'updated'
-                    ? 'border-cyan-500/30 bg-cyan-950/10 hover:border-cyan-400'
-                    : 'border-gray-700 bg-white/[0.02] hover:border-cyan-400 hover:bg-cyan-950/10'
-                }`}
+                      ? 'border-cyan-500/30 bg-cyan-950/10 hover:border-cyan-400'
+                      : 'border-gray-700 bg-white/[0.02] hover:border-cyan-400 hover:bg-cyan-950/10'
+                  }`}
               >
                 <input
                   ref={plannedInputRef}
@@ -645,11 +643,10 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
           {/* Module Card B: Actual Site Execution (Daily DPR)               */}
           {/* ============================================================== */}
           <div
-            className={`bg-[#0F131D] border rounded-xl p-5 flex flex-col justify-between transition-all duration-300 shadow-xl ${
-              actualStatus.isJustUpdated
-                ? 'border-emerald-500/50 shadow-emerald-950/40 ring-1 ring-emerald-500/30'
-                : 'border-white/10 hover:border-emerald-500/30'
-            }`}
+            className={`bg-[#0F131D] border rounded-xl p-5 flex flex-col justify-between transition-all duration-300 shadow-xl ${actualStatus.isJustUpdated
+              ? 'border-emerald-500/50 shadow-emerald-950/40 ring-1 ring-emerald-500/30'
+              : 'border-white/10 hover:border-emerald-500/30'
+              }`}
           >
             <div>
               {/* Header Tag with Dynamic Status Badge */}
@@ -724,15 +721,14 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
                     actualInputRef.current?.click();
                   }
                 }}
-                className={`border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-all mt-4 relative overflow-hidden ${
-                  isDraggingActual
-                    ? 'border-emerald-400 bg-emerald-950/30 scale-[0.99]'
-                    : actualStatus.state === 'processing'
+                className={`border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-all mt-4 relative overflow-hidden ${isDraggingActual
+                  ? 'border-emerald-400 bg-emerald-950/30 scale-[0.99]'
+                  : actualStatus.state === 'processing'
                     ? 'border-emerald-500/50 bg-emerald-950/20 cursor-wait'
                     : actualStatus.state === 'updated'
-                    ? 'border-emerald-500/30 bg-emerald-950/10 hover:border-emerald-400'
-                    : 'border-gray-700 bg-white/[0.02] hover:border-emerald-400 hover:bg-emerald-950/10'
-                }`}
+                      ? 'border-emerald-500/30 bg-emerald-950/10 hover:border-emerald-400'
+                      : 'border-gray-700 bg-white/[0.02] hover:border-emerald-400 hover:bg-emerald-950/10'
+                  }`}
               >
                 <input
                   ref={actualInputRef}
