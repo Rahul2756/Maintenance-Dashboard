@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   TrendingUp,
   Layers,
@@ -11,10 +11,7 @@ import {
   Ruler,
   Navigation,
   Compass,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Filter
+  Calendar
 } from 'lucide-react';
 import { ActualDPRRow, ProjectBaseline, ActivityType, BOQCardMetric, HighwaySide } from '../../types/dpr';
 import { Badge } from '../ui/Badge';
@@ -80,48 +77,12 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
   const selectedIso = serialToIsoDate(effectiveDate);
   const selectedDisplayDate = isoToDisplayDate(selectedIso);
 
-  // Current date index in available dates list for stepping
-  const currentDateIndex = useMemo(() => {
-    const idx = allDates.findIndex(
-      (d) => serialToIsoDate(d) === selectedIso || d === effectiveDate
-    );
-    return idx >= 0 ? idx : allDates.length - 1;
-  }, [allDates, selectedIso, effectiveDate]);
-
-  // Local activity view state ('All' or specific activity)
-  const [selectedActivityFilter, setSelectedActivityFilter] = useState<ActivityType | 'All'>('All');
-
-  const handleDateSelect = (newDate: string) => {
-    if (onDateChange) {
-      onDateChange(newDate);
-    }
-  };
-
-  const handlePrevDate = () => {
-    if (currentDateIndex > 0) {
-      handleDateSelect(allDates[currentDateIndex - 1]);
-    }
-  };
-
-  const handleNextDate = () => {
-    if (currentDateIndex < allDates.length - 1) {
-      handleDateSelect(allDates[currentDateIndex + 1]);
-    }
-  };
-
-  const handleActivityClick = (act: ActivityType | 'All') => {
-    setSelectedActivityFilter(act);
-    if (onActivitySelect) {
-      onActivitySelect(act);
-    }
-  };
-
-  // Determine active highlights based on global or local filter
-  const isAllActivities = selectedActivityFilter === 'All' && (!selectedActivities || selectedActivities.length >= 4);
-  const isMillingSelected = isAllActivities || selectedActivityFilter === 'Milling' || (selectedActivities?.includes('Milling') ?? true);
-  const isTackSelected = isAllActivities || selectedActivityFilter === 'Tackcoat' || (selectedActivities?.includes('Tackcoat') ?? true);
-  const isDbmSelected = isAllActivities || selectedActivityFilter === 'DBM' || (selectedActivities?.includes('DBM') ?? true);
-  const isBcSelected = selectedActivityFilter === 'BC' || (selectedActivities?.includes('BC') && selectedActivities.length === 1);
+  // Determine active highlights based on global filter
+  const isAllActivities = !selectedActivities || selectedActivities.length >= 4 || selectedActivities.length === 0;
+  const isMillingSelected = isAllActivities || (selectedActivities?.includes('Milling') ?? true);
+  const isTackSelected = isAllActivities || (selectedActivities?.includes('Tackcoat') ?? true);
+  const isDbmSelected = isAllActivities || (selectedActivities?.includes('DBM') ?? true);
+  const isBcSelected = Boolean(selectedActivities && selectedActivities.length === 1 && selectedActivities.includes('BC'));
 
   // 1. DYNAMIC CONTRACTUAL TARGET LENGTHS FROM STRETCH-WISE SUMMARY
   // Milling: 147.23 km (LHS: 72.36 km, RHS: 74.87 km)
@@ -258,87 +219,10 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
             <span className="w-2 h-2 rounded-full bg-cyan-400" />
             Corridor Scope: 75.66 km (151.32 km BHS)
           </span>
-        </div>
-      </div>
-
-      {/* ============================================================== */}
-      {/* INTERACTIVE CONTROLS: DATE SELECTOR & ACTIVITY FILTER          */}
-      {/* ============================================================== */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-[#0C1427] via-[#0E1A33] to-[#0A1020] border border-cyan-500/30 shadow-lg shadow-cyan-950/40">
-        {/* Left: Prominent Date Selector */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-950/90 border border-cyan-400/40 text-cyan-300 shadow-sm">
-            <Calendar className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider">Date Selector:</span>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <button
-              onClick={handlePrevDate}
-              disabled={currentDateIndex <= 0}
-              title="Previous work date"
-              className="p-1.5 rounded-lg bg-[#0F172A] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-900/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </button>
-
-            <select
-              value={effectiveDate}
-              onChange={(e) => handleDateSelect(e.target.value)}
-              className="px-3 py-1.5 rounded-lg bg-[#0F172A] border border-cyan-400/50 text-cyan-200 text-xs font-mono font-bold focus:outline-none focus:ring-1 focus:ring-cyan-400 cursor-pointer shadow-inner"
-            >
-              {allDates.map((d) => {
-                const label = isoToDisplayDate(serialToIsoDate(d));
-                return (
-                  <option key={d} value={d} className="bg-[#0D1524] text-white">
-                    {label} ({d})
-                  </option>
-                );
-              })}
-            </select>
-
-            <button
-              onClick={handleNextDate}
-              disabled={currentDateIndex >= allDates.length - 1}
-              title="Next work date"
-              className="p-1.5 rounded-lg bg-[#0F172A] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-900/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-            >
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#080D19] border border-cyan-500/20 text-[11px] font-mono text-slate-300">
-            <span className="text-slate-400">As-of Date:</span>
-            <span className="text-cyan-300 font-bold">{selectedDisplayDate}</span>
-          </div>
-        </div>
-
-        {/* Right: Activity Selector */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <div className="flex items-center gap-1 text-[11px] font-mono text-slate-400 mr-1 hidden sm:flex">
-            <Filter className="w-3 h-3 text-cyan-400" />
-            <span>Activity:</span>
-          </div>
-          {(['All', 'Milling', 'Tackcoat', 'DBM', 'BC'] as const).map((act) => {
-            const isAll = act === 'All';
-            const isActive = isAll
-              ? selectedActivityFilter === 'All'
-              : selectedActivityFilter === act;
-            const label = act === 'Tackcoat' ? 'Tack Coat' : act === 'All' ? 'All Activities' : act;
-            return (
-              <button
-                key={act}
-                onClick={() => handleActivityClick(act)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all ${
-                  isActive
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/30 ring-1 ring-cyan-300 scale-105'
-                    : 'bg-[#0F172A] border border-cyan-500/20 text-slate-300 hover:bg-cyan-950/50 hover:text-cyan-200'
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0D1524] border border-cyan-500/30 shadow-sm font-medium text-cyan-300">
+            <Calendar className="w-3 h-3 text-cyan-400" />
+            As-of Date: {selectedDisplayDate}
+          </span>
         </div>
       </div>
 
