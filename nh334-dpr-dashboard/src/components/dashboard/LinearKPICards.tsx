@@ -343,25 +343,22 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
 
                 {/* Total Target Length row */}
                 <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium flex-wrap">
-                  <span className="text-slate-400">Total Target:</span>
-                  <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
+                  <span className="text-slate-400 whitespace-nowrap">Total Target:</span>
+                  <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20 whitespace-normal break-words inline-block">
                     {fmt(metrics.milling.targetM)} m ({metrics.milling.targetKm.toFixed(2)} km)
                   </span>
                 </div>
 
                 {/* Selected Day Progress row */}
-                <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono">
-                  <span className="text-slate-400">Today:</span>
+                <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono flex-wrap">
+                  <span className="text-slate-400 whitespace-nowrap">Today:</span>
                   {metrics.milling.dailyM > 0 ? (
-                    <span className="font-bold text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">
+                    <span className="font-bold text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30 whitespace-normal break-words inline-block">
                       +{fmt(metrics.milling.dailyM)} m ({metrics.milling.dailyKm.toFixed(3)} km)
-                      <span className="text-slate-300 text-[10px] ml-1 font-normal">
-                        [{metrics.milling.dailyEntries} {metrics.milling.dailyEntries === 1 ? 'entry' : 'entries'}]
-                      </span>
                     </span>
                   ) : (
-                    <span className="text-slate-500 bg-[#0A101D] px-2 py-0.5 rounded border border-slate-700/50">
-                      0 m (0 entries)
+                    <span className="text-slate-500 bg-[#0A101D] px-2 py-0.5 rounded border border-slate-700/50 whitespace-normal break-words inline-block">
+                      0 m
                     </span>
                   )}
                 </div>
@@ -491,25 +488,22 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
 
                 {/* Total Target Length row */}
                 <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium flex-wrap">
-                  <span className="text-slate-400">Total Target:</span>
-                  <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
+                  <span className="text-slate-400 whitespace-nowrap">Total Target:</span>
+                  <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20 whitespace-normal break-words inline-block">
                     {fmt(metrics.tack.targetM)} m ({metrics.tack.targetKm.toFixed(2)} km)
                   </span>
                 </div>
 
                 {/* Selected Day Progress row */}
-                <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono">
-                  <span className="text-slate-400">Today:</span>
+                <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono flex-wrap">
+                  <span className="text-slate-400 whitespace-nowrap">Today:</span>
                   {metrics.tack.dailyM > 0 ? (
-                    <span className="font-bold text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">
+                    <span className="font-bold text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30 whitespace-normal break-words inline-block">
                       +{fmt(metrics.tack.dailyM)} m ({metrics.tack.dailyKm.toFixed(3)} km)
-                      <span className="text-slate-300 text-[10px] ml-1 font-normal">
-                        [{metrics.tack.dailyEntries} {metrics.tack.dailyEntries === 1 ? 'entry' : 'entries'}]
-                      </span>
                     </span>
                   ) : (
-                    <span className="text-slate-500 bg-[#0A101D] px-2 py-0.5 rounded border border-slate-700/50">
-                      0 m (0 entries)
+                    <span className="text-slate-500 bg-[#0A101D] px-2 py-0.5 rounded border border-slate-700/50 whitespace-normal break-words inline-block">
+                      0 m
                     </span>
                   )}
                 </div>
@@ -639,25 +633,22 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
 
                 {/* Total Target Length row */}
                 <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium flex-wrap">
-                  <span className="text-slate-400">Total Target:</span>
-                  <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
+                  <span className="text-slate-400 whitespace-nowrap">Total Target:</span>
+                  <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20 whitespace-normal break-words inline-block">
                     {fmt(metrics.dbm.targetM)} m ({metrics.dbm.targetKm.toFixed(2)} km)
                   </span>
                 </div>
 
                 {/* Selected Day Progress row */}
-                <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono">
-                  <span className="text-slate-400">Today:</span>
+                <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono flex-wrap">
+                  <span className="text-slate-400 whitespace-nowrap">Today:</span>
                   {metrics.dbm.dailyM > 0 ? (
-                    <span className="font-bold text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                    <span className="font-bold text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30 whitespace-normal break-words inline-block">
                       +{fmt(metrics.dbm.dailyM)} m ({metrics.dbm.dailyKm.toFixed(3)} km)
-                      <span className="text-slate-300 text-[10px] ml-1 font-normal">
-                        [{metrics.dbm.dailyEntries} {metrics.dbm.dailyEntries === 1 ? 'entry' : 'entries'}]
-                      </span>
                     </span>
                   ) : (
-                    <span className="text-slate-500 bg-[#0A101D] px-2 py-0.5 rounded border border-slate-700/50">
-                      0 m (0 entries)
+                    <span className="text-slate-500 bg-[#0A101D] px-2 py-0.5 rounded border border-slate-700/50 whitespace-normal break-words inline-block">
+                      0 m
                     </span>
                   )}
                 </div>
@@ -787,25 +778,22 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
 
                 {/* Total Target Length row */}
                 <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium flex-wrap">
-                  <span className="text-slate-400">Total Target:</span>
-                  <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
+                  <span className="text-slate-400 whitespace-nowrap">Total Target:</span>
+                  <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20 whitespace-normal break-words inline-block">
                     {metrics.bc.targetKm.toFixed(2)} km ({fmt(metrics.bc.targetM)} m)
                   </span>
                 </div>
 
                 {/* Selected Day Progress row */}
-                <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono">
-                  <span className="text-slate-400">Today:</span>
+                <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono flex-wrap">
+                  <span className="text-slate-400 whitespace-nowrap">Today:</span>
                   {metrics.bc.dailyM > 0 ? (
-                    <span className="font-bold text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                    <span className="font-bold text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30 whitespace-normal break-words inline-block">
                       +{metrics.bc.dailyKm.toFixed(3)} km ({fmt(metrics.bc.dailyM)} m)
-                      <span className="text-slate-300 text-[10px] ml-1 font-normal">
-                        [{metrics.bc.dailyEntries} {metrics.bc.dailyEntries === 1 ? 'entry' : 'entries'}]
-                      </span>
                     </span>
                   ) : (
-                    <span className="text-slate-500 bg-[#0A101D] px-2 py-0.5 rounded border border-slate-700/50">
-                      0 km (0 entries)
+                    <span className="text-slate-500 bg-[#0A101D] px-2 py-0.5 rounded border border-slate-700/50 whitespace-normal break-words inline-block">
+                      0 km
                     </span>
                   )}
                 </div>
@@ -915,21 +903,21 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
 
                   {/* Coverage row: Milled vs Paved */}
                   <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium flex-wrap">
-                    <span className="text-slate-400">Milled:</span>
-                    <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
+                    <span className="text-slate-400 whitespace-nowrap">Milled:</span>
+                    <span className="font-mono font-bold text-white bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20 whitespace-normal break-words inline-block">
                       {fmt(metrics.milling.cumulativeM)} m
                     </span>
-                    <span className="text-slate-400 ml-1">Paved:</span>
-                    <span className="font-mono font-bold text-emerald-300 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
+                    <span className="text-slate-400 ml-1 whitespace-nowrap">Paved:</span>
+                    <span className="font-mono font-bold text-emerald-300 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20 whitespace-normal break-words inline-block">
                       {fmt(metrics.dbm.cumulativeM)} m
                     </span>
                   </div>
 
                   {/* Selected Day Net Gap change */}
                   <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono flex-wrap">
-                    <span className="text-slate-400">Today Delta:</span>
+                    <span className="text-slate-400 whitespace-nowrap">Today Delta:</span>
                     <span
-                      className={`font-mono font-bold px-2 py-0.5 rounded border ${
+                      className={`font-mono font-bold px-2 py-0.5 rounded border whitespace-normal break-words inline-block ${
                         metrics.dailyNetGapM > 0
                           ? 'text-rose-300 bg-rose-950/60 border-rose-500/30'
                           : metrics.dailyNetGapM < 0
