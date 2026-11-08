@@ -181,7 +181,7 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
   const [projectedMarkers, setProjectedMarkers] = useState<ProjectedMarker[]>([]);
 
   // Current active date (all DPR execution data up to latest reporting date)
-  const activeTimelineDate = availableDates[availableDates.length - 1] || '23.10.2026';
+  const activeTimelineDate = availableDates[availableDates.length - 1] || '01.11.2026';
 
   // Helper date comparator
   const isDateOnOrBefore = (targetDate: string, comparisonDate: string) => {

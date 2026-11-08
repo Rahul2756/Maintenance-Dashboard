@@ -392,7 +392,7 @@ export const HeaderFilterBar: React.FC<HeaderFilterBarProps> = ({
             <Calendar className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
             <span className="text-[11px] text-slate-400 font-sans font-medium">As of:</span>
             <select
-              value={filters.selectedSingleDate || (availableDates[availableDates.length - 1] || '23.10.2026')}
+              value={filters.selectedSingleDate || (availableDates[availableDates.length - 1] || '01.11.2026')}
               onChange={e => setSelectedSingleDate(e.target.value)}
               className="bg-transparent border-none text-cyan-300 font-bold focus:outline-none cursor-pointer text-xs font-mono"
             >

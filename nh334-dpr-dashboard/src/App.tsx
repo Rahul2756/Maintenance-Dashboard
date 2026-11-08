@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   ActualDPRRow,
   PlannedRecord,
@@ -80,8 +80,8 @@ function DashboardContent() {
     pm: 'National Highways InvIT Project Managers Pvt. Ltd.',
     pmc: 'Cube Highways Technologies Pvt Ltd',
     independentEngineer: 'Chaitanya Projects Consultancy Limited in Association with Mahamarg Infra Consultants Pvt. Ltd',
-    dprNo: 11,
-    reportDate: '23.10.2026',
+    dprNo: 20,
+    reportDate: '01.11.2026',
     weather: 'Clear',
     shift: 'Day & Night / 24 hrs',
     workStartDate: '13.10.2026 (Planned)',
@@ -233,22 +233,24 @@ function DashboardContent() {
     });
   }, [actualRows]);
 
-  // Update filter start/end if dates loaded
+  // Update filter start/end if dates loaded (default to latest date)
+  const hasInitializedDateRef = useRef(false);
   useEffect(() => {
     if (availableDates.length > 0) {
       const latest = availableDates[availableDates.length - 1];
       const earliest = availableDates[0];
-      if (!filters.selectedSingleDate || !availableDates.includes(filters.selectedSingleDate)) {
+      if (!hasInitializedDateRef.current) {
+        hasInitializedDateRef.current = true;
         setSelectedSingleDate(latest);
-      }
-      if (!filters.dateRange.start || !filters.dateRange.end || !availableDates.includes(filters.dateRange.end)) {
         setDateRange({
           start: earliest,
           end: latest
         });
+      } else if (!filters.selectedSingleDate || !availableDates.includes(filters.selectedSingleDate)) {
+        setSelectedSingleDate(latest);
       }
     }
-  }, [availableDates, filters.selectedSingleDate, filters.dateRange.start, filters.dateRange.end, setDateRange, setSelectedSingleDate]);
+  }, [availableDates, filters.selectedSingleDate, setDateRange, setSelectedSingleDate]);
 
   // Filtered actual DPR rows based on global filter controls
   const filteredRows = useMemo(() => {
@@ -256,7 +258,7 @@ function DashboardContent() {
   }, [actualRows, filters]);
 
   // Selected date (As of date) for DPR and cumulative calculations
-  const selectedDate = filters.selectedSingleDate || filters.dateRange.end || (availableDates[availableDates.length - 1] || '23.10.2026');
+  const selectedDate = filters.selectedSingleDate || filters.dateRange.end || (availableDates[availableDates.length - 1] || '01.11.2026');
   const selectedIso = dmyToIso(selectedDate);
 
   // Dynamic cumulative achieved quantities computed as of selectedDate
@@ -683,7 +685,7 @@ function DashboardContent() {
               selectedActivities={filters.selectedActivities}
               onSelectRow={row => setSelectedRow(row)}
               plannedRecords={plannedRecords}
-              reportDate={filters.selectedSingleDate || filters.dateRange.end || metadata.reportDate || '23.10.2026'}
+              reportDate={filters.selectedSingleDate || filters.dateRange.end || metadata.reportDate || '01.11.2026'}
               onSelectChainage={chM => setMapSelectedChainage(chM)}
               targetChainageM={stripTargetChainage}
               onStripDatasetLoaded={ds => setSharedStripDataset(ds)}

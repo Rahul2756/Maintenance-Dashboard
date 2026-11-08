@@ -90,7 +90,9 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
     if (set.size === 0) {
       return [
         '14.10.2026', '15.10.2026', '16.10.2026', '17.10.2026', '18.10.2026',
-        '19.10.2026', '20.10.2026', '21.10.2026', '22.10.2026', '23.10.2026'
+        '19.10.2026', '20.10.2026', '21.10.2026', '22.10.2026', '23.10.2026',
+        '24.10.2026', '25.10.2026', '26.10.2026', '27.10.2026', '28.10.2026',
+        '29.10.2026', '31.10.2026', '01.11.2026'
       ];
     }
     return Array.from(set).sort((a, b) => {
@@ -107,7 +109,7 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
   const activeMaxCh = context ? context.filters.chainageBounds.to : (propsFilters?.maxChainage ?? 206.220);
   const activeAnomaliesOnly = context ? context.filters.anomaliesOnly : (propsFilters?.anomaliesOnly ?? false);
   const activeStartDate = context ? context.filters.dateRange.start : (propsFilters?.startDate || dates[0] || '14.10.2026');
-  const activeEndDate = context ? context.filters.dateRange.end : (propsFilters?.endDate || dates[dates.length - 1] || '23.10.2026');
+  const activeEndDate = context ? context.filters.dateRange.end : (propsFilters?.endDate || dates[dates.length - 1] || '01.11.2026');
   const singleFocusedDate = context?.filters.selectedSingleDate || null;
 
   // Determine if filter bar is currently set to a single day or a multi-day range
@@ -155,7 +157,7 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
       context.setSelectedSingleDate(null);
       context.setDateRange({
         start: dates[0] || '14.10.2026',
-        end: dates[dates.length - 1] || '23.10.2026'
+        end: dates[dates.length - 1] || '01.11.2026'
       });
     }
     if (propsOnFilterChange && propsFilters) {

@@ -71,11 +71,17 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
       '29.10.2026', '31.10.2026', '01.11.2026'
     ];
 
-  // Ensure selectedSingleDate is synchronized with available dateOptions
+  // Ensure selectedSingleDate is synchronized with available dateOptions and defaults to latest date
+  const topHeaderInitRef = useRef(false);
   useEffect(() => {
     if (dateOptions && dateOptions.length > 0) {
-      if (!filters?.selectedSingleDate || !dateOptions.includes(filters.selectedSingleDate)) {
-        const latest = dateOptions[dateOptions.length - 1];
+      const latest = dateOptions[dateOptions.length - 1];
+      if (!topHeaderInitRef.current) {
+        topHeaderInitRef.current = true;
+        if (!filters?.selectedSingleDate || filters.selectedSingleDate === '23.10.2026') {
+          setSelectedSingleDate?.(latest);
+        }
+      } else if (!filters?.selectedSingleDate || !dateOptions.includes(filters.selectedSingleDate)) {
         setSelectedSingleDate?.(latest);
       }
     }
@@ -489,7 +495,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                   value={
                     filters?.selectedSingleDate && dateOptions.includes(filters.selectedSingleDate)
                       ? filters.selectedSingleDate
-                      : (dateOptions[dateOptions.length - 1] || '23.10.2026')
+                      : (dateOptions[dateOptions.length - 1] || '01.11.2026')
                   }
                   onChange={e => {
                     const val = e.target.value;
