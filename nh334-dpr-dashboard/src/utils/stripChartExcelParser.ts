@@ -425,6 +425,7 @@ export async function fetchOrLoadStripChartDataset(): Promise<StripChartDataset>
 
     // 2. Fetch Source B: final_sheet.xlsx
     const finalUrls = [
+      '/data/Final_sheet_10-11-2026.xlsx',
       '/data/final_sheet.xlsx',
       '/data/Final_sheet.xlsx',
     ];

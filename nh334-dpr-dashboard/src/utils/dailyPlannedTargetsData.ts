@@ -1,0 +1,733 @@
+export type SCurveActivity = 'Milling' | 'Tackcoat (DBM)' | 'DBM' | 'Tackcoat (BC)' | 'BC';
+
+export interface DailyPlannedTargetsByActivity {
+  Milling: number;
+  'Tackcoat (DBM)': number;
+  DBM: number;
+  'Tackcoat (BC)': number;
+  BC: number;
+  Tackcoat?: number;
+}
+
+export const CONTRACTUAL_TARGETS_5: Record<SCurveActivity, { target: number; unit: 'Sqm' | 'Cum' }> = {
+  'Milling': { target: 681284, unit: 'Sqm' },
+  'Tackcoat (DBM)': { target: 681283.75, unit: 'Sqm' },
+  'DBM': { target: 37026.246, unit: 'Cum' },
+  'Tackcoat (BC)': { target: 1166986.75, unit: 'Cum' },
+  'BC': { target: 46679.48, unit: 'Cum' }
+};
+
+export const DEFAULT_DAILY_PLANNED_TARGETS: Record<string, DailyPlannedTargetsByActivity> = {
+  "12.10.2026": {
+    "Milling": 5940.53,
+    "Tackcoat (DBM)": 5940.53,
+    "DBM": 300.12,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 5940.53
+  },
+  "13.10.2026": {
+    "Milling": 5940.53,
+    "Tackcoat (DBM)": 5940.53,
+    "DBM": 300.12,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 5940.53
+  },
+  "14.10.2026": {
+    "Milling": 5940.53,
+    "Tackcoat (DBM)": 5940.53,
+    "DBM": 300.12,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 5940.53
+  },
+  "15.10.2026": {
+    "Milling": 5940.53,
+    "Tackcoat (DBM)": 5940.53,
+    "DBM": 300.12,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 5940.53
+  },
+  "16.10.2026": {
+    "Milling": 5940.53,
+    "Tackcoat (DBM)": 5940.53,
+    "DBM": 300.12,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 5940.53
+  },
+  "17.10.2026": {
+    "Milling": 5940.53,
+    "Tackcoat (DBM)": 5940.53,
+    "DBM": 300.12,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 5940.53
+  },
+  "18.10.2026": {
+    "Milling": 5940.53,
+    "Tackcoat (DBM)": 5940.53,
+    "DBM": 300.12,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 5940.53
+  },
+  "19.10.2026": {
+    "Milling": 8282.78,
+    "Tackcoat (DBM)": 8282.78,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 8282.78
+  },
+  "20.10.2026": {
+    "Milling": 8282.78,
+    "Tackcoat (DBM)": 8282.78,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 8282.78
+  },
+  "21.10.2026": {
+    "Milling": 8282.78,
+    "Tackcoat (DBM)": 8282.78,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 8282.78
+  },
+  "22.10.2026": {
+    "Milling": 8282.78,
+    "Tackcoat (DBM)": 8282.78,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 8282.78
+  },
+  "23.10.2026": {
+    "Milling": 8282.78,
+    "Tackcoat (DBM)": 8282.78,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 8282.78
+  },
+  "24.10.2026": {
+    "Milling": 8282.78,
+    "Tackcoat (DBM)": 8282.78,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 8282.78
+  },
+  "25.10.2026": {
+    "Milling": 8282.78,
+    "Tackcoat (DBM)": 8282.78,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 0,
+    "BC": 0,
+    "Tackcoat": 8282.78
+  },
+  "26.10.2026": {
+    "Milling": 8356.91,
+    "Tackcoat (DBM)": 8356.91,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 15036.07,
+    "BC": 601.44,
+    "Tackcoat": 23392.98
+  },
+  "27.10.2026": {
+    "Milling": 8356.91,
+    "Tackcoat (DBM)": 8356.91,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 15036.07,
+    "BC": 601.44,
+    "Tackcoat": 23392.98
+  },
+  "28.10.2026": {
+    "Milling": 8356.91,
+    "Tackcoat (DBM)": 8356.91,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 15036.07,
+    "BC": 601.44,
+    "Tackcoat": 23392.98
+  },
+  "29.10.2026": {
+    "Milling": 8356.91,
+    "Tackcoat (DBM)": 8356.91,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 15036.07,
+    "BC": 601.44,
+    "Tackcoat": 23392.98
+  },
+  "30.10.2026": {
+    "Milling": 8356.91,
+    "Tackcoat (DBM)": 8356.91,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 15036.07,
+    "BC": 601.44,
+    "Tackcoat": 23392.98
+  },
+  "31.10.2026": {
+    "Milling": 8356.91,
+    "Tackcoat (DBM)": 8356.91,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 15036.07,
+    "BC": 601.44,
+    "Tackcoat": 23392.98
+  },
+  "01.11.2026": {
+    "Milling": 8356.91,
+    "Tackcoat (DBM)": 8356.91,
+    "DBM": 420.17,
+    "Tackcoat (BC)": 15036.07,
+    "BC": 601.44,
+    "Tackcoat": 23392.98
+  },
+  "02.11.2026": {
+    "Milling": 6770.99,
+    "Tackcoat (DBM)": 4082.99,
+    "DBM": 225,
+    "Tackcoat (BC)": 18496.25,
+    "BC": 739.85,
+    "Tackcoat": 22579.24
+  },
+  "03.11.2026": {
+    "Milling": 6770.99,
+    "Tackcoat (DBM)": 4082.99,
+    "DBM": 225,
+    "Tackcoat (BC)": 18496.25,
+    "BC": 739.85,
+    "Tackcoat": 22579.24
+  },
+  "04.11.2026": {
+    "Milling": 6770.99,
+    "Tackcoat (DBM)": 4082.99,
+    "DBM": 225,
+    "Tackcoat (BC)": 18496.25,
+    "BC": 739.85,
+    "Tackcoat": 22579.24
+  },
+  "05.11.2026": {
+    "Milling": 6770.99,
+    "Tackcoat (DBM)": 4082.99,
+    "DBM": 225,
+    "Tackcoat (BC)": 18496.25,
+    "BC": 739.85,
+    "Tackcoat": 22579.24
+  },
+  "06.11.2026": {
+    "Milling": 6770.99,
+    "Tackcoat (DBM)": 4082.99,
+    "DBM": 225,
+    "Tackcoat (BC)": 18496.25,
+    "BC": 739.85,
+    "Tackcoat": 22579.24
+  },
+  "07.11.2026": {
+    "Milling": 6770.99,
+    "Tackcoat (DBM)": 4082.99,
+    "DBM": 225,
+    "Tackcoat (BC)": 18496.25,
+    "BC": 739.85,
+    "Tackcoat": 22579.24
+  },
+  "10.11.2026": {
+    "Milling": 12902.43,
+    "Tackcoat (DBM)": 12735.76,
+    "DBM": 679.17,
+    "Tackcoat (BC)": 21594.58,
+    "BC": 863.78,
+    "Tackcoat": 34330.34
+  },
+  "11.11.2026": {
+    "Milling": 12902.43,
+    "Tackcoat (DBM)": 12735.76,
+    "DBM": 679.17,
+    "Tackcoat (BC)": 21594.58,
+    "BC": 863.78,
+    "Tackcoat": 34330.34
+  },
+  "12.11.2026": {
+    "Milling": 12902.43,
+    "Tackcoat (DBM)": 12735.76,
+    "DBM": 679.17,
+    "Tackcoat (BC)": 21594.58,
+    "BC": 863.78,
+    "Tackcoat": 34330.34
+  },
+  "13.11.2026": {
+    "Milling": 12902.43,
+    "Tackcoat (DBM)": 12735.76,
+    "DBM": 679.17,
+    "Tackcoat (BC)": 21594.58,
+    "BC": 863.78,
+    "Tackcoat": 34330.34
+  },
+  "14.11.2026": {
+    "Milling": 12902.43,
+    "Tackcoat (DBM)": 12735.76,
+    "DBM": 679.17,
+    "Tackcoat (BC)": 21594.58,
+    "BC": 863.78,
+    "Tackcoat": 34330.34
+  },
+  "15.11.2026": {
+    "Milling": 12902.43,
+    "Tackcoat (DBM)": 12735.76,
+    "DBM": 679.17,
+    "Tackcoat (BC)": 21594.58,
+    "BC": 863.78,
+    "Tackcoat": 34330.34
+  },
+  "16.11.2026": {
+    "Milling": 9302.15,
+    "Tackcoat (DBM)": 10613.46,
+    "DBM": 570.5,
+    "Tackcoat (BC)": 18260.71,
+    "BC": 730.43,
+    "Tackcoat": 28874.17
+  },
+  "17.11.2026": {
+    "Milling": 9302.15,
+    "Tackcoat (DBM)": 10613.46,
+    "DBM": 570.5,
+    "Tackcoat (BC)": 18260.71,
+    "BC": 730.43,
+    "Tackcoat": 28874.17
+  },
+  "18.11.2026": {
+    "Milling": 9302.15,
+    "Tackcoat (DBM)": 10613.46,
+    "DBM": 570.5,
+    "Tackcoat (BC)": 18260.71,
+    "BC": 730.43,
+    "Tackcoat": 28874.17
+  },
+  "19.11.2026": {
+    "Milling": 9302.15,
+    "Tackcoat (DBM)": 10613.46,
+    "DBM": 570.5,
+    "Tackcoat (BC)": 18260.71,
+    "BC": 730.43,
+    "Tackcoat": 28874.17
+  },
+  "20.11.2026": {
+    "Milling": 9302.15,
+    "Tackcoat (DBM)": 10613.46,
+    "DBM": 570.5,
+    "Tackcoat (BC)": 18260.71,
+    "BC": 730.43,
+    "Tackcoat": 28874.17
+  },
+  "21.11.2026": {
+    "Milling": 9302.15,
+    "Tackcoat (DBM)": 10613.46,
+    "DBM": 570.5,
+    "Tackcoat (BC)": 18260.71,
+    "BC": 730.43,
+    "Tackcoat": 28874.17
+  },
+  "22.11.2026": {
+    "Milling": 9302.15,
+    "Tackcoat (DBM)": 10613.46,
+    "DBM": 570.5,
+    "Tackcoat (BC)": 18260.71,
+    "BC": 730.43,
+    "Tackcoat": 28874.17
+  },
+  "23.11.2026": {
+    "Milling": 11351.34,
+    "Tackcoat (DBM)": 12825.59,
+    "DBM": 704.43,
+    "Tackcoat (BC)": 17820.79,
+    "BC": 627.12,
+    "Tackcoat": 30646.38
+  },
+  "24.11.2026": {
+    "Milling": 11351.34,
+    "Tackcoat (DBM)": 12825.59,
+    "DBM": 704.43,
+    "Tackcoat (BC)": 17820.79,
+    "BC": 627.12,
+    "Tackcoat": 30646.38
+  },
+  "25.11.2026": {
+    "Milling": 11351.34,
+    "Tackcoat (DBM)": 12825.59,
+    "DBM": 704.43,
+    "Tackcoat (BC)": 17820.79,
+    "BC": 627.12,
+    "Tackcoat": 30646.38
+  },
+  "26.11.2026": {
+    "Milling": 11351.34,
+    "Tackcoat (DBM)": 12825.59,
+    "DBM": 704.43,
+    "Tackcoat (BC)": 17820.79,
+    "BC": 627.12,
+    "Tackcoat": 30646.38
+  },
+  "27.11.2026": {
+    "Milling": 11351.34,
+    "Tackcoat (DBM)": 12825.59,
+    "DBM": 704.43,
+    "Tackcoat (BC)": 17820.79,
+    "BC": 627.12,
+    "Tackcoat": 30646.38
+  },
+  "28.11.2026": {
+    "Milling": 11351.34,
+    "Tackcoat (DBM)": 12825.59,
+    "DBM": 704.43,
+    "Tackcoat (BC)": 17820.79,
+    "BC": 627.12,
+    "Tackcoat": 30646.38
+  },
+  "29.11.2026": {
+    "Milling": 11351.34,
+    "Tackcoat (DBM)": 12825.59,
+    "DBM": 704.43,
+    "Tackcoat (BC)": 17820.79,
+    "BC": 627.12,
+    "Tackcoat": 30646.38
+  },
+  "30.11.2026": {
+    "Milling": 11112.81,
+    "Tackcoat (DBM)": 12228.25,
+    "DBM": 702.73,
+    "Tackcoat (BC)": 15260.07,
+    "BC": 696.12,
+    "Tackcoat": 27488.32
+  },
+  "01.12.2026": {
+    "Milling": 11112.81,
+    "Tackcoat (DBM)": 12228.25,
+    "DBM": 702.73,
+    "Tackcoat (BC)": 15260.07,
+    "BC": 696.12,
+    "Tackcoat": 27488.32
+  },
+  "02.12.2026": {
+    "Milling": 11112.81,
+    "Tackcoat (DBM)": 12228.25,
+    "DBM": 702.73,
+    "Tackcoat (BC)": 15260.07,
+    "BC": 696.12,
+    "Tackcoat": 27488.32
+  },
+  "03.12.2026": {
+    "Milling": 11112.81,
+    "Tackcoat (DBM)": 12228.25,
+    "DBM": 702.73,
+    "Tackcoat (BC)": 15260.07,
+    "BC": 696.12,
+    "Tackcoat": 27488.32
+  },
+  "04.12.2026": {
+    "Milling": 11112.81,
+    "Tackcoat (DBM)": 12228.25,
+    "DBM": 702.73,
+    "Tackcoat (BC)": 15260.07,
+    "BC": 696.12,
+    "Tackcoat": 27488.32
+  },
+  "05.12.2026": {
+    "Milling": 11112.81,
+    "Tackcoat (DBM)": 12228.25,
+    "DBM": 702.73,
+    "Tackcoat (BC)": 15260.07,
+    "BC": 696.12,
+    "Tackcoat": 27488.32
+  },
+  "06.12.2026": {
+    "Milling": 11112.81,
+    "Tackcoat (DBM)": 12228.25,
+    "DBM": 702.73,
+    "Tackcoat (BC)": 15260.07,
+    "BC": 696.12,
+    "Tackcoat": 27488.32
+  },
+  "07.12.2026": {
+    "Milling": 10093.22,
+    "Tackcoat (DBM)": 10093.22,
+    "DBM": 560.71,
+    "Tackcoat (BC)": 16785.71,
+    "BC": 671.43,
+    "Tackcoat": 26878.93
+  },
+  "08.12.2026": {
+    "Milling": 10093.22,
+    "Tackcoat (DBM)": 10093.22,
+    "DBM": 560.71,
+    "Tackcoat (BC)": 16785.71,
+    "BC": 671.43,
+    "Tackcoat": 26878.93
+  },
+  "09.12.2026": {
+    "Milling": 10093.22,
+    "Tackcoat (DBM)": 10093.22,
+    "DBM": 560.71,
+    "Tackcoat (BC)": 16785.71,
+    "BC": 671.43,
+    "Tackcoat": 26878.93
+  },
+  "10.12.2026": {
+    "Milling": 10093.22,
+    "Tackcoat (DBM)": 10093.22,
+    "DBM": 560.71,
+    "Tackcoat (BC)": 16785.71,
+    "BC": 671.43,
+    "Tackcoat": 26878.93
+  },
+  "11.12.2026": {
+    "Milling": 10093.22,
+    "Tackcoat (DBM)": 10093.22,
+    "DBM": 560.71,
+    "Tackcoat (BC)": 16785.71,
+    "BC": 671.43,
+    "Tackcoat": 26878.93
+  },
+  "12.12.2026": {
+    "Milling": 10093.22,
+    "Tackcoat (DBM)": 10093.22,
+    "DBM": 560.71,
+    "Tackcoat (BC)": 16785.71,
+    "BC": 671.43,
+    "Tackcoat": 26878.93
+  },
+  "13.12.2026": {
+    "Milling": 10093.22,
+    "Tackcoat (DBM)": 10093.22,
+    "DBM": 560.71,
+    "Tackcoat (BC)": 16785.71,
+    "BC": 671.43,
+    "Tackcoat": 26878.93
+  },
+  "14.12.2026": {
+    "Milling": 10391.18,
+    "Tackcoat (DBM)": 10391.18,
+    "DBM": 578.69,
+    "Tackcoat (BC)": 16798.82,
+    "BC": 671.95,
+    "Tackcoat": 27190
+  },
+  "15.12.2026": {
+    "Milling": 10391.18,
+    "Tackcoat (DBM)": 10391.18,
+    "DBM": 578.69,
+    "Tackcoat (BC)": 16798.82,
+    "BC": 671.95,
+    "Tackcoat": 27190
+  },
+  "16.12.2026": {
+    "Milling": 10391.18,
+    "Tackcoat (DBM)": 10391.18,
+    "DBM": 578.69,
+    "Tackcoat (BC)": 16798.82,
+    "BC": 671.95,
+    "Tackcoat": 27190
+  },
+  "17.12.2026": {
+    "Milling": 10391.18,
+    "Tackcoat (DBM)": 10391.18,
+    "DBM": 578.69,
+    "Tackcoat (BC)": 16798.82,
+    "BC": 671.95,
+    "Tackcoat": 27190
+  },
+  "18.12.2026": {
+    "Milling": 10391.18,
+    "Tackcoat (DBM)": 10391.18,
+    "DBM": 578.69,
+    "Tackcoat (BC)": 16798.82,
+    "BC": 671.95,
+    "Tackcoat": 27190
+  },
+  "19.12.2026": {
+    "Milling": 10391.18,
+    "Tackcoat (DBM)": 10391.18,
+    "DBM": 578.69,
+    "Tackcoat (BC)": 16798.82,
+    "BC": 671.95,
+    "Tackcoat": 27190
+  },
+  "20.12.2026": {
+    "Milling": 10391.18,
+    "Tackcoat (DBM)": 10391.18,
+    "DBM": 578.69,
+    "Tackcoat (BC)": 16798.82,
+    "BC": 671.95,
+    "Tackcoat": 27190
+  },
+  "21.12.2026": {
+    "Milling": 9344.98,
+    "Tackcoat (DBM)": 9344.98,
+    "DBM": 515.52,
+    "Tackcoat (BC)": 19176.32,
+    "BC": 767.05,
+    "Tackcoat": 28521.3
+  },
+  "22.12.2026": {
+    "Milling": 9344.98,
+    "Tackcoat (DBM)": 9344.98,
+    "DBM": 515.52,
+    "Tackcoat (BC)": 19176.32,
+    "BC": 767.05,
+    "Tackcoat": 28521.3
+  },
+  "23.12.2026": {
+    "Milling": 9344.98,
+    "Tackcoat (DBM)": 9344.98,
+    "DBM": 515.52,
+    "Tackcoat (BC)": 19176.32,
+    "BC": 767.05,
+    "Tackcoat": 28521.3
+  },
+  "24.12.2026": {
+    "Milling": 9344.98,
+    "Tackcoat (DBM)": 9344.98,
+    "DBM": 515.52,
+    "Tackcoat (BC)": 19176.32,
+    "BC": 767.05,
+    "Tackcoat": 28521.3
+  },
+  "25.12.2026": {
+    "Milling": 9344.98,
+    "Tackcoat (DBM)": 9344.98,
+    "DBM": 515.52,
+    "Tackcoat (BC)": 19176.32,
+    "BC": 767.05,
+    "Tackcoat": 28521.3
+  },
+  "26.12.2026": {
+    "Milling": 9344.98,
+    "Tackcoat (DBM)": 9344.98,
+    "DBM": 515.52,
+    "Tackcoat (BC)": 19176.32,
+    "BC": 767.05,
+    "Tackcoat": 28521.3
+  },
+  "27.12.2026": {
+    "Milling": 9344.98,
+    "Tackcoat (DBM)": 9344.98,
+    "DBM": 515.52,
+    "Tackcoat (BC)": 19176.32,
+    "BC": 767.05,
+    "Tackcoat": 28521.3
+  },
+  "28.12.2026": {
+    "Milling": 6379.68,
+    "Tackcoat (DBM)": 6379.64,
+    "DBM": 331.31,
+    "Tackcoat (BC)": 12321.41,
+    "BC": 492.86,
+    "Tackcoat": 18701.05
+  },
+  "29.12.2026": {
+    "Milling": 6379.68,
+    "Tackcoat (DBM)": 6379.64,
+    "DBM": 331.31,
+    "Tackcoat (BC)": 12321.41,
+    "BC": 492.86,
+    "Tackcoat": 18701.05
+  },
+  "30.12.2026": {
+    "Milling": 6379.68,
+    "Tackcoat (DBM)": 6379.64,
+    "DBM": 331.31,
+    "Tackcoat (BC)": 12321.41,
+    "BC": 492.86,
+    "Tackcoat": 18701.05
+  },
+  "31.12.2026": {
+    "Milling": 6379.68,
+    "Tackcoat (DBM)": 6379.64,
+    "DBM": 331.31,
+    "Tackcoat (BC)": 12321.41,
+    "BC": 492.86,
+    "Tackcoat": 18701.05
+  },
+  "01.01.2027": {
+    "Milling": 6379.68,
+    "Tackcoat (DBM)": 6379.64,
+    "DBM": 331.31,
+    "Tackcoat (BC)": 12321.41,
+    "BC": 492.86,
+    "Tackcoat": 18701.05
+  },
+  "02.01.2027": {
+    "Milling": 6379.68,
+    "Tackcoat (DBM)": 6379.64,
+    "DBM": 331.31,
+    "Tackcoat (BC)": 12321.41,
+    "BC": 492.86,
+    "Tackcoat": 18701.05
+  },
+  "03.01.2027": {
+    "Milling": 6379.68,
+    "Tackcoat (DBM)": 6379.64,
+    "DBM": 331.31,
+    "Tackcoat (BC)": 12321.41,
+    "BC": 492.86,
+    "Tackcoat": 18701.05
+  },
+  "04.01.2027": {
+    "Milling": 0,
+    "Tackcoat (DBM)": 0,
+    "DBM": 0,
+    "Tackcoat (BC)": 13671.41,
+    "BC": 546.86,
+    "Tackcoat": 13671.41
+  },
+  "05.01.2027": {
+    "Milling": 0,
+    "Tackcoat (DBM)": 0,
+    "DBM": 0,
+    "Tackcoat (BC)": 13671.41,
+    "BC": 546.86,
+    "Tackcoat": 13671.41
+  },
+  "06.01.2027": {
+    "Milling": 0,
+    "Tackcoat (DBM)": 0,
+    "DBM": 0,
+    "Tackcoat (BC)": 13671.41,
+    "BC": 546.86,
+    "Tackcoat": 13671.41
+  },
+  "07.01.2027": {
+    "Milling": 0,
+    "Tackcoat (DBM)": 0,
+    "DBM": 0,
+    "Tackcoat (BC)": 13671.41,
+    "BC": 546.86,
+    "Tackcoat": 13671.41
+  },
+  "08.01.2027": {
+    "Milling": 0,
+    "Tackcoat (DBM)": 0,
+    "DBM": 0,
+    "Tackcoat (BC)": 13671.41,
+    "BC": 546.86,
+    "Tackcoat": 13671.41
+  },
+  "09.01.2027": {
+    "Milling": 0,
+    "Tackcoat (DBM)": 0,
+    "DBM": 0,
+    "Tackcoat (BC)": 13671.41,
+    "BC": 546.86,
+    "Tackcoat": 13671.41
+  },
+  "10.01.2027": {
+    "Milling": 0,
+    "Tackcoat (DBM)": 0,
+    "DBM": 0,
+    "Tackcoat (BC)": 13671.41,
+    "BC": 546.86,
+    "Tackcoat": 13671.41
+  }
+};

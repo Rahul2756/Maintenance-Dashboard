@@ -15,6 +15,9 @@ import { KPIAggregates, ActivityType } from '../../types/dpr';
 import { Badge } from '../ui/Badge';
 import { MiniTripleBarChart } from '../ui/MiniTripleBarChart';
 
+// Feature flag: Temporarily hide "Today" values from all card faces (strictly toggleable: set to true to retrieve/show)
+const SHOW_TODAY_VALUES = false;
+
 interface KPICardsProps {
   kpis: KPIAggregates;
   selectedActivities?: ActivityType[];
@@ -164,12 +167,14 @@ export const KPICards: React.FC<KPICardsProps> = ({ kpis, selectedActivities }) 
                   </span>
                   <span className="text-xs text-amber-400 font-bold font-mono">sqm</span>
                 </div>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-[11px] font-mono font-bold text-amber-300">
-                    <Clock className="w-3 h-3 text-amber-400" />
-                    Today: {isMillingSelected ? `${fmt(millingToday, 1)} sqm` : '—'}
-                  </span>
-                </div>
+                {SHOW_TODAY_VALUES && (
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-[11px] font-mono font-bold text-amber-300">
+                      <Clock className="w-3 h-3 text-amber-400" />
+                      Today: {isMillingSelected ? `${fmt(millingToday, 1)} sqm` : '—'}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {isMillingSelected && (
@@ -284,12 +289,14 @@ export const KPICards: React.FC<KPICardsProps> = ({ kpis, selectedActivities }) 
                   </span>
                   <span className="text-xs text-amber-400 font-bold font-mono">sqm</span>
                 </div>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-[11px] font-mono font-bold text-amber-300">
-                    <Clock className="w-3 h-3 text-amber-400" />
-                    Today: {isTackSelected ? `${fmt(tackToday, 1)} sqm` : '—'}
-                  </span>
-                </div>
+                {SHOW_TODAY_VALUES && (
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-[11px] font-mono font-bold text-amber-300">
+                      <Clock className="w-3 h-3 text-amber-400" />
+                      Today: {isTackSelected ? `${fmt(tackToday, 1)} sqm` : '—'}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {isTackSelected && (
@@ -404,12 +411,14 @@ export const KPICards: React.FC<KPICardsProps> = ({ kpis, selectedActivities }) 
                   </span>
                   <span className="text-xs text-emerald-400 font-bold font-mono">Cum</span>
                 </div>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-mono font-bold text-emerald-300">
-                    <Clock className="w-3 h-3 text-emerald-400" />
-                    Today: {isDbmSelected ? `${fmt(dbmToday, 2)} Cum` : '—'}
-                  </span>
-                </div>
+                {SHOW_TODAY_VALUES && (
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-mono font-bold text-emerald-300">
+                      <Clock className="w-3 h-3 text-emerald-400" />
+                      Today: {isDbmSelected ? `${fmt(dbmToday, 2)} Cum` : '—'}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {isDbmSelected && (
@@ -524,12 +533,14 @@ export const KPICards: React.FC<KPICardsProps> = ({ kpis, selectedActivities }) 
                   </span>
                   <span className="text-xs text-purple-400 font-bold font-mono">Cum</span>
                 </div>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-[11px] font-mono font-bold text-purple-300">
-                    <Clock className="w-3 h-3 text-purple-400" />
-                    Today: {isBcSelected ? `${fmt(bcToday, 2)} Cum` : '—'}
-                  </span>
-                </div>
+                {SHOW_TODAY_VALUES && (
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-[11px] font-mono font-bold text-purple-300">
+                      <Clock className="w-3 h-3 text-purple-400" />
+                      Today: {isBcSelected ? `${fmt(bcToday, 2)} Cum` : '—'}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {isBcSelected && (

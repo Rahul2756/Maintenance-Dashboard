@@ -1,4 +1,12 @@
 import * as XLSX from 'xlsx';
+import {
+  DEFAULT_DAILY_PLANNED_TARGETS,
+  CONTRACTUAL_TARGETS_5,
+  type DailyPlannedTargetsByActivity,
+  type SCurveActivity
+} from './dailyPlannedTargetsData';
+export type { DailyPlannedTargetsByActivity, SCurveActivity };
+export { CONTRACTUAL_TARGETS_5 };
 import type {
   ActualDPRRow,
   PlannedRecord,
@@ -18,7 +26,10 @@ import type {
   StretchWiseSummaryRow,
   StretchData,
   StretchWiseSummaryTableData,
-  DailyGroupedExecutionRow
+  DailyGroupedExecutionRow,
+  LinearLaneFilter,
+  LinearStretchFilter,
+  StretchWiseTemplateRow
 } from '../types/dpr';
 
 /**
@@ -289,17 +300,7 @@ export function calculateExecutedLaneLength(
   };
 }
 
-export interface StretchWiseTemplateRow {
-  rowNum: number;
-  side: HighwaySide;
-  activity: string;
-  normalizedActivity: string;
-  lane: string;
-  stretch1PlannedKm: number;
-  stretch2PlannedKm: number;
-  stretch3PlannedKm: number;
-  totalPlannedKm: number;
-}
+export type { StretchWiseTemplateRow };
 
 /**
  * Authoritative Stretch-wise programmed baseline rows from 'Stretch-wise Summary' in final_sheet.xlsx
@@ -340,17 +341,116 @@ export const DEFAULT_STRETCH_WISE_TEMPLATE: StretchWiseTemplateRow[] = [
 ];
 
 /**
+ * Computes authoritative planned linear targets (m) from Stretch-wise Summary baseline (Col P, Planned)
+ * respecting Side (Both, LHS, RHS) and Lane (All, Fast Lane, Slow Lane).
+ * Note: BC is strictly excluded from lane-wise filtering.
+ */
+export function getLinearTargetM(
+  template: StretchWiseTemplateRow[] | undefined,
+  activity: 'Milling' | 'Tackcoat' | 'DBM' | 'BC',
+  side: HighwaySide = 'Both',
+  laneFilter: LinearLaneFilter = 'All',
+  stretchFilter: LinearStretchFilter = 'All'
+): number {
+  const t = (template && template.length > 0) ? template : DEFAULT_STRETCH_WISE_TEMPLATE;
+
+  const getRowPlannedKm = (r: StretchWiseTemplateRow): number => {
+    if (stretchFilter === 'Stretch 1') return r.stretch1PlannedKm;
+    if (stretchFilter === 'Stretch 2') return r.stretch2PlannedKm;
+    if (stretchFilter === 'Stretch 3') return r.stretch3PlannedKm;
+    return r.totalPlannedKm;
+  };
+
+  // 1. BC is strictly excluded from lane-wise filtering as per Master Prompt
+  if (activity === 'BC') {
+    const bcRows = t.filter(r =>
+      (r.normalizedActivity === 'BC' || r.activity.toLowerCase().includes('bc')) &&
+      !r.activity.toLowerCase().includes('tack') &&
+      !r.activity.toLowerCase().includes('sr') &&
+      (side === 'Both' || side === 'ALL' || side === 'BHS' || r.side === side)
+    );
+    const sumKm = bcRows.reduce((sum, r) => sum + getRowPlannedKm(r), 0);
+    return Math.round(sumKm * 1000);
+  }
+
+  // 2. When 'All' is selected, return overall totals
+  if (laneFilter === 'All') {
+    if (activity === 'Milling') {
+      const rows = t.filter(r =>
+        r.normalizedActivity === 'Milling' &&
+        (side === 'Both' || side === 'ALL' || side === 'BHS' || r.side === side)
+      );
+      const sumKm = rows.reduce((sum, r) => sum + getRowPlannedKm(r), 0);
+      return Math.round(sumKm * 1000);
+    }
+    if (activity === 'DBM') {
+      const rows = t.filter(r =>
+        r.normalizedActivity === 'DBM' &&
+        !r.activity.toLowerCase().includes('sr') &&
+        (side === 'Both' || side === 'ALL' || side === 'BHS' || r.side === side)
+      );
+      const sumKm = rows.reduce((sum, r) => sum + getRowPlannedKm(r), 0);
+      return Math.round(sumKm * 1000);
+    }
+    if (activity === 'Tackcoat') {
+      const rows = t.filter(r =>
+        r.activity.toLowerCase().includes('tack') &&
+        (side === 'Both' || side === 'ALL' || side === 'BHS' || r.side === side)
+      );
+      const sumKm = rows.reduce((sum, r) => sum + getRowPlannedKm(r), 0);
+      return Math.round(sumKm * 1000);
+    }
+  }
+
+  // 3. Lane Filter: Fast Lane (F/L) or Slow Lane (S/L)
+  const targetLaneCode = laneFilter === 'Fast Lane' ? 'F/L' : 'S/L';
+
+  if (activity === 'Milling') {
+    const rows = t.filter(r =>
+      r.normalizedActivity === 'Milling' &&
+      r.lane === targetLaneCode &&
+      (side === 'Both' || side === 'ALL' || side === 'BHS' || r.side === side)
+    );
+    const sumKm = rows.reduce((sum, r) => sum + getRowPlannedKm(r), 0);
+    return Math.round(sumKm * 1000);
+  }
+
+  if (activity === 'DBM') {
+    const rows = t.filter(r =>
+      r.normalizedActivity === 'DBM' &&
+      !r.activity.toLowerCase().includes('sr') &&
+      r.lane === targetLaneCode &&
+      (side === 'Both' || side === 'ALL' || side === 'BHS' || r.side === side)
+    );
+    const sumKm = rows.reduce((sum, r) => sum + getRowPlannedKm(r), 0);
+    return Math.round(sumKm * 1000);
+  }
+
+  if (activity === 'Tackcoat') {
+    const rows = t.filter(r =>
+      r.activity.toLowerCase().includes('tack') &&
+      r.lane === targetLaneCode &&
+      (side === 'Both' || side === 'ALL' || side === 'BHS' || r.side === side)
+    );
+    const sumKm = rows.reduce((sum, r) => sum + getRowPlannedKm(r), 0);
+    return Math.round(sumKm * 1000);
+  }
+
+  return 0;
+}
+
+/**
  * Default Schedule Milestones for NH-334 DPR executive tracking from WP-R1
  * Corridor: Ch. 130+560 to Ch. 206+220 (75.660 km)
  * Period: 02.11.2026 to 10.01.2027 (70 calendar days across 10 weekly phases)
  */
 export const DEFAULT_SCHEDULE_MILESTONES: ScheduleMilestones = {
-  startDate: '02.11.2026',
+  startDate: '13.10.2026',
   completionDate: '10.01.2027',
   reportDate: '05.11.2026',
-  daysElapsed: 4,
+  daysElapsed: 23,
   daysRemaining: 66,
-  totalDays: 70
+  totalDays: 89
 };
 
 /**
@@ -429,8 +529,8 @@ export const DEFAULT_SECTION_SCOPES: SectionQuantityScope[] = [
  * Consolidated Contract Scope from 'WP-R1' (MCW + Service Road + Misc)
  */
 export const DEFAULT_CONSOLIDATED_SCOPE: ConsolidatedQuantityScope = {
-  millingSqm: { mcw: 515298.0, sr: 165986.0, total: 681284.0 },
-  tackCoatSqm: { mcw: 1494585.0, sr: 353685.5, total: 1848270.5 },
+  millingSqm: { mcw: 681284.0, sr: 0, total: 681284.0 },
+  tackCoatSqm: { mcw: 1848270.5, sr: 0, total: 1848270.5 },
   dbmCum: 37026.246,
   bcPmbCum: 46679.48,
   roadMarkingSqm: 59396.601,
@@ -472,6 +572,7 @@ export const DEFAULT_PROJECT_BASELINE: ProjectBaseline = {
   millingPlannedLengthM: 147228,
   dbmPlannedLengthM: 147228,
   tackcoatPlannedLengthM: 235114,
+  stretchWiseTemplate: DEFAULT_STRETCH_WISE_TEMPLATE,
   lhs: {
     millingTargetSqm: 334999.5,
     dbmTargetMT: 18388.0,
@@ -1882,6 +1983,7 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
       tackcoatLengthM: Math.round(tackRhsKm * 1000) || 119999,
       bcLengthM: Math.round(bcRhsKm * 1000) || 53928
     },
+    stretchWiseTemplate,
     source: 'work_program_excel'
   };
 
@@ -1977,7 +2079,10 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
     }
 
     // Column O: Achieved Today is primary
-    const achievedToday = Number(row[clAchCol]) || 0;
+    let achievedToday = Number(row[clAchCol]) || 0;
+    if (achievedToday === 0 && (normAct === 'Tackcoat' || rawAct.toLowerCase().includes('tack'))) {
+      achievedToday = Number((lengthM * widthM).toFixed(2));
+    }
     const cumulativeAchieved = Number(row[clCumCol]) || 0;
 
     const remarksText = row[clRemarksCol] ? String(row[clRemarksCol]).trim() : '';
@@ -1999,6 +2104,7 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
       side,
       lane,
       activity: normAct,
+      rawActivity: rawAct,
       unit,
       plannedToday,
       lengthM,
@@ -2050,7 +2156,7 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
   };
 
   const metadata: DPRMetadata = {
-    projectName: 'Muzaffarnagar - Haridwar Section, NH-334 (Ch. 130+560KM to 206+220KM)',
+    projectName: 'Muzaffarnagar - Haridwar Section, NH-334 (KM130+560 TO KM 206+220)',
     contractor: 'M/s Atcons India Limited',
     concessionaire: 'NHIT Southern Projects private limited',
     pm: 'National Highways InvIT Project Managers Pvt. Ltd.',
@@ -2060,8 +2166,62 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
     reportDate: latestDate,
     weather: 'Clear',
     shift: 'Day & Night / 24 hrs',
-    workStartDate: '14.10.2026',
+    workStartDate: '13.10.2026',
     targetCompletionDate: '10.01.2027'
+  };
+
+  // Dynamically extract Project Start from 'MZR-HDR Master Sheet' SETTINGS ('Work start (planned, per DPR)')
+  let dynamicStartDate = '13.10.2026';
+  let dynamicCompletionDate = '10.01.2027';
+  let dynamicReportDate = latestDate || '05.11.2026';
+
+  const wsMaster = wb.Sheets['MZR-HDR Master Sheet'] || wb.Sheets[wb.SheetNames[0]];
+  if (wsMaster) {
+    const masterRows: any[][] = XLSX.utils.sheet_to_json(wsMaster, { header: 1 });
+    for (let r = 0; r < masterRows.length; r++) {
+      const row = masterRows[r] || [];
+      for (let c = 0; c < row.length; c++) {
+        const val = String(row[c] || '').trim().toLowerCase();
+        if (val.includes('work start (planned, per dpr)')) {
+          const nextVal = row[c + 1];
+          if (nextVal !== undefined && nextVal !== null) {
+            if (typeof nextVal === 'number') {
+              const d = XLSX.SSF.parse_date_code(nextVal);
+              if (d && d.y) {
+                dynamicStartDate = `${String(d.d).padStart(2, '0')}.${String(d.m).padStart(2, '0')}.${d.y}`;
+              }
+            } else {
+              const match = String(nextVal).match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
+              if (match) {
+                dynamicStartDate = `${match[1].padStart(2, '0')}.${match[2].padStart(2, '0')}.${match[3]}`;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Dynamic schedule duration & timeline calculations
+  const parseDMYHelper = (str: string): Date => {
+    const parts = str.split('.').map(Number);
+    return new Date(parts[2], parts[1] - 1, parts[0]);
+  };
+  const startObj = parseDMYHelper(dynamicStartDate);
+  const compObj = parseDMYHelper(dynamicCompletionDate);
+  const repObj = parseDMYHelper(dynamicReportDate);
+  const msInDay = 86400000;
+  const totalDays = Math.max(1, Math.round((compObj.getTime() - startObj.getTime()) / msInDay));
+  const daysElapsed = Math.max(0, Math.round((repObj.getTime() - startObj.getTime()) / msInDay));
+  const daysRemaining = Math.max(0, Math.round((compObj.getTime() - repObj.getTime()) / msInDay));
+
+  const dynamicMilestones: ScheduleMilestones = {
+    startDate: dynamicStartDate,
+    completionDate: dynamicCompletionDate,
+    reportDate: dynamicReportDate,
+    daysElapsed,
+    daysRemaining,
+    totalDays
   };
 
   return {
@@ -2070,11 +2230,11 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
     metadata,
     qcLogs: getFallbackData().qcLogs,
     baseline,
-    milestones: DEFAULT_SCHEDULE_MILESTONES,
+    milestones: dynamicMilestones,
     sectionScopes: DEFAULT_SECTION_SCOPES,
     consolidatedScope: {
-      millingSqm: { mcw: 515298, sr: 165986, total: targets.Both.Milling },
-      tackCoatSqm: { mcw: 1494585, sr: 353685, total: targets.Both.Tackcoat },
+      millingSqm: { mcw: targets.Both.Milling, sr: 0, total: targets.Both.Milling },
+      tackCoatSqm: { mcw: targets.Both.Tackcoat, sr: 0, total: targets.Both.Tackcoat },
       dbmCum: targets.Both.DBM,
       bcPmbCum: targets.Both.BC,
       roadMarkingSqm: 59396.601,
@@ -2717,9 +2877,12 @@ export async function loadDashboardData(): Promise<{
   dataQualityWarnings: string[];
 }> {
   try {
-    let res = await fetch('/data/final_sheet.xlsx');
+    let res = await fetch(`/data/Final_sheet_10-11-2026.xlsx?t=${Date.now()}`);
     if (!res.ok) {
-      res = await fetch('/data/Final_sheet.xlsx');
+      res = await fetch(`/data/final_sheet.xlsx?t=${Date.now()}`);
+    }
+    if (!res.ok) {
+      res = await fetch(`/data/Final_sheet.xlsx?t=${Date.now()}`);
     }
     if (!res.ok) {
       throw new Error(`Critical Error: 'final_sheet.xlsx' could not be fetched (HTTP ${res.status}).`);
@@ -2745,4 +2908,232 @@ export async function loadDashboardData(): Promise<{
       dataQualityWarnings: ['Running in fallback mode due to live workbook load issue']
     };
   }
+}
+
+/**
+ * Parses Work Program.xlsx (up to 01.11.2026) and Revised Work program-R-1_05-11-2026.xlsx (from 02.11.2026 onwards)
+ * and distributes weekly planned quantities evenly across calendar days in each week.
+ */
+export function parseDualWorkPrograms(
+  olderWpBuffer?: ArrayBuffer | null,
+  revisedWpBuffer?: ArrayBuffer | null
+): Record<string, DailyPlannedTargetsByActivity> {
+  const dailyMap: Record<string, Record<SCurveActivity, number>> = {};
+
+  function parseDate(val: any): Date | null {
+    if (!val) return null;
+    if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+    if (typeof val === 'number') {
+      try {
+        const d = XLSX.SSF.parse_date_code(val);
+        if (d && d.y) return new Date(d.y, d.m - 1, d.d);
+      } catch {}
+    }
+    const str = String(val).trim();
+    const parts = str.split(/[./-]/);
+    if (parts.length === 3) {
+      const d = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      const y = parseInt(parts[2], 10);
+      if (!isNaN(d) && !isNaN(m) && !isNaN(y)) {
+        return new Date(y, m, d);
+      }
+    }
+    return null;
+  }
+
+  function formatDateKey(d: Date): string {
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}.${month}.${year}`;
+  }
+
+  function addDays(d: Date, days: number): Date {
+    const res = new Date(d);
+    res.setDate(res.getDate() + days);
+    return res;
+  }
+
+  function getDaysInclusive(d1: Date, d2: Date): number {
+    const diffTime = Math.abs(d2.getTime() - d1.getTime());
+    return Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  }
+
+  function normalizeActivity(raw: any): SCurveActivity | null {
+    if (!raw) return null;
+    const s = String(raw).trim().toLowerCase();
+    if (s.includes('milling')) return 'Milling';
+    if (s.includes('tack')) {
+      if (s.includes('bc')) return 'Tackcoat (BC)';
+      return 'Tackcoat (DBM)';
+    }
+    if (s.includes('dbm')) return 'DBM';
+    if (s.includes('bc')) return 'BC';
+    return null;
+  }
+
+  // 1. Older Work Program.xlsx: 12.10.2026 to 01.11.2026
+  if (olderWpBuffer) {
+    try {
+      const wb = XLSX.read(new Uint8Array(olderWpBuffer), { type: 'array' });
+      const ws = wb.Sheets['Work Program'] || wb.Sheets[wb.SheetNames[0]];
+      if (ws) {
+        const raw: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        const dateRow = raw[5] || [];
+        const colIndices = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34];
+        const weekCols: { colIdx: number; startDate: Date; endDate: Date; days: number }[] = [];
+
+        for (const c of colIndices) {
+          const sDate = parseDate(dateRow[c]);
+          const eDate = parseDate(dateRow[c + 1]);
+          if (sDate && eDate) {
+            weekCols.push({
+              colIdx: c,
+              startDate: sDate,
+              endDate: eDate,
+              days: getDaysInclusive(sDate, eDate)
+            });
+          }
+        }
+
+        const cutoffDate = parseDate('01.11.2026')!;
+        for (let r = 6; r <= 42; r++) {
+          const row = raw[r];
+          if (!row) continue;
+          const act = normalizeActivity(row[4]);
+          if (!act) continue;
+
+          for (const w of weekCols) {
+            if (w.startDate > cutoffDate) continue;
+
+            const cellVal = row[w.colIdx];
+            if (cellVal === undefined || cellVal === null || cellVal === '') continue;
+            if (typeof cellVal === 'string' && cellVal.toLowerCase().includes('completed')) continue;
+            const num = typeof cellVal === 'number' ? cellVal : parseFloat(String(cellVal).replace(/,/g, ''));
+            if (isNaN(num) || num <= 0) continue;
+
+            const dailyVal = num / w.days;
+            let curr = new Date(w.startDate);
+            while (curr <= w.endDate && curr <= cutoffDate) {
+              const dKey = formatDateKey(curr);
+              if (!dailyMap[dKey]) dailyMap[dKey] = { Milling: 0, 'Tackcoat (DBM)': 0, DBM: 0, 'Tackcoat (BC)': 0, BC: 0 };
+              dailyMap[dKey][act] += dailyVal;
+              curr = addDays(curr, 1);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Could not parse older Work Program buffer:', e);
+    }
+  }
+
+  // 2. Revised Work program-R-1_05-11-2026.xlsx: 02.11.2026 onwards
+  if (revisedWpBuffer) {
+    try {
+      const wb = XLSX.read(new Uint8Array(revisedWpBuffer), { type: 'array' });
+      const ws = wb.Sheets['WP-R1'] || wb.Sheets[wb.SheetNames[0]];
+      if (ws) {
+        const raw: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        const dateRow = raw[6] || [];
+        const colIndices = [12, 14, 16, 18, 20, 22, 24, 26, 28, 30];
+        const weekCols: { colIdx: number; startDate: Date; endDate: Date; days: number }[] = [];
+
+        for (const c of colIndices) {
+          const sDate = parseDate(dateRow[c]);
+          const eDate = parseDate(dateRow[c + 1]);
+          if (sDate && eDate) {
+            weekCols.push({
+              colIdx: c,
+              startDate: sDate,
+              endDate: eDate,
+              days: getDaysInclusive(sDate, eDate)
+            });
+          }
+        }
+
+        const startDateCutoff = parseDate('02.11.2026')!;
+        for (let r = 7; r <= 46; r++) {
+          const row = raw[r];
+          if (!row) continue;
+          const act = normalizeActivity(row[4]);
+          if (!act) continue;
+
+          for (const w of weekCols) {
+            if (w.endDate < startDateCutoff) continue;
+
+            const cellVal = row[w.colIdx];
+            if (cellVal === undefined || cellVal === null || cellVal === '') continue;
+            if (typeof cellVal === 'string' && cellVal.toLowerCase().includes('completed')) continue;
+            const num = typeof cellVal === 'number' ? cellVal : parseFloat(String(cellVal).replace(/,/g, ''));
+            if (isNaN(num) || num <= 0) continue;
+
+            const dailyVal = num / w.days;
+            let curr = new Date(w.startDate);
+            while (curr <= w.endDate) {
+              if (curr >= startDateCutoff) {
+                const dKey = formatDateKey(curr);
+                if (!dailyMap[dKey]) dailyMap[dKey] = { Milling: 0, 'Tackcoat (DBM)': 0, DBM: 0, 'Tackcoat (BC)': 0, BC: 0 };
+                dailyMap[dKey][act] += dailyVal;
+              }
+              curr = addDays(curr, 1);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Could not parse revised Work Program buffer:', e);
+    }
+  }
+
+  if (Object.keys(dailyMap).length === 0) {
+    return { ...DEFAULT_DAILY_PLANNED_TARGETS };
+  }
+
+  const result: Record<string, DailyPlannedTargetsByActivity> = {};
+  for (const [k, v] of Object.entries(dailyMap)) {
+    const m = Number(v.Milling.toFixed(2));
+    const tDbm = Number(v['Tackcoat (DBM)'].toFixed(2));
+    const dbm = Number(v.DBM.toFixed(2));
+    const tBc = Number(v['Tackcoat (BC)'].toFixed(2));
+    const bc = Number(v.BC.toFixed(2));
+    result[k] = {
+      Milling: m,
+      'Tackcoat (DBM)': tDbm,
+      DBM: dbm,
+      'Tackcoat (BC)': tBc,
+      BC: bc,
+      Tackcoat: Number((tDbm + tBc).toFixed(2))
+    };
+  }
+  return result;
+}
+
+/**
+ * Dynamically loads and merges daily planned targets from both Work Program workbooks
+ */
+export async function loadWorkProgramDailyPlanned(): Promise<Record<string, DailyPlannedTargetsByActivity>> {
+  try {
+    const [resOlder, resRevised] = await Promise.all([
+      fetch(`/data/Work%20Program.xlsx?t=${Date.now()}`),
+      fetch(`/data/Revised%20Work%20program-R-1_05-11-2026.xlsx?t=${Date.now()}`)
+    ]);
+
+    let olderBuf: ArrayBuffer | null = null;
+    let revisedBuf: ArrayBuffer | null = null;
+
+    if (resOlder.ok) olderBuf = await resOlder.arrayBuffer();
+    if (resRevised.ok) revisedBuf = await resRevised.arrayBuffer();
+
+    if (olderBuf || revisedBuf) {
+      const parsed = parseDualWorkPrograms(olderBuf, revisedBuf);
+      if (Object.keys(parsed).length > 0) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to dynamically fetch Work Program files, using pre-computed targets:', err);
+  }
+  return { ...DEFAULT_DAILY_PLANNED_TARGETS };
 }

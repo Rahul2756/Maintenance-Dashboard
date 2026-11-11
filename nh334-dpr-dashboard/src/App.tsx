@@ -23,8 +23,19 @@ import {
   DEFAULT_CUMULATIVE_ACHIEVED,
   getPhasedTargetForDate,
   getPhasedMillingTargetForDate,
-  StretchWiseTemplateRow
+  StretchWiseTemplateRow,
+  loadWorkProgramDailyPlanned,
+  type DailyPlannedTargetsByActivity
 } from './utils/excelParser';
+import { DEFAULT_DAILY_PLANNED_TARGETS } from './utils/dailyPlannedTargetsData';
+import {
+  StateFilter,
+  STATE_BOUNDARIES,
+  filterAndSplitRowsByState,
+  filterAndSplitPlannedRecordsByState,
+  filterBaselineByState,
+  filterDailyPlannedTargetsByState
+} from './utils/stateFilterUtils';
 import {
   FilterProvider,
   useFilters,
@@ -59,6 +70,9 @@ import {
 import { Loader2, CheckCircle2, Layers, BarChart3, Compass, FileSpreadsheet, Calendar, Sparkles } from 'lucide-react';
 import { ModuleSeparator } from './components/dashboard/ModuleSeparator';
 
+// Control visibility of the S-Curve completion forecast visual (Set to true to show again)
+const SHOW_FORECAST_VISUAL = false;
+
 function DashboardContent() {
   const {
     filters,
@@ -74,7 +88,7 @@ function DashboardContent() {
   const [plannedRecords, setPlannedRecords] = useState<PlannedRecord[]>([]);
   const [baseline, setBaseline] = useState<ProjectBaseline>(DEFAULT_PROJECT_BASELINE);
   const [metadata, setMetadata] = useState<DPRMetadata>({
-    projectName: 'Muzaffarnagar - Haridwar Section, NH-334 (Ch. 130+560KM to 206+220KM)',
+    projectName: 'Muzaffarnagar - Haridwar Section, NH-334 (KM130+560 TO KM 206+220)',
     contractor: 'M/s Atcons India Limited',
     concessionaire: 'NHIT Southern Projects private limited',
     pm: 'National Highways InvIT Project Managers Pvt. Ltd.',
@@ -93,13 +107,14 @@ function DashboardContent() {
   const [cumulativeAchieved, setCumulativeAchieved] = useState<CumulativeAchievedQuantities>(DEFAULT_CUMULATIVE_ACHIEVED);
   const [qcLogs, setQcLogs] = useState<QCTestLogItem[]>([]);
   const [dataSource, setDataSource] = useState<'live_excel' | 'fallback' | 'indexeddb'>('live_excel');
+  const [dailyPlannedTargets, setDailyPlannedTargets] = useState<Record<string, DailyPlannedTargetsByActivity>>(DEFAULT_DAILY_PLANNED_TARGETS);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [uploadMeta, setUploadMeta] = useState<UploadMetadata | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // Set official page title
   useEffect(() => {
-    document.title = 'Muzaffarnagar - Haridwar Section, NH-334 (Ch. 130+560KM to 206+220KM)';
+    document.title = 'Muzaffarnagar - Haridwar Section, NH-334 (KM130+560 TO KM 206+220)';
   }, []);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -135,6 +150,15 @@ function DashboardContent() {
       setMilestones(defaultData.milestones);
       setCumulativeAchieved(defaultData.cumulativeAchieved);
       setDataSource(defaultData.source);
+
+      try {
+        const wpTargets = await loadWorkProgramDailyPlanned();
+        if (wpTargets && Object.keys(wpTargets).length > 0) {
+          setDailyPlannedTargets(wpTargets);
+        }
+      } catch (wpErr) {
+        console.warn('Could not load dynamic work program planned targets:', wpErr);
+      }
     } catch (e) {
       console.error('Failed to load final_sheet.xlsx, checking stored data:', e);
       try {
@@ -148,7 +172,7 @@ function DashboardContent() {
           setDataSource('indexeddb');
           return;
         }
-      } catch {}
+      } catch { }
       const fallbackData = await loadDashboardData();
       setActualRows(fallbackData.actual);
       setPlannedRecords(fallbackData.planned);
@@ -211,6 +235,16 @@ function DashboardContent() {
       setMilestones(data.milestones);
       setCumulativeAchieved(data.cumulativeAchieved);
       setDataSource(data.source);
+
+      try {
+        const wpTargets = await loadWorkProgramDailyPlanned();
+        if (wpTargets && Object.keys(wpTargets).length > 0) {
+          setDailyPlannedTargets(wpTargets);
+        }
+      } catch (wpErr) {
+        console.warn('Could not reload work program targets:', wpErr);
+      }
+
       showToast('Live Excel data synchronized', 'success');
     } catch (err) {
       console.error('Reload failed:', err);
@@ -246,16 +280,40 @@ function DashboardContent() {
           start: earliest,
           end: latest
         });
-      } else if (!filters.selectedSingleDate || !availableDates.includes(filters.selectedSingleDate)) {
+      } else if (filters.selectedSingleDate && !availableDates.includes(filters.selectedSingleDate)) {
         setSelectedSingleDate(latest);
       }
     }
   }, [availableDates, filters.selectedSingleDate, setDateRange, setSelectedSingleDate]);
 
+  // Active State selection
+  const selectedState: StateFilter = filters.state || 'All';
+
+  // State-filtered and split datasets adhering to authoritative chainage boundaries:
+  // - Uttar Pradesh: Ch. 130+560 to 151+360 (20.80 km)
+  // - Uttarakhand (intersected with active project corridor): Ch. 151+360 to 206+220 (54.86 km)
+  // - All States: Ch. 130+560 to 206+220 (75.66 km)
+  // Cross-boundary records at Ch. 151+360 are split proportionally to prevent double-counting.
+  const stateFilteredActualRows = useMemo(() => {
+    return filterAndSplitRowsByState(actualRows, selectedState);
+  }, [actualRows, selectedState]);
+
+  const stateFilteredPlannedRecords = useMemo(() => {
+    return filterAndSplitPlannedRecordsByState(plannedRecords, selectedState);
+  }, [plannedRecords, selectedState]);
+
+  const stateFilteredBaseline = useMemo(() => {
+    return filterBaselineByState(baseline, selectedState);
+  }, [baseline, selectedState]);
+
+  const stateFilteredDailyPlannedTargets = useMemo(() => {
+    return filterDailyPlannedTargetsByState(dailyPlannedTargets, selectedState);
+  }, [dailyPlannedTargets, selectedState]);
+
   // Filtered actual DPR rows based on global filter controls
   const filteredRows = useMemo(() => {
-    return actualRows.filter(r => rowMatchesGlobalFilter(r, filters));
-  }, [actualRows, filters]);
+    return stateFilteredActualRows.filter(r => rowMatchesGlobalFilter(r, filters));
+  }, [stateFilteredActualRows, filters]);
 
   // Selected date (As of date) for DPR and cumulative calculations
   const selectedDate = filters.selectedSingleDate || filters.dateRange.end || (availableDates[availableDates.length - 1] || '01.11.2026');
@@ -263,18 +321,18 @@ function DashboardContent() {
 
   // Dynamic cumulative achieved quantities computed as of selectedDate
   const dynamicCumulativeAchieved: CumulativeAchievedQuantities = useMemo(() => {
-    if (actualRows.length > 0) {
+    if (stateFilteredActualRows.length > 0) {
       const selIso = dmyToIso(selectedDate);
-      const m = actualRows
+      const m = stateFilteredActualRows
         .filter(r => r.activity === 'Milling' && (r.isoDate || dmyToIso(r.date)) <= selIso)
         .reduce((sum, r) => sum + r.achievedToday, 0);
-      const t = actualRows
+      const t = stateFilteredActualRows
         .filter(r => r.activity === 'Tackcoat' && (r.isoDate || dmyToIso(r.date)) <= selIso)
         .reduce((sum, r) => sum + r.achievedToday, 0);
-      const d = actualRows
+      const d = stateFilteredActualRows
         .filter(r => r.activity === 'DBM' && (r.isoDate || dmyToIso(r.date)) <= selIso)
         .reduce((sum, r) => sum + r.achievedToday, 0);
-      const b = actualRows
+      const b = stateFilteredActualRows
         .filter(r => r.activity === 'BC' && (r.isoDate || dmyToIso(r.date)) <= selIso)
         .reduce((sum, r) => sum + r.achievedToday, 0);
       return {
@@ -284,33 +342,37 @@ function DashboardContent() {
         bcCum: Number(b.toFixed(1))
       };
     }
+    // When filtered to a state with zero logged actuals yet (e.g. UP upcoming phase), report 0
+    if (selectedState !== 'All') {
+      return { millingSqm: 0, tackCoatSqm: 0, dbmCum: 0, bcCum: 0 };
+    }
     return cumulativeAchieved;
-  }, [actualRows, selectedDate, cumulativeAchieved]);
+  }, [stateFilteredActualRows, selectedDate, cumulativeAchieved, selectedState]);
 
   // Authoritative BOQ and Linear progress metrics computed dynamically from final_sheet.xlsx
   const boqMetrics = useMemo(() => {
-    return computeBOQProgressMetrics(actualRows, baseline, selectedDate, filters.side);
-  }, [actualRows, baseline, selectedDate, filters.side]);
+    return computeBOQProgressMetrics(stateFilteredActualRows, stateFilteredBaseline, selectedDate, filters.side);
+  }, [stateFilteredActualRows, stateFilteredBaseline, selectedDate, filters.side]);
 
   // Cumulative rows up to and including selectedDate (matching side filter)
   const cumulativeRows = useMemo(() => {
-    return actualRows.filter(r => {
+    return stateFilteredActualRows.filter(r => {
       const rIso = r.isoDate || dmyToIso(r.date);
       const matchesDate = rIso !== '' && selectedIso !== '' && rIso <= selectedIso;
       const matchesSide = filters.side === 'Both' || r.side === filters.side || r.side === 'BHS';
       return matchesDate && matchesSide;
     });
-  }, [actualRows, selectedIso, filters.side]);
+  }, [stateFilteredActualRows, selectedIso, filters.side]);
 
   // Filtered rows matching date, activity, and chainage but retaining both LHS & RHS for side-wise comparison
   const filteredRowsBothSides = useMemo(() => {
-    return actualRows.filter(r => rowMatchesGlobalFilter(r, { ...filters, side: 'Both' }));
-  }, [actualRows, filters]);
+    return stateFilteredActualRows.filter(r => rowMatchesGlobalFilter(r, { ...filters, side: 'Both' }));
+  }, [stateFilteredActualRows, filters]);
 
   // Total anomalies in dataset
   const totalAnomaliesCount = useMemo(() => {
-    return actualRows.filter(r => r.isAnomaly).length;
-  }, [actualRows]);
+    return stateFilteredActualRows.filter(r => r.isAnomaly).length;
+  }, [stateFilteredActualRows]);
 
   // Aggregate KPIs reactively against authoritative final_sheet.xlsx data
   const kpis: KPIAggregates = useMemo(() => {
@@ -331,7 +393,7 @@ function DashboardContent() {
     let cumBc = 0;
 
     availableDates.forEach(date => {
-      const dayRows = actualRows.filter(r => r.date === date && (filters.side === 'Both' || r.side === filters.side || r.side === 'BHS'));
+      const dayRows = stateFilteredActualRows.filter(r => r.date === date && (filters.side === 'Both' || r.side === filters.side || r.side === 'BHS'));
       dayRows.forEach(r => {
         if (r.activity === 'Milling') cumMilling += r.achievedToday;
         if (r.activity === 'Tackcoat') cumTack += r.achievedToday;
@@ -429,12 +491,12 @@ function DashboardContent() {
       excessDepthCount: excessDepth,
       offsetCount: offset
     };
-  }, [boqMetrics, actualRows, availableDates, filters.selectedActivities, filters.side, filteredRows]);
+  }, [boqMetrics, stateFilteredActualRows, availableDates, filters.selectedActivities, filters.side, filteredRows]);
 
   // Grouped daily progress comparisons for Bar/Line visual
   const dailyComparisons: DailyProgressComparison[] = useMemo(() => {
     return availableDates.map(date => {
-      const dayRows = actualRows.filter(r => r.date === date);
+      const dayRows = stateFilteredActualRows.filter(r => r.date === date);
       let millingAchieved = 0;
       let tackcoatAchieved = 0;
       let dbmAchievedCum = 0;
@@ -452,13 +514,15 @@ function DashboardContent() {
         }
       });
 
-      const phasedDailyTargetMT = getPhasedTargetForDate(date, baseline.dailyPhases);
-      const phasedDailyMillingSqm = getPhasedMillingTargetForDate(date, baseline.dailyPhases);
+      const dayPlanned = stateFilteredDailyPlannedTargets[date] || { Milling: 0, Tackcoat: 0, DBM: 0, BC: 0 };
+      const millingPlanned = Number((dayPlanned.Milling || 0).toFixed(1));
+      const tackcoatPlanned = Number((dayPlanned.Tackcoat || 0).toFixed(1));
+      const dbmPlanned = Number((dayPlanned.DBM || 0).toFixed(2));
+      const bcPlanned = Number((dayPlanned.BC || 0).toFixed(2));
+
       const actualDbmMT = Number((dbmAchievedCum * 2.38).toFixed(2));
       const actualDbmCum = Number(dbmAchievedCum.toFixed(2));
-      const phasedDailyTargetCum = Number((phasedDailyTargetMT / 2.38).toFixed(2));
-      const tackcoatPlanned = Math.round(phasedDailyMillingSqm * 0.85);
-      const rate = phasedDailyTargetCum > 0 ? Math.min(150, Math.round((actualDbmCum / phasedDailyTargetCum) * 100)) : 100;
+      const rate = dbmPlanned > 0 ? Math.min(150, Math.round((actualDbmCum / dbmPlanned) * 100)) : 100;
 
       const [d, m] = date.split('.');
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -468,20 +532,20 @@ function DashboardContent() {
       return {
         date,
         displayDate,
-        millingPlanned: phasedDailyMillingSqm,
+        millingPlanned,
         millingAchieved: Math.round(millingAchieved),
-        tackcoatPlanned: tackcoatPlanned,
+        tackcoatPlanned,
         tackcoatAchieved: Math.round(tackcoatAchieved),
-        dbmPlanned: phasedDailyTargetCum,
+        dbmPlanned,
         dbmAchieved: actualDbmCum,
-        bcPlanned: 0,
+        bcPlanned,
         bcAchieved: Number(bcAchievedCum.toFixed(2)),
-        totalPlannedWeighted: phasedDailyTargetMT,
+        totalPlannedWeighted: Number((dbmPlanned * 2.38).toFixed(2)),
         totalAchievedWeighted: actualDbmMT,
         adherenceRate: rate
       };
     });
-  }, [availableDates, actualRows, baseline]);
+  }, [availableDates, stateFilteredActualRows, stateFilteredDailyPlannedTargets]);
 
   // Export full report action
   const handleExportFullReport = () => {
@@ -491,6 +555,8 @@ function DashboardContent() {
       pmc: metadata.pmc,
       dprNo: metadata.dprNo,
       reportDate: metadata.reportDate,
+      selectedState,
+      stateScope: STATE_BOUNDARIES[selectedState],
       kpis: {
         millingAchieved: kpis.millingAchieved,
         tackcoatAchieved: kpis.tackcoatAchieved,
@@ -556,7 +622,7 @@ function DashboardContent() {
 
       {/* Main Content Workspace: Displays ONLY the Selected Module */}
       <main className="flex-1 px-4 lg:px-6 py-6 max-w-[1780px] w-full mx-auto space-y-6">
-        
+
         {/* =========================================================================
             MODULE 1: PROJECT OVERVIEW (Only displayed when activeModule === 'overview')
         ========================================================================== */}
@@ -568,16 +634,17 @@ function DashboardContent() {
           >
             {/* Project Overview & Schedule Milestone Module */}
             <ProjectOverviewModule
-              milestones={milestones}
+              milestones={milestones ? { ...milestones, reportDate: selectedDate || milestones.reportDate } : undefined}
               sectionScopes={sectionScopes}
               consolidatedScope={consolidatedScope}
               cumulativeAchieved={dynamicCumulativeAchieved}
+              baseline={stateFilteredBaseline}
             />
 
             {/* Daily Quick Insight Timeline & Day Scrubber */}
             <DailyQuickInsight
-              actualRows={actualRows}
-              baseline={baseline}
+              actualRows={stateFilteredActualRows}
+              baseline={stateFilteredBaseline}
               availableDates={availableDates}
               onSelectRow={row => setSelectedRow(row)}
             />
@@ -595,8 +662,8 @@ function DashboardContent() {
           >
             {/* Row 1: Physical Linear Progress & Chainage Length KPI Cards */}
             <LinearKPICards
-              actualRows={actualRows}
-              baseline={baseline}
+              actualRows={stateFilteredActualRows}
+              baseline={stateFilteredBaseline}
               selectedActivities={filters.selectedActivities}
               side={filters.side}
               selectedDate={selectedDate}
@@ -625,10 +692,11 @@ function DashboardContent() {
               </div>
               <div className="min-h-[380px]">
                 <SCurveActualChart
-                  actualRows={filteredRows}
+                  actualRows={stateFilteredActualRows}
+                  dailyPlannedTargets={stateFilteredDailyPlannedTargets}
                   milestones={milestones}
-                  baseline={baseline}
-                  cumulativeAchieved={cumulativeAchieved}
+                  baseline={stateFilteredBaseline}
+                  cumulativeAchieved={dynamicCumulativeAchieved}
                   dailyComparisons={dailyComparisons}
                   availableDates={availableDates}
                 />
@@ -640,7 +708,7 @@ function DashboardContent() {
               <div className="min-h-[380px]">
                 <ActivityCompletionBalance
                   actualRows={cumulativeRows}
-                  baseline={baseline}
+                  baseline={stateFilteredBaseline}
                   selectedActivities={filters.selectedActivities}
                   side={filters.side}
                 />
@@ -648,22 +716,24 @@ function DashboardContent() {
               <div className="min-h-[380px]">
                 <LHSRHSProgressComparison
                   actualRows={cumulativeRows}
-                  baseline={baseline}
+                  baseline={stateFilteredBaseline}
                   selectedActivities={filters.selectedActivities}
                   globalSide={filters.side}
                 />
               </div>
             </div>
 
-            {/* Row 5: Long-Term Contractual Baseline S-Curve & Trendline Pace Forecast */}
-            <div className="w-full min-h-[380px]">
-              <SCurveForecastChart
-                actualRows={filteredRows}
-                milestones={milestones}
-                baseline={baseline}
-                cumulativeAchieved={cumulativeAchieved}
-              />
-            </div>
+            {/* Row 5: Long-Term Contractual Baseline S-Curve & Trendline Pace Forecast (Temporarily hidden; toggle SHOW_FORECAST_VISUAL to restore) */}
+            {SHOW_FORECAST_VISUAL && (
+              <div className="w-full min-h-[380px]">
+                <SCurveForecastChart
+                  actualRows={filteredRows}
+                  milestones={milestones}
+                  baseline={stateFilteredBaseline}
+                  cumulativeAchieved={dynamicCumulativeAchieved}
+                />
+              </div>
+            )}
           </section>
         )}
 
@@ -679,12 +749,12 @@ function DashboardContent() {
             {/* 1. Master Linear Highway Progression Strip Chart (Strictly ON TOP) */}
             <LinearChainageStrip
               rows={filteredRows}
-              minChainage={filters.chainageBounds.from}
-              maxChainage={filters.chainageBounds.to}
-              baseline={baseline}
+              minChainage={STATE_BOUNDARIES[selectedState].minKm}
+              maxChainage={STATE_BOUNDARIES[selectedState].maxKm}
+              baseline={stateFilteredBaseline}
               selectedActivities={filters.selectedActivities}
               onSelectRow={row => setSelectedRow(row)}
-              plannedRecords={plannedRecords}
+              plannedRecords={stateFilteredPlannedRecords}
               reportDate={filters.selectedSingleDate || filters.dateRange.end || metadata.reportDate || '01.11.2026'}
               onSelectChainage={chM => setMapSelectedChainage(chM)}
               targetChainageM={stripTargetChainage}
@@ -694,7 +764,7 @@ function DashboardContent() {
             {/* 2. NH-334 Geographical GIS & Highway Digital Twin (Directly BELOW on same page) */}
             <GeographicalGISModule
               actualRows={filteredRows}
-              plannedRecords={plannedRecords}
+              plannedRecords={stateFilteredPlannedRecords}
               stripDataset={sharedStripDataset}
               selectedChainageM={mapSelectedChainage}
               onSelectChainage={chM => {
@@ -734,7 +804,7 @@ function DashboardContent() {
       {/* Executive Footer */}
       <footer className="px-6 py-4 border-t border-white/[0.06] bg-[#0B0C0E] text-xs text-slate-500 flex flex-wrap items-center justify-between gap-3 mt-8">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-slate-400">Muzaffarnagar - Haridwar Section, NH-334 (Ch. 130+560KM to 206+220KM)</span>
+          <span className="font-semibold text-slate-400">Muzaffarnagar - Haridwar Section, NH-334 (KM130+560 TO KM 206+220)</span>
           <span>•</span>
           <span>Chainage Ch. 130+560 to Km 206+220 BHS</span>
           <span>•</span>

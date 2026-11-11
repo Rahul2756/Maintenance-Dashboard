@@ -19,6 +19,7 @@ import {
   Layers,
   Crosshair
 } from 'lucide-react';
+import { StateFilter, STATE_BOUNDARIES } from '../../utils/stateFilterUtils';
 
 interface GISMapCanvasProps {
   mode: MapMode;
@@ -29,6 +30,7 @@ interface GISMapCanvasProps {
   pegmanActive: boolean;
   onPegmanDrop?: (lat: number, lon: number, chainageFmt: string) => void;
   colorMode?: 'status' | 'activity';
+  stateFilter?: StateFilter;
 }
 
 // Tile URL generators
@@ -74,7 +76,8 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
   onSelectSegment,
   pegmanActive,
   onPegmanDrop,
-  colorMode = 'status'
+  colorMode = 'status',
+  stateFilter = 'All'
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -96,7 +99,42 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
     segment?: RoadSegmentGeo;
   } | null>(null);
 
-  const milestones = React.useMemo(() => getMilestoneMarkers(5000), []);
+  // Re-center and adjust zoom dynamically based on active state boundaries
+  useEffect(() => {
+    if (stateFilter === 'Uttar Pradesh') {
+      setCenter([29.62, 77.78]);
+      setZoom(11.4);
+    } else if (stateFilter === 'Uttarakhand') {
+      setCenter([29.89, 78.02]);
+      setZoom(11.0);
+    } else {
+      setCenter([
+        (CORRIDOR_EXTENT.minLat + CORRIDOR_EXTENT.maxLat) / 2,
+        (CORRIDOR_EXTENT.minLon + CORRIDOR_EXTENT.maxLon) / 2
+      ]);
+      setZoom(10.8);
+    }
+  }, [stateFilter]);
+
+  const rawMilestones = React.useMemo(() => getMilestoneMarkers(5000), []);
+
+  const milestones = React.useMemo(() => {
+    if (!stateFilter || stateFilter === 'All') return rawMilestones;
+    const boundary = STATE_BOUNDARIES[stateFilter];
+    return rawMilestones.filter(m => m.chainageM >= boundary.minM && m.chainageM <= boundary.maxM);
+  }, [rawMilestones, stateFilter]);
+
+  const filteredLandmarks = React.useMemo(() => {
+    if (!stateFilter || stateFilter === 'All') return NH334_LANDMARKS;
+    const boundary = STATE_BOUNDARIES[stateFilter];
+    return NH334_LANDMARKS.filter(lm => lm.chainageM >= boundary.minM && lm.chainageM <= boundary.maxM);
+  }, [stateFilter]);
+
+  const filteredGpsPoints = React.useMemo(() => {
+    if (!stateFilter || stateFilter === 'All') return GPS_POINTS;
+    const boundary = STATE_BOUNDARIES[stateFilter];
+    return GPS_POINTS.filter(pt => pt.chainageM >= boundary.minM && pt.chainageM <= boundary.maxM);
+  }, [stateFilter]);
 
   // Fit Full Corridor
   const handleFitFullCorridor = useCallback(() => {
@@ -221,11 +259,11 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
     }
 
     // 3. Render Base NH-334 Polyline (Real GPS Alignment glow & route trace)
-    if (GPS_POINTS.length > 1) {
+    if (filteredGpsPoints.length > 1) {
       // Glow underlay
       ctx.beginPath();
       let started = false;
-      for (const pt of GPS_POINTS) {
+      for (const pt of filteredGpsPoints) {
         const [sx, sy] = toScreen(pt.lat, pt.lon);
         if (!started) {
           ctx.moveTo(sx, sy);
@@ -281,6 +319,10 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
 
     segments.forEach((seg) => {
       if (!seg.coordinates || seg.coordinates.length < 2) return;
+      if (seg.isExclusion || !seg.color || seg.status === 'dps' || seg.status === 'under_construction' || seg.status === 'himalayan') {
+        // Out of Scope (DPS, Under Construction, Himalayan): No fill / blank road format
+        return;
+      }
 
       const offsetDist = isDual ? (seg.side === 'LHS' ? -3.5 : seg.side === 'RHS' ? 3.5 : 0) : 0;
       const pts = computeOffsetPoints(seg.coordinates, offsetDist);
@@ -374,7 +416,7 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
     });
 
     // 6. Render Major Project Landmarks (Purquazi, Roorkee, Haridwar, etc.)
-    NH334_LANDMARKS.forEach((lm) => {
+    filteredLandmarks.forEach((lm) => {
       const [sx, sy] = toScreen(lm.lat, lm.lon);
       if (sx < -100 || sx > width + 100 || sy < -100 || sy > height + 100) return;
 

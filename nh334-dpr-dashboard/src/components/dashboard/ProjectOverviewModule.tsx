@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import {
   Calendar,
   Flag,
@@ -6,27 +6,29 @@ import {
   Timer,
   Hourglass,
   Layers,
-  MapPin,
   Droplet
 } from 'lucide-react';
 import {
   ScheduleMilestones,
   SectionQuantityScope,
   ConsolidatedQuantityScope,
-  CumulativeAchievedQuantities
+  CumulativeAchievedQuantities,
+  ProjectBaseline
 } from '../../types/dpr';
 import {
   DEFAULT_SCHEDULE_MILESTONES,
-  DEFAULT_SECTION_SCOPES,
   DEFAULT_CONSOLIDATED_SCOPE,
   DEFAULT_CUMULATIVE_ACHIEVED
 } from '../../utils/excelParser';
+import { useFilters } from '../../context/FilterContext';
+import { STATE_BOUNDARIES } from '../../utils/stateFilterUtils';
 
 export interface ProjectOverviewModuleProps {
   milestones?: ScheduleMilestones;
   sectionScopes?: SectionQuantityScope[];
   consolidatedScope?: ConsolidatedQuantityScope;
   cumulativeAchieved?: CumulativeAchievedQuantities;
+  baseline?: ProjectBaseline;
   className?: string;
 }
 
@@ -91,138 +93,58 @@ const MillingMachineIcon: React.FC<{ className?: string }> = ({ className = 'w-5
   </svg>
 );
 
+// Feature flag: Hide achieved quantity and percentage progress bar from BOQ scope cards (Set to true to re-enable)
+const SHOW_BOQ_ACHIEVED_PROGRESS = false;
+
 export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
   milestones = DEFAULT_SCHEDULE_MILESTONES,
-  sectionScopes = DEFAULT_SECTION_SCOPES,
   consolidatedScope = DEFAULT_CONSOLIDATED_SCOPE,
   cumulativeAchieved = DEFAULT_CUMULATIVE_ACHIEVED,
+  baseline,
   className = ''
 }) => {
-  const [selectedSection, setSelectedSection] = useState<'all' | 'sec1' | 'sec2'>('all');
+  const { filters } = useFilters();
+  const selectedState = filters.state || 'All';
+  const stateBoundary = STATE_BOUNDARIES[selectedState];
 
-  const sec1 = sectionScopes[0] || DEFAULT_SECTION_SCOPES[0];
-  const sec2 = sectionScopes[1] || DEFAULT_SECTION_SCOPES[1];
+  // Derived project timeline calculations dynamically computed from start date, completion date, and report date
+  const parseDMY = (str: string): Date | null => {
+    if (!str) return null;
+    const parts = str.split('.').map(Number);
+    if (parts.length < 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) return null;
+    return new Date(parts[2], parts[1] - 1, parts[0]);
+  };
 
-  // Derived timeline calculations
-  const totalDays = milestones.totalDays || (milestones.daysElapsed + milestones.daysRemaining) || 70;
-  const timeElapsedPct = totalDays > 0 ? (milestones.daysElapsed / totalDays) * 100 : 5.7;
+  const startObj = parseDMY(milestones.startDate) || new Date(2026, 9, 13);
+  const compObj = parseDMY(milestones.completionDate) || new Date(2027, 0, 10);
+  const repObj = parseDMY(milestones.reportDate) || new Date(2026, 10, 5);
 
-  // Selected Section View Scope & Progress Calculations
-  const currentView = useMemo(() => {
-    if (selectedSection === 'sec1') {
-      const mScope = sec1.millingSqm.total;
-      const tScope = sec1.tackCoatSqm.total;
-      const dScope = sec1.dbmCum.total;
-      const bScope = sec1.bcCum.total;
+  const msInDay = 86400000;
+  const totalDays = Math.max(1, Math.round((compObj.getTime() - startObj.getTime()) / msInDay));
+  const daysElapsed = Math.max(0, Math.round((repObj.getTime() - startObj.getTime()) / msInDay));
+  const daysRemaining = Math.max(0, Math.round((compObj.getTime() - repObj.getTime()) / msInDay));
+  const timeElapsedPct = totalDays > 0 ? (daysElapsed / totalDays) * 100 : 0;
 
-      // Section 1 (Muzaffarnagar - Roorkee) is prior/future phase; actual DPR logging is on Sec 2
-      const mAchieved = 0;
-      const tAchieved = 0;
-      const dAchieved = 0;
-      const bAchieved = 0;
+  // Authoritative contractual BOQ targets dynamically reflecting state selection
+  const millingScope = baseline?.totalMillingTargetSqm ?? (consolidatedScope?.millingSqm?.total || consolidatedScope?.millingSqm?.mcw || 681284);
+  const tackCoatScope = baseline?.totalTackcoatTargetSqm ?? (consolidatedScope?.tackCoatSqm?.total || consolidatedScope?.tackCoatSqm?.mcw || 1848270.5);
+  const dbmScope = baseline?.totalDbmTargetCum ?? (consolidatedScope?.dbmCum || 37026.246);
+  const bcScope = baseline?.totalBcTargetCum ?? (consolidatedScope?.bcPmbCum || 46679.48);
 
-      return {
-        name: sec1.sectionName,
-        span: sec1.chainageSpan,
-        lengthKm: sec1.lengthKm,
-        milling: {
-          scope: mScope,
-          achieved: mAchieved,
-          pct: mScope > 0 ? (mAchieved / mScope) * 100 : 0
-        },
-        tackCoat: {
-          scope: tScope,
-          achieved: tAchieved,
-          pct: tScope > 0 ? (tAchieved / tScope) * 100 : 0
-        },
-        dbm: {
-          scope: dScope,
-          achieved: dAchieved,
-          pct: dScope > 0 ? (dAchieved / dScope) * 100 : 0
-        },
-        bc: {
-          scope: bScope,
-          achieved: bAchieved,
-          pct: bScope > 0 ? (bAchieved / bScope) * 100 : 0
-        }
-      };
-    }
+  const millingAchieved = cumulativeAchieved?.millingSqm || 0;
+  const tackCoatAchieved = cumulativeAchieved?.tackCoatSqm || 0;
+  const dbmAchieved = cumulativeAchieved?.dbmCum || 0;
+  const bcAchieved = cumulativeAchieved?.bcCum || 0;
 
-    if (selectedSection === 'sec2') {
-      const mScope = sec2.millingSqm.total;
-      const tScope = sec2.tackCoatSqm.total;
-      const dScope = sec2.dbmCum.total;
-      const bScope = sec2.bcCum.total;
+  const millingPct = millingScope > 0 ? (millingAchieved / millingScope) * 100 : 0;
+  const tackCoatPct = tackCoatScope > 0 ? (tackCoatAchieved / tackCoatScope) * 100 : 0;
+  const dbmPct = dbmScope > 0 ? (dbmAchieved / dbmScope) * 100 : 0;
+  const bcPct = bcScope > 0 ? (bcAchieved / bcScope) * 100 : 0;
 
-      const mAchieved = cumulativeAchieved.millingSqm;
-      const tAchieved = cumulativeAchieved.tackCoatSqm;
-      const dAchieved = cumulativeAchieved.dbmCum;
-      const bAchieved = cumulativeAchieved.bcCum;
-
-      return {
-        name: sec2.sectionName,
-        span: sec2.chainageSpan,
-        lengthKm: sec2.lengthKm,
-        milling: {
-          scope: mScope,
-          achieved: mAchieved,
-          pct: mScope > 0 ? (mAchieved / mScope) * 100 : 0
-        },
-        tackCoat: {
-          scope: tScope,
-          achieved: tAchieved,
-          pct: tScope > 0 ? (tAchieved / tScope) * 100 : 0
-        },
-        dbm: {
-          scope: dScope,
-          achieved: dAchieved,
-          pct: dScope > 0 ? (dAchieved / dScope) * 100 : 0
-        },
-        bc: {
-          scope: bScope,
-          achieved: bAchieved,
-          pct: bScope > 0 ? (bAchieved / bScope) * 100 : 0
-        }
-      };
-    }
-
-    // Default 'all' - Consolidated Scope
-    const mScope = consolidatedScope.millingSqm.mcw || 515298;
-    const tScope = consolidatedScope.tackCoatSqm.mcw || 1494585;
-    const dScope = consolidatedScope.dbmCum || 37026.246;
-    const bScope = consolidatedScope.bcPmbCum || 46679.48;
-
-    const mAchieved = cumulativeAchieved.millingSqm;
-    const tAchieved = cumulativeAchieved.tackCoatSqm;
-    const dAchieved = cumulativeAchieved.dbmCum;
-    const bAchieved = cumulativeAchieved.bcCum;
-
-    return {
-      name: 'All Sections',
-      span: 'CH. 130+560 to 206+220',
-      lengthKm: 75.66,
-      milling: {
-        scope: mScope,
-        achieved: mAchieved,
-        pct: mScope > 0 ? (mAchieved / mScope) * 100 : 0
-      },
-      tackCoat: {
-        scope: tScope,
-        achieved: tAchieved,
-        pct: tScope > 0 ? (tAchieved / tScope) * 100 : 0
-      },
-      dbm: {
-        scope: dScope,
-        achieved: dAchieved,
-        pct: dScope > 0 ? (dAchieved / dScope) * 100 : 0
-      },
-      bc: {
-        scope: bScope,
-        achieved: bAchieved,
-        pct: bScope > 0 ? (bAchieved / bScope) * 100 : 0
-      }
-    };
-  }, [selectedSection, sec1, sec2, consolidatedScope, cumulativeAchieved]);
+  const millingBalance = Math.max(0, millingScope - millingAchieved);
+  const tackCoatBalance = Math.max(0, tackCoatScope - tackCoatAchieved);
+  const dbmBalance = Math.max(0, dbmScope - dbmAchieved);
+  const bcBalance = Math.max(0, bcScope - bcAchieved);
 
   return (
     <div className={`space-y-6 w-full ${className}`}>
@@ -299,7 +221,7 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
                 Active construction window
               </span>
               <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-xs w-fit shadow-sm">
-                {milestones.daysElapsed} days
+                {daysElapsed} days
               </span>
             </div>
           </div>
@@ -317,7 +239,7 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
                 To milestone finish
               </span>
               <span className="mt-3 inline-flex items-center px-4 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-[#00E599] font-mono font-bold text-xs w-fit shadow-sm">
-                {milestones.daysRemaining} days
+                {daysRemaining} days
               </span>
             </div>
           </div>
@@ -328,7 +250,7 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
               {timeElapsedPct.toFixed(1)}% Elapsed
             </div>
             <div className="text-[11px] text-slate-300 font-mono font-medium mt-0.5">
-              {milestones.daysElapsed} / {totalDays} Days
+              {daysElapsed} / {totalDays} Days
             </div>
             <div className="mt-3.5 w-full bg-[#112420] border border-[#0F5A46]/50 rounded-full h-[16px] sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
               <div
@@ -367,57 +289,15 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#08201A] border border-[#0F5A46] text-xs font-medium shadow-sm">
             <HighwayRoadIcon className="w-4 h-4 text-[#00E599]" />
             <span className="text-white font-semibold">NH-334:</span>
-            <span className="text-[#00E599] font-bold font-mono">75.66 km</span>
-            <span className="text-slate-300">Total Corridor</span>
-          </div>
-        </div>
-
-        {/* Corridor Scope Selector */}
-        <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-6 pt-5 border-t border-white/[0.08]">
-          <div className="flex items-center gap-1.5 text-xs text-white font-semibold mr-1">
-            <MapPin className="w-4 h-4 text-[#00E599]" />
-            <span>Corridor Scope View:</span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-            <button
-              type="button"
-              onClick={() => setSelectedSection('all')}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs transition-all cursor-pointer ${
-                selectedSection === 'all'
-                  ? 'bg-[#003B2C] text-[#00E599] border-2 border-[#00E599] shadow-md font-bold'
-                  : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/25 hover:text-white font-medium'
-              }`}
-            >
-              All Sections (75.66 km)
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedSection('sec1')}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs transition-all cursor-pointer ${
-                selectedSection === 'sec1'
-                  ? 'bg-[#003B2C] text-[#00E599] border-2 border-[#00E599] shadow-md font-bold'
-                  : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/25 hover:text-white font-medium'
-              }`}
-            >
-              Muzaffarnagar – Roorkee (38.44 km)
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedSection('sec2')}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs transition-all cursor-pointer ${
-                selectedSection === 'sec2'
-                  ? 'bg-[#003B2C] text-[#00E599] border-2 border-[#00E599] shadow-md font-bold'
-                  : 'bg-[#091218] text-slate-300 border border-white/10 hover:border-white/25 hover:text-white font-medium'
-              }`}
-            >
-              Roorkee – Haridwar (37.22 km)
-            </button>
+            <span className="text-[#00E599] font-bold font-mono">{stateBoundary.lengthKm.toFixed(2)} km</span>
+            <span className="text-slate-300">
+              {selectedState === 'All' ? 'Total Corridor' : `${selectedState} (Ch. ${stateBoundary.minKm.toFixed(3)} to ${stateBoundary.maxKm.toFixed(3)})`}
+            </span>
           </div>
         </div>
 
         {/* 4 BOQ Activity Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 mt-7">
           {/* Card 1: Milling */}
           <div className="rounded-[22px] sm:rounded-[24px] bg-[#091218] border border-[#143028] p-5 sm:p-6 lg:p-7 flex flex-col justify-between shadow-lg hover:border-[#0F5A46] transition-all duration-200">
             <div>
@@ -436,23 +316,27 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
               </div>
 
               <div className="text-xl sm:text-2xl font-bold text-white font-mono tracking-tight my-2.5 leading-none">
-                {formatNumber(currentView.milling.scope)}
+                {formatNumber(millingScope)}
               </div>
 
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
-                <span>Achieved: {formatNumber(currentView.milling.achieved, 1)} Sqm</span>
-                <span className="text-white font-bold text-xs sm:text-sm font-mono">
-                  {currentView.milling.pct.toFixed(1)}%
-                </span>
-              </div>
+              {SHOW_BOQ_ACHIEVED_PROGRESS && (
+                <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
+                  <span>Achieved: {formatNumber(millingAchieved, 1)} Sqm</span>
+                  <span className="text-white font-bold text-xs sm:text-sm font-mono">
+                    {millingPct.toFixed(1)}%
+                  </span>
+                </div>
+              )}
             </div>
 
-            <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
-              <div
-                className="h-full rounded-full bg-[#00E599] transition-all duration-700"
-                style={{ width: `${Math.min(100, Math.max(0, currentView.milling.pct))}%` }}
-              />
-            </div>
+            {SHOW_BOQ_ACHIEVED_PROGRESS && (
+              <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
+                <div
+                  className="h-full rounded-full bg-[#00E599] transition-all duration-700"
+                  style={{ width: `${Math.min(100, Math.max(0, millingPct))}%` }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Card 2: Tack Coat */}
@@ -473,23 +357,27 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
               </div>
 
               <div className="text-xl sm:text-2xl font-bold text-white font-mono tracking-tight my-2.5 leading-none">
-                {formatNumber(currentView.tackCoat.scope)}
+                {formatNumber(tackCoatScope)}
               </div>
 
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
-                <span>Achieved: {formatNumber(currentView.tackCoat.achieved, 1)} Sqm</span>
-                <span className="text-white font-bold text-xs sm:text-sm font-mono">
-                  {currentView.tackCoat.pct.toFixed(1)}%
-                </span>
-              </div>
+              {SHOW_BOQ_ACHIEVED_PROGRESS && (
+                <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
+                  <span>Achieved: {formatNumber(tackCoatAchieved, 1)} Sqm</span>
+                  <span className="text-white font-bold text-xs sm:text-sm font-mono">
+                    {tackCoatPct.toFixed(1)}%
+                  </span>
+                </div>
+              )}
             </div>
 
-            <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
-              <div
-                className="h-full rounded-full bg-[#00E599] transition-all duration-700"
-                style={{ width: `${Math.min(100, Math.max(0, currentView.tackCoat.pct))}%` }}
-              />
-            </div>
+            {SHOW_BOQ_ACHIEVED_PROGRESS && (
+              <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
+                <div
+                  className="h-full rounded-full bg-[#00E599] transition-all duration-700"
+                  style={{ width: `${Math.min(100, Math.max(0, tackCoatPct))}%` }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Card 3: DBM (Bituminous Base) */}
@@ -510,23 +398,27 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
               </div>
 
               <div className="text-xl sm:text-2xl font-bold text-white font-mono tracking-tight my-2.5 leading-none">
-                {formatNumber(currentView.dbm.scope, 0)}
+                {formatNumber(dbmScope, 0)}
               </div>
 
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
-                <span>Achieved: {formatNumber(currentView.dbm.achieved, 1)} Cum</span>
-                <span className="text-white font-bold text-xs sm:text-sm font-mono">
-                  {currentView.dbm.pct.toFixed(1)}%
-                </span>
-              </div>
+              {SHOW_BOQ_ACHIEVED_PROGRESS && (
+                <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
+                  <span>Achieved: {formatNumber(dbmAchieved, 1)} Cum</span>
+                  <span className="text-white font-bold text-xs sm:text-sm font-mono">
+                    {dbmPct.toFixed(1)}%
+                  </span>
+                </div>
+              )}
             </div>
 
-            <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
-              <div
-                className="h-full rounded-full bg-[#00E599] transition-all duration-700"
-                style={{ width: `${Math.min(100, Math.max(0, currentView.dbm.pct))}%` }}
-              />
-            </div>
+            {SHOW_BOQ_ACHIEVED_PROGRESS && (
+              <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
+                <div
+                  className="h-full rounded-full bg-[#00E599] transition-all duration-700"
+                  style={{ width: `${Math.min(100, Math.max(0, dbmPct))}%` }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Card 4: BC (Wearing Course) */}
@@ -547,23 +439,27 @@ export const ProjectOverviewModule: React.FC<ProjectOverviewModuleProps> = ({
               </div>
 
               <div className="text-xl sm:text-2xl font-bold text-white font-mono tracking-tight my-2.5 leading-none">
-                {formatNumber(currentView.bc.scope, 0)}
+                {formatNumber(bcScope, 0)}
               </div>
 
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
-                <span>Achieved: {formatNumber(currentView.bc.achieved, 1)} Cum</span>
-                <span className="text-white font-bold text-xs sm:text-sm font-mono">
-                  {currentView.bc.pct.toFixed(1)}%
-                </span>
-              </div>
+              {SHOW_BOQ_ACHIEVED_PROGRESS && (
+                <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-2">
+                  <span>Achieved: {formatNumber(bcAchieved, 1)} Cum</span>
+                  <span className="text-white font-bold text-xs sm:text-sm font-mono">
+                    {bcPct.toFixed(1)}%
+                  </span>
+                </div>
+              )}
             </div>
 
-            <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
-              <div
-                className="h-full rounded-full bg-[#00E599] transition-all duration-700"
-                style={{ width: `${Math.min(100, Math.max(0, currentView.bc.pct))}%` }}
-              />
-            </div>
+            {SHOW_BOQ_ACHIEVED_PROGRESS && (
+              <div className="w-full bg-[#112420] border border-[#0F5A46]/40 rounded-full h-3.5 sm:h-[18px] overflow-hidden p-[2px] shadow-inner">
+                <div
+                  className="h-full rounded-full bg-[#00E599] transition-all duration-700"
+                  style={{ width: `${Math.min(100, Math.max(0, bcPct))}%` }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>

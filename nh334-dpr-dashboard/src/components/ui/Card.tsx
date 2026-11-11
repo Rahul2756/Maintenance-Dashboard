@@ -7,13 +7,13 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
-export const Card: React.FC<CardProps> = ({
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(({
   children,
   hoverEffect = false,
   glow = 'none',
   className = '',
   ...props
-}) => {
+}, ref) => {
   const glowStyles = {
     none: 'border-white/10 shadow-lg shadow-black/40',
     emerald: 'border-emerald-500/40 shadow-[0_4px_25px_-4px_rgba(16,185,129,0.22)] ring-1 ring-emerald-500/20',
@@ -25,6 +25,7 @@ export const Card: React.FC<CardProps> = ({
 
   return (
     <div
+      ref={ref}
       className={`relative rounded-2xl bg-[#13161D] backdrop-blur-md border border-white/10 overflow-hidden transition-all duration-300 ${
         hoverEffect ? 'hover:border-white/25 hover:shadow-2xl hover:-translate-y-0.5' : ''
       } ${glowStyles[glow]} ${className}`}
@@ -33,7 +34,8 @@ export const Card: React.FC<CardProps> = ({
       {children}
     </div>
   );
-};
+});
+Card.displayName = 'Card';
 
 export const CardHeader: React.FC<{
   children: React.ReactNode;

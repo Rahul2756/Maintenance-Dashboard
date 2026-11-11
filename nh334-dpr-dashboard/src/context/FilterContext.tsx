@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
-import { ActivityType, ActualDPRRow, GlobalFilterState } from '../types/dpr';
+import { ActivityType, ActualDPRRow, GlobalFilterState, LinearLaneFilter, LinearStretchFilter, StateFilter } from '../types/dpr';
+import { STATE_BOUNDARIES } from '../utils/stateFilterUtils';
 
-export type { GlobalFilterState };
+export type { GlobalFilterState, LinearLaneFilter, LinearStretchFilter, StateFilter };
+export { STATE_BOUNDARIES };
 
 export type ModuleTab = 'all' | 'overview' | 'analytics' | 'spatial' | 'logs' | 'dpr';
 
@@ -56,7 +58,10 @@ export const CHAINAGE_PRESETS: Record<'All' | 'DPR' | 'Sec1' | 'Sec2', ChainageP
 
 export const DEFAULT_FILTER_STATE: GlobalFilterState = {
   side: 'Both',
+  state: 'All',
   lane: 'All',
+  linearLane: 'All',
+  linearStretch: 'All',
   selectedActivities: ['Milling', 'Tackcoat', 'DBM', 'BC'],
   dateRange: { start: '14.10.2026', end: '01.11.2026' },
   selectedSingleDate: '01.11.2026',
@@ -73,8 +78,14 @@ interface FilterContextType {
   setActiveModule: (module: ModuleTab) => void;
   scrollToModule: (module: ModuleTab) => void;
   setSide: (side: 'LHS' | 'RHS' | 'Both') => void;
+  state: StateFilter;
+  setState: (state: StateFilter) => void;
   setLane: (lane: 'All' | 'F/L' | 'S/L' | 'FW' | 'SR') => void;
   lane: 'All' | 'F/L' | 'S/L' | 'FW' | 'SR';
+  linearLane: LinearLaneFilter;
+  setLinearLane: (lane: LinearLaneFilter) => void;
+  linearStretch: LinearStretchFilter;
+  setLinearStretch: (stretch: LinearStretchFilter) => void;
   toggleActivity: (activity: ActivityType, singleMode?: boolean) => void;
   setSelectedActivities: (activities: ActivityType[]) => void;
   selectAllActivities: () => void;
@@ -143,8 +154,20 @@ export const FilterProvider: React.FC<{
     setFilters(prev => ({ ...prev, side }));
   }, []);
 
+  const setState = useCallback((state: StateFilter) => {
+    setFilters(prev => ({ ...prev, state }));
+  }, []);
+
   const setLane = useCallback((lane: 'All' | 'F/L' | 'S/L' | 'FW' | 'SR') => {
     setFilters(prev => ({ ...prev, lane }));
+  }, []);
+
+  const setLinearLane = useCallback((linearLane: LinearLaneFilter) => {
+    setFilters(prev => ({ ...prev, linearLane }));
+  }, []);
+
+  const setLinearStretch = useCallback((linearStretch: LinearStretchFilter) => {
+    setFilters(prev => ({ ...prev, linearStretch }));
   }, []);
 
   const toggleActivity = useCallback((activity: ActivityType, singleMode: boolean = false) => {
@@ -239,6 +262,10 @@ export const FilterProvider: React.FC<{
     const earliest = availableDates?.[0] || '14.10.2026';
     setFilters({
       side: 'Both',
+      state: 'All',
+      lane: 'All',
+      linearLane: 'All',
+      linearStretch: 'All',
       selectedActivities: ['Milling', 'Tackcoat', 'DBM', 'BC'],
       dateRange: {
         start: earliest,
@@ -255,6 +282,7 @@ export const FilterProvider: React.FC<{
   const filterStats = useMemo(() => {
     const hasSingleDate = filters.selectedSingleDate !== null;
     const hasSideFilter = filters.side !== 'Both';
+    const hasStateFilter = Boolean(filters.state && filters.state !== 'All');
     const hasActivityFilter = filters.selectedActivities.length !== 4;
     const hasChainageFilter = filters.chainageScope !== 'DPR';
     const hasAnomalyFilter = filters.anomaliesOnly;
@@ -263,6 +291,7 @@ export const FilterProvider: React.FC<{
     const count =
       (hasSingleDate ? 1 : 0) +
       (hasSideFilter ? 1 : 0) +
+      (hasStateFilter ? 1 : 0) +
       (hasActivityFilter ? 1 : 0) +
       (hasChainageFilter ? 1 : 0) +
       (hasAnomalyFilter ? 1 : 0) +
@@ -272,6 +301,7 @@ export const FilterProvider: React.FC<{
       activeFilterCount: count,
       hasSingleDate,
       hasSideFilter,
+      hasStateFilter,
       hasActivityFilter,
       hasChainageFilter,
       hasAnomalyFilter,
@@ -296,7 +326,10 @@ export const FilterProvider: React.FC<{
       setActiveModule,
       scrollToModule,
       setSide,
+      setState,
       setLane,
+      setLinearLane,
+      setLinearStretch,
       toggleActivity,
       setSelectedActivities,
       selectAllActivities,
@@ -313,7 +346,10 @@ export const FilterProvider: React.FC<{
       filterStats,
       // Convenience properties
       side: filters.side,
+      state: filters.state || 'All',
       lane: filters.lane || 'All',
+      linearLane: filters.linearLane || 'All',
+      linearStretch: filters.linearStretch || 'All',
       selectedActivities: filters.selectedActivities,
       scope: filters.chainageScope,
       setScope: setChainageScope,
@@ -331,7 +367,10 @@ export const FilterProvider: React.FC<{
       activeModule,
       scrollToModule,
       setSide,
+      setState,
       setLane,
+      setLinearLane,
+      setLinearStretch,
       toggleActivity,
       setSelectedActivities,
       selectAllActivities,
@@ -389,6 +428,14 @@ export function rowMatchesGlobalFilter(row: ActualDPRRow, filters: GlobalFilterS
   // 2. Side filter ('Both' accepts all, otherwise must match 'LHS' or 'RHS')
   if (filters.side !== 'Both') {
     if (row.side !== filters.side) return false;
+  }
+
+  // 2.2 State filter
+  if (filters.state && filters.state !== 'All') {
+    const boundary = STATE_BOUNDARIES[filters.state];
+    const rowMin = Math.min(row.fromChainage, row.toChainage);
+    const rowMax = Math.max(row.fromChainage, row.toChainage);
+    if (rowMax < boundary.minKm || rowMin > boundary.maxKm) return false;
   }
 
   // 2.5 Lane filter ('All' accepts all)

@@ -13,6 +13,8 @@ import {
   STATUS_COLORS,
   STRIP_ACTIVITIES
 } from '../../utils/gisUtils';
+import { useFilters } from '../../context/FilterContext';
+import { STATE_BOUNDARIES } from '../../utils/stateFilterUtils';
 import { GISMapCanvas } from './GISMapCanvas';
 import { RoadInspectionPanel } from './RoadInspectionPanel';
 import { StreetViewModal } from './StreetViewModal';
@@ -62,21 +64,26 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Map Mode: satellite | hybrid | roadmap | 3d
-  const [mapMode, setMapMode] = useState<MapMode>('hybrid');
+  // Read Global State Filter
+  const { filters } = useFilters();
+  const selectedState = filters.state || 'All';
+  const stateBoundary = STATE_BOUNDARIES[selectedState];
+
+  // Map Mode: satellite | hybrid | roadmap | 3d (Default to 3D GIS)
+  const [mapMode, setMapMode] = useState<MapMode>('3d');
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
-  // Synchronized Filters
+  // Synchronized Filters (Default activity is Milling; strictly 5 core activities, All Activities completely removed)
   const [sideFilter, setSideFilter] = useState<HighwaySide>('Both');
-  const [activityFilter, setActivityFilter] = useState<string>('all');
+  const [activityFilter, setActivityFilter] = useState<string>('milling');
   
   // Date View State (Overall View vs Selected Date View)
   const allDates = stripDataset?.availableDates && stripDataset.availableDates.length > 0
     ? stripDataset.availableDates
     : externalDates && externalDates.length > 0
     ? externalDates
-    : ['14-Oct-2026', '23-Oct-2026', '01-Nov-2026'];
-  const defaultLatestDate = allDates[allDates.length - 1] || '01-Nov-2026';
+    : ['14-Oct-2026', '23-Oct-2026', '01-Nov-2026', '05-Nov-2026'];
+  const defaultLatestDate = allDates[allDates.length - 1] || '05-Nov-2026';
 
   const [dateMode, setDateMode] = useState<'overall' | 'selected'>('overall');
   const [activeDate, setActiveDate] = useState<string>(defaultLatestDate);
@@ -103,9 +110,10 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
       stripDataset,
       activityFilter,
       sideFilter,
-      dateMode === 'selected' ? activeDate : 'all'
+      dateMode === 'selected' ? activeDate : defaultLatestDate,
+      selectedState
     );
-  }, [actualRows, plannedRecords, stripDataset, activityFilter, sideFilter, dateMode, activeDate]);
+  }, [actualRows, plannedRecords, stripDataset, activityFilter, sideFilter, dateMode, activeDate, defaultLatestDate, selectedState]);
 
   // Sync external selected chainage
   useEffect(() => {
@@ -177,11 +185,11 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
   const handleJumpToSearch = () => {
     if (!searchInput.trim()) return;
     const chM = parseChainageStrToM(searchInput);
-    if (chM >= CORRIDOR_EXTENT.projectStartM - 2000 && chM <= CORRIDOR_EXTENT.projectEndM + 2000) {
+    if (chM >= stateBoundary.minM - 500 && chM <= stateBoundary.maxM + 500) {
       handleSelectChainage(chM);
       setSearchInput('');
     } else {
-      alert(`Chainage outside corridor bounds (Ch. 130+560 to 206+220)`);
+      alert(`Chainage Ch. ${formatChainageM(chM, '')} is outside ${stateBoundary.label} corridor bounds (Ch. ${formatChainageM(stateBoundary.minM, '')} to ${formatChainageM(stateBoundary.maxM, '')})`);
     }
   };
 
@@ -246,7 +254,7 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
               NH-334 Geographical GIS & Highway Digital Twin
             </h2>
             <p className="text-xs text-slate-400 font-mono mt-0.5">
-              Interactive Corridor Inspection | Muzaffarnagar – Haridwar | Ch. 130+560 to Ch. 206+220
+              Interactive Corridor Inspection | Muzaffarnagar – Haridwar | {selectedState === 'All' ? 'Ch. 130+560 to Ch. 206+220' : `${selectedState} (Ch. ${stateBoundary.minKm.toFixed(3)} to Ch. ${stateBoundary.maxKm.toFixed(3)})`}
             </p>
           </div>
         </div>
@@ -255,11 +263,11 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
         <div className="flex items-center gap-2.5 font-mono text-xs">
           <div className="bg-[#0B0C0E] px-3 py-1.5 rounded-xl border border-white/5 flex items-center gap-2 text-slate-300">
             <Navigation className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Span: <strong className="text-white">75.660 km</strong></span>
+            <span>Span: <strong className="text-white">{stateBoundary.lengthKm.toFixed(3)} km</strong></span>
           </div>
           <div className="bg-[#0B0C0E] px-3 py-1.5 rounded-xl border border-white/5 flex items-center gap-2 text-slate-300">
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span>Ch. 130+560 → 206+220</span>
+            <span>Ch. {stateBoundary.minKm.toFixed(3)} → {stateBoundary.maxKm.toFixed(3)}</span>
           </div>
         </div>
       </div>
@@ -376,9 +384,9 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
 
           {/* Reset / Full Corridor */}
           <button
-            onClick={() => handleSelectChainage(169000)}
+            onClick={() => handleSelectChainage(stateBoundary.minM)}
             className="w-8 h-8 rounded-xl bg-[#0B0C0E] hover:bg-white/5 border border-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-            title="Reset to Manglaur (Ch. 169+000)"
+            title={`Reset to corridor start (Ch. ${formatChainageM(stateBoundary.minM, '')})`}
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
@@ -476,27 +484,27 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
           )}
         </div>
 
-        {/* Status Legend Pills */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 text-slate-300" title="Completed by Our Team">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
-            <span>Completed</span>
+        {/* Status Legend Pills (Progress Categories & Out of Scope No Fill) */}
+        <div className="flex items-center gap-4 flex-wrap text-xs font-mono">
+          <div className="flex items-center gap-1.5 text-slate-300" title="Completed segments">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] shadow-sm shadow-[#10B981]/50" />
+            <span className="text-emerald-300 font-medium">Completed</span>
           </div>
-          <div className="flex items-center gap-1.5 text-slate-300" title="Work Done by DPS">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6]" />
-            <span>DPS Zone</span>
+          <div className="flex items-center gap-1.5 text-slate-300" title="In-progress segments">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#06B6D4] shadow-sm shadow-[#06B6D4]/50" />
+            <span className="text-cyan-300 font-medium">In Progress</span>
           </div>
-          <div className="flex items-center gap-1.5 text-slate-300" title="Under Construction">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D97706]" />
-            <span>Under Construction</span>
+          <div className="flex items-center gap-1.5 text-slate-300" title="Planned future segments">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#3B82F6] shadow-sm shadow-[#3B82F6]/50" />
+            <span className="text-blue-300 font-medium">Planned</span>
           </div>
-          <div className="flex items-center gap-1.5 text-slate-300" title="Himalayan">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#EC4899]" />
-            <span>Himalayan</span>
+          <div className="flex items-center gap-1.5 text-slate-300" title="Delayed / Overdue uncompleted segments">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444] shadow-sm shadow-[#EF4444]/50" />
+            <span className="text-rose-300 font-medium">Delayed</span>
           </div>
-          <div className="flex items-center gap-1.5 text-slate-300" title="Remaining Eligible Scope">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#0284C7]" />
-            <span>Remaining Scope</span>
+          <div className="flex items-center gap-1.5 text-slate-400" title="Work Done by DPS, Himalayan, Under Construction (Out of Scope - No Fill / Blank Road)">
+            <span className="w-2.5 h-2.5 rounded-full border border-slate-500 bg-transparent" />
+            <span className="text-slate-400 font-medium">Out of Scope (No Fill)</span>
           </div>
         </div>
       </div>
@@ -508,6 +516,12 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
             <Highway3DDigitalTwin
               actualRows={actualRows}
               plannedRecords={plannedRecords}
+              stripDataset={stripDataset}
+              sideFilter={sideFilter}
+              selectedActivityFilter={activityFilter}
+              onActivityChange={(actId) => setActivityFilter(actId)}
+              onSideChange={(side) => setSideFilter(side)}
+              activeReportingDate={dateMode === 'selected' ? activeDate : defaultLatestDate}
               selectedRow={selectedRow}
               onSelectRow={row => {
                 if (onSelectRow) onSelectRow(row);
@@ -516,8 +530,8 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
                   handleSelectChainage(m);
                 }
               }}
-              minChainage={130.560}
-              maxChainage={206.220}
+              minChainage={stateBoundary.minKm}
+              maxChainage={stateBoundary.maxKm}
               availableDates={allDates}
               qcLogs={qcLogs}
             />
@@ -529,6 +543,7 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
             selectedChainageM={selectedChainage}
             onSelectChainage={handleSelectChainage}
             onSelectSegment={handleSelectSegment}
+            stateFilter={selectedState}
             pegmanActive={pegmanActive}
             onPegmanDrop={handlePegmanDrop}
           />

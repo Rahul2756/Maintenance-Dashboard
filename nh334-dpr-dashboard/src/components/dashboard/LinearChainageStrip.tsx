@@ -6,6 +6,8 @@ import { GitCommit, Layers, Flame, Truck, MapPin, CheckCircle2, Clock, AlertCirc
 import { formatChainagePlus } from '../../utils/excelParser';
 import { SpatialMapModule } from '../modules/SpatialMapModule';
 import { StripChartDataset } from '../../types/stripChart';
+import { useFilters } from '../../context/FilterContext';
+import { STATE_BOUNDARIES } from '../../utils/stateFilterUtils';
 
 export type StripCompletionStatus = 'completed' | 'in_progress' | 'delayed' | 'future_planned';
 
@@ -52,15 +54,19 @@ export const LinearChainageStrip: React.FC<LinearChainageStripProps> = ({
   targetChainageM,
   onStripDatasetLoaded
 }) => {
+  const { filters } = useFilters();
+  const selectedState = filters.state || 'All';
+  const stateBoundary = STATE_BOUNDARIES[selectedState];
+
   const [stripView, setStripView] = useState<'grid' | 'strip'>('grid');
   const [hoveredSegment, setHoveredSegment] = useState<CorridorStripSegment | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const [colorMode, setColorMode] = useState<'status' | 'activity'>('status');
   const [statusFilter, setStatusFilter] = useState<'all' | StripCompletionStatus>('all');
 
-  // Base track strictly to fixed baseline bounds (169.000 to 206.220 km)
-  const effectiveMin = baseline?.minChainage ?? minChainage;
-  const effectiveMax = baseline?.maxChainage ?? maxChainage;
+  // Base track strictly to fixed baseline bounds (UP: 130.560 to 151.360; UK: 151.360 to 206.220; All: 130.560 to 206.220)
+  const effectiveMin = baseline?.minChainage ?? (selectedState !== 'All' ? stateBoundary.minKm : minChainage);
+  const effectiveMax = baseline?.maxChainage ?? (selectedState !== 'All' ? stateBoundary.maxKm : maxChainage);
   const totalLengthKm = effectiveMax - effectiveMin || 1;
 
   const isMillingSelected = !selectedActivities || selectedActivities.includes('Milling');
@@ -334,7 +340,13 @@ export const LinearChainageStrip: React.FC<LinearChainageStripProps> = ({
             }`}
           >
             <GitCommit className="w-3.5 h-3.5 text-cyan-400" />
-            <span>NH-334 Linear Progression Grid (Ch. 130+560 to 206+200)</span>
+            <span>
+              NH-334 Linear Progression Grid (
+              {selectedState === 'All'
+                ? 'Ch. 130+560 to 206+220'
+                : `${stateBoundary.shortLabel}: Ch. ${stateBoundary.minKm.toFixed(3)} to ${stateBoundary.maxKm.toFixed(3)}`}
+              )
+            </span>
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">
               Master Format
             </span>
@@ -350,7 +362,13 @@ export const LinearChainageStrip: React.FC<LinearChainageStripProps> = ({
             }`}
           >
             <Layers className="w-3.5 h-3.5 text-slate-400" />
-            <span>DPR Execution Strip Map (Ch. 169+000 to 206+220)</span>
+            <span>
+              DPR Execution Strip Map (
+              {selectedState === 'All'
+                ? 'Ch. 169+000 to 206+220'
+                : `${stateBoundary.shortLabel}: Ch. ${stateBoundary.minKm.toFixed(3)} to ${stateBoundary.maxKm.toFixed(3)}`}
+              )
+            </span>
           </button>
         </div>
 

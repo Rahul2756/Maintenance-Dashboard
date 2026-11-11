@@ -55,6 +55,8 @@ export const HeaderFilterBar: React.FC<HeaderFilterBarProps> = ({
     activeModule,
     scrollToModule,
     setSide,
+    state,
+    setState,
     toggleActivity,
     selectAllActivities,
     setDateRange,
@@ -104,7 +106,7 @@ export const HeaderFilterBar: React.FC<HeaderFilterBarProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-sm lg:text-base font-extrabold text-white tracking-tight drop-shadow-sm flex items-center gap-2">
-                  <span>Muzaffarnagar - Haridwar Section, NH-334 (Ch. 130+560KM to 206+220KM)</span>
+                  <span>Muzaffarnagar - Haridwar Section, NH-334 (KM130+560 TO KM 206+220)</span>
                 </h1>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-mono font-bold shrink-0">
                   BHS Both Sides
@@ -392,10 +394,20 @@ export const HeaderFilterBar: React.FC<HeaderFilterBarProps> = ({
             <Calendar className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
             <span className="text-[11px] text-slate-400 font-sans font-medium">As of:</span>
             <select
-              value={filters.selectedSingleDate || (availableDates[availableDates.length - 1] || '01.11.2026')}
-              onChange={e => setSelectedSingleDate(e.target.value)}
+              value={filters.selectedSingleDate || 'ALL'}
+              onChange={e => {
+                const val = e.target.value;
+                if (val === 'ALL') {
+                  setSelectedSingleDate(null);
+                } else {
+                  setSelectedSingleDate(val);
+                }
+              }}
               className="bg-transparent border-none text-cyan-300 font-bold focus:outline-none cursor-pointer text-xs font-mono"
             >
+              <option value="ALL" className="bg-[#1A1D24] text-cyan-300 font-bold">
+                All (Cumulative to {availableDates[availableDates.length - 1] || '05.11.2026'})
+              </option>
               {[...availableDates].reverse().map(d => {
                 const isLatest = d === availableDates[availableDates.length - 1];
                 const display = isoToDisplayDate(serialToIsoDate(d));
@@ -405,6 +417,27 @@ export const HeaderFilterBar: React.FC<HeaderFilterBarProps> = ({
                   </option>
                 );
               })}
+            </select>
+          </div>
+
+          {/* State Selector */}
+          <div className="flex items-center gap-1.5 bg-[#1A1D24] px-2.5 py-1 rounded-xl border border-white/10 text-slate-300 font-mono">
+            <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <span className="text-[11px] text-slate-400 font-sans font-medium">State:</span>
+            <select
+              value={state || 'All'}
+              onChange={e => setState(e.target.value as any)}
+              className="bg-transparent border-none text-cyan-300 font-bold focus:outline-none cursor-pointer text-xs font-mono"
+            >
+              <option value="All" className="bg-[#1A1D24] text-cyan-300 font-bold">
+                All States
+              </option>
+              <option value="Uttar Pradesh" className="bg-[#1A1D24] text-slate-200">
+                Uttar Pradesh
+              </option>
+              <option value="Uttarakhand" className="bg-[#1A1D24] text-slate-200">
+                Uttarakhand
+              </option>
             </select>
           </div>
         </div>

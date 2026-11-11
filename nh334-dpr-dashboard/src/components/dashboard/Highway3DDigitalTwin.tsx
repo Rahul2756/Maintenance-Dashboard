@@ -9,6 +9,12 @@ import {
   QCTestLogItem,
   DashboardFilters
 } from '../../types/dpr';
+import { StripChartDataset } from '../../types/stripChart';
+import {
+  buildHighway3DProgressSegments,
+  Highway3DProgressSegment,
+  STRIP_ACTIVITIES
+} from '../../utils/gisUtils';
 import { formatChainagePlus, formatChainageKm, normalizeChainage } from '../../utils/excelParser';
 import {
   Compass,
@@ -52,38 +58,16 @@ export interface Highway3DDigitalTwinProps {
   qcLogs?: QCTestLogItem[];
   globalFilters?: DashboardFilters;
   onFilterChange?: (filters: DashboardFilters) => void;
+  stripDataset?: StripChartDataset | null;
+  sideFilter?: HighwaySide;
+  selectedActivityFilter?: string;
+  onActivityChange?: (activity: string) => void;
+  onSideChange?: (side: HighwaySide) => void;
+  activeReportingDate?: string;
 }
 
-// Normalized internal road segment for 3D modeling
-interface RoadSegmentData {
-  id: string;
-  fromChainage: number; // e.g. 189.500
-  toChainage: number;   // e.g. 190.220
-  lengthM: number;
-  side: HighwaySide;
-  lane: string;
-  date: string;
-  activity: ActivityType;
-  primaryRow: ActualDPRRow;
-  allRowsAtChainage: ActualDPRRow[];
-  plannedRecord?: PlannedRecord;
-  achievedQty: number;
-  plannedQty: number;
-  remainingQty: number;
-  unit: string;
-  progressPercent: number;
-  widthM: number;
-  depthM: number | null;
-  depthMm?: number;
-  isAnomaly: boolean;
-  anomalyDescription: string;
-  status: 'completed' | 'in_progress' | 'delayed' | 'planned' | 'not_started';
-  // 3D placement coordinates
-  startX: number;
-  endX: number;
-  centerZ: number;
-  widthZ: number;
-}
+// Normalized road segment type aliased to Highway3DProgressSegment
+export type RoadSegmentData = Highway3DProgressSegment;
 
 interface ProjectedMarker {
   id: string;
@@ -102,12 +86,18 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
   plannedRecords,
   selectedRow,
   onSelectRow,
-  minChainage = 189.230,
-  maxChainage = 204.000,
+  minChainage = 130.560,
+  maxChainage = 206.220,
   availableDates,
   qcLogs = [],
   globalFilters,
-  onFilterChange
+  onFilterChange,
+  stripDataset,
+  sideFilter = 'Both',
+  selectedActivityFilter: externalActivityFilter,
+  onActivityChange,
+  onSideChange,
+  activeReportingDate
 }) => {
   // Container & Canvas references
   const containerRef = useRef<HTMLDivElement>(null);
@@ -140,12 +130,26 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
 
   // View state
   const [viewMode, setViewMode] = useState<ViewMode>('Overall');
-  const [selectedActivityFilter, setSelectedActivityFilter] = useState<'ALL' | ActivityType>('ALL');
+  const [internalActivity, setInternalActivity] = useState<string>(
+    externalActivityFilter || 'milling'
+  );
+
+  useEffect(() => {
+    if (externalActivityFilter) {
+      setInternalActivity(externalActivityFilter);
+    }
+  }, [externalActivityFilter]);
+
+  const handleActivityChange = (actId: string) => {
+    setInternalActivity(actId);
+    if (onActivityChange) onActivityChange(actId);
+  };
+
   const [cameraMode, setCameraMode] = useState<CameraMode>('3D');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isFlyoverActive, setIsFlyoverActive] = useState(false);
   const flyoverProgressRef = useRef(0);
-  const [flyoverSpeed, setFlyoverSpeed] = useState(1);
+  const flyoverSpeed = 1;
 
   // Driver mode state
   const driverPositionRef = useRef(kmToWorldX(189.500));
@@ -158,7 +162,7 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
   // Hover and selection state
   const [hoveredSegment, setHoveredSegment] = useState<RoadSegmentData | null>(null);
   const [selectedSegment, setSelectedSegment] = useState<RoadSegmentData | null>(null);
-  const [inspectorActiveActivity, setInspectorActiveActivity] = useState<ActivityType>('Milling');
+  const [inspectorActiveActivity, setInspectorActiveActivity] = useState<string>('milling');
 
   // Chainage Tour Playback state (moves slowly from starting chainage to ending chainage)
   const [currentTourChainage, setCurrentTourChainage] = useState<number>(minChainage);
@@ -181,113 +185,20 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
   const [projectedMarkers, setProjectedMarkers] = useState<ProjectedMarker[]>([]);
 
   // Current active date (all DPR execution data up to latest reporting date)
-  const activeTimelineDate = availableDates[availableDates.length - 1] || '01.11.2026';
+  const activeTimelineDate = activeReportingDate || availableDates[availableDates.length - 1] || '05.11.2026';
 
-  // Helper date comparator
-  const isDateOnOrBefore = (targetDate: string, comparisonDate: string) => {
-    if (!targetDate || !comparisonDate) return true;
-    const [td, tm, ty] = targetDate.split('.').map(Number);
-    const [cd, cm, cy] = comparisonDate.split('.').map(Number);
-    const tTime = new Date(ty, tm - 1, td).getTime();
-    const cTime = new Date(cy, cm - 1, cd).getTime();
-    return tTime <= cTime;
-  };
-
-  // 1. Process Raw DPR and Planned Records into 3D Segments
+  // 1. Process 3D Segments using dynamic Strip Chart data logic & planned records
   const roadSegments: RoadSegmentData[] = useMemo(() => {
-    const list: RoadSegmentData[] = [];
-    const map = new Map<string, ActualDPRRow[]>();
-
-    // Group actual rows by chainage span
-    actualRows.forEach(row => {
-      const key = `${row.fromChainage.toFixed(3)}-${row.toChainage.toFixed(3)}-${row.side}`;
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(row);
-    });
-
-    map.forEach((rowsAtSpan) => {
-      const primary = rowsAtSpan[0];
-      const fromKm = Math.min(primary.fromChainage, primary.toChainage);
-      const toKm = Math.max(primary.fromChainage, primary.toChainage);
-
-      // Find matching planned record if exists
-      const planned = plannedRecords.find(
-        p => Math.abs(p.chainageFrom - fromKm) < 0.2 || Math.abs(p.chainageTo - toKm) < 0.2
-      );
-
-      // Check anomalies
-      const hasAnomaly = rowsAtSpan.some(r => r.isAnomaly);
-      const anomalyDesc = rowsAtSpan.find(r => r.isAnomaly)?.remarks || 
-                          rowsAtSpan.find(r => r.isAnomaly)?.anomalyDescription || '';
-
-      // Determine lane placement on road (Z axis)
-      // Carriageway layout:
-      // LHS Fast Lane (F/L): Z = -2.75, width = 3.5m
-      // LHS Slow Lane (S/L): Z = -6.25, width = 3.5m
-      // LHS Both Lanes (F/L & S/L): Z = -4.5, width = 7.0m
-      let centerZ = -2.75;
-      let widthZ = 3.5;
-      const laneStr = (primary.lane || '').toUpperCase();
-      if (laneStr.includes('F/L') && laneStr.includes('S/L')) {
-        centerZ = -4.5;
-        widthZ = 7.0;
-      } else if (laneStr.includes('S/L')) {
-        centerZ = -6.25;
-        widthZ = 3.5;
-      } else {
-        centerZ = -2.75;
-        widthZ = 3.5;
-      }
-
-      // If RHS
-      if (primary.side === 'RHS') {
-        centerZ = Math.abs(centerZ);
-      }
-
-      // Calculate execution status
-      const plannedSum = rowsAtSpan.reduce((sum, r) => sum + (r.plannedToday || 0), 0) || 
-                         (planned ? planned.millingAreaSqm : 1000);
-      const achievedSum = rowsAtSpan.reduce((sum, r) => sum + r.achievedToday, 0);
-      const remainingSum = Math.max(0, plannedSum - achievedSum);
-      const progressPct = plannedSum > 0 ? Math.min(100, Math.round((achievedSum / plannedSum) * 100)) : 100;
-
-      let status: 'completed' | 'in_progress' | 'delayed' | 'planned' | 'not_started' = 'in_progress';
-      if (progressPct >= 99) status = 'completed';
-      else if (progressPct > 0) status = 'in_progress';
-      else status = 'not_started';
-
-      list.push({
-        id: primary.id || `${fromKm}-${toKm}`,
-        fromChainage: fromKm,
-        toChainage: toKm,
-        lengthM: primary.lengthM || Math.round((toKm - fromKm) * 1000),
-        side: primary.side,
-        lane: primary.lane || 'F/L',
-        date: primary.date,
-        activity: primary.activity,
-        primaryRow: primary,
-        allRowsAtChainage: rowsAtSpan,
-        plannedRecord: planned,
-        achievedQty: achievedSum,
-        plannedQty: plannedSum,
-        remainingQty: remainingSum,
-        unit: primary.unit,
-        progressPercent: progressPct,
-        widthM: primary.widthM || 3.5,
-        depthM: primary.depthM,
-        depthMm: primary.depthMm,
-        isAnomaly: hasAnomaly,
-        anomalyDescription: anomalyDesc,
-        status,
-        startX: kmToWorldX(fromKm),
-        endX: kmToWorldX(toKm),
-        centerZ,
-        widthZ
-      });
-    });
-
-    return list;
-  }, [actualRows, plannedRecords, kmToWorldX]);
+    return buildHighway3DProgressSegments(
+      actualRows,
+      plannedRecords,
+      stripDataset ?? null,
+      internalActivity,
+      sideFilter,
+      activeTimelineDate,
+      kmToWorldX
+    );
+  }, [actualRows, plannedRecords, stripDataset, internalActivity, sideFilter, activeTimelineDate, kmToWorldX]);
 
   // Sync selectedSegment when external selectedRow prop changes
   useEffect(() => {
@@ -298,7 +209,7 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
 
       if (match) {
         setSelectedSegment(match);
-        setInspectorActiveActivity(selectedRow.activity);
+        setInspectorActiveActivity(match.activity);
         // Smoothly focus camera towards this chainage
         smoothFlyToChainage((match.fromChainage + match.toChainage) / 2);
       }
@@ -307,69 +218,45 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
 
   // Color evaluation function based on ViewMode and timeline
   const getSegmentColor = useCallback((seg: RoadSegmentData) => {
-    // Check if work was executed on or before the timeline scrub date
-    const isExecutedByDate = isDateOnOrBefore(seg.date, activeTimelineDate);
-
-    if (!isExecutedByDate) {
-      // Historical view: not yet executed on this date
-      return { color: 0x222630, emissive: 0x000000, opacity: 0.45 };
+    // Out-of-scope segments (Work by DPS, Himalayan, Under Construction) are kept in "no fill" format
+    if (seg.isOutOfScope || seg.status === 'dps' || seg.status === 'under_construction' || seg.status === 'himalayan') {
+      return { color: 0x000000, emissive: 0x000000, opacity: 0 };
     }
 
-    if (viewMode === 'Overall') {
-      if (seg.isAnomaly) {
-        return { color: 0xf43f5e, emissive: 0xbe123c, opacity: 0.95 }; // Glowing Crimson
-      }
-      if (seg.status === 'completed') {
-        return { color: 0x10b981, emissive: 0x065f46, opacity: 0.95 }; // Emerald
-      }
-      if (seg.status === 'in_progress') {
-        return { color: 0x06b6d4, emissive: 0x0e7490, opacity: 0.9 };  // Cyan
-      }
-      return { color: 0x3b82f6, emissive: 0x1d4ed8, opacity: 0.85 }; // Planned Blue
-    }
-
-    if (viewMode === 'Activity') {
-      if (selectedActivityFilter !== 'ALL' && seg.activity !== selectedActivityFilter) {
-        return { color: 0x1e2129, emissive: 0x000000, opacity: 0.25 }; // Dimmed out
-      }
-      if (seg.activity === 'Milling') {
-        return { color: 0x00e5ff, emissive: 0x00838f, opacity: 0.95 }; // Vibrant Cyan
-      }
-      if (seg.activity === 'Tackcoat') {
-        return { color: 0xf59e0b, emissive: 0xb45309, opacity: 0.95 }; // Amber
-      }
-      if (seg.activity === 'DBM') {
-        return { color: 0x10b981, emissive: 0x047857, opacity: 0.95 }; // Emerald
-      }
+    if (viewMode === 'Overall' || viewMode === 'Activity') {
+      return { color: seg.color, emissive: seg.emissive, opacity: 0.95 };
     }
 
     if (viewMode === 'Planned') {
-      return { color: 0x3b82f6, emissive: 0x1e40af, opacity: 0.9 }; // Cobalt Blue
+      if (seg.status === 'planned' || seg.status === 'delayed') {
+        return { color: 0x3b82f6, emissive: 0x1e40af, opacity: 0.95 };
+      }
+      return { color: 0x222630, emissive: 0x000000, opacity: 0.25 };
     }
 
     if (viewMode === 'Actual') {
-      if (seg.isAnomaly) return { color: 0xf43f5e, emissive: 0x9f1239, opacity: 0.95 };
-      return { color: 0x10b981, emissive: 0x065f46, opacity: 0.95 };
+      if (seg.status === 'completed' || seg.status === 'in_progress') {
+        return { color: seg.color, emissive: seg.emissive, opacity: 0.95 };
+      }
+      return { color: 0x222630, emissive: 0x000000, opacity: 0.25 };
     }
 
     if (viewMode === 'Delayed') {
-      // If planned completion was before active date but not completed
-      const isDelayed = seg.progressPercent < 80;
-      if (isDelayed) {
-        return { color: 0xf97316, emissive: 0xc2410c, opacity: 0.95 }; // Warning Orange
+      if (seg.status === 'delayed') {
+        return { color: 0xef4444, emissive: 0x991b1b, opacity: 0.95 };
       }
-      return { color: 0x222630, emissive: 0x000000, opacity: 0.35 };
+      return { color: 0x222630, emissive: 0x000000, opacity: 0.25 };
     }
 
     if (viewMode === 'Remaining') {
-      if (seg.remainingQty > 0) {
-        return { color: 0x8b5cf6, emissive: 0x5b21b6, opacity: 0.95 }; // Purple
+      if (seg.status === 'planned' || seg.status === 'delayed' || seg.status === 'in_progress') {
+        return { color: 0x8b5cf6, emissive: 0x5b21b6, opacity: 0.95 };
       }
-      return { color: 0x222630, emissive: 0x000000, opacity: 0.3 };
+      return { color: 0x222630, emissive: 0x000000, opacity: 0.25 };
     }
 
-    return { color: 0x10b981, emissive: 0x000000, opacity: 0.9 };
-  }, [viewMode, selectedActivityFilter, activeTimelineDate]);
+    return { color: seg.color, emissive: seg.emissive, opacity: 0.95 };
+  }, [viewMode]);
 
   // Smooth camera animation target helper
   const cameraTargetRef = useRef<{
@@ -419,11 +306,11 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
     // SCENE
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b0c0e);
-    scene.fog = new THREE.FogExp2(0x0b0c0e, 0.0012);
+    scene.fog = new THREE.FogExp2(0x0b0c0e, 0.00015);
     sceneRef.current = scene;
 
     // CAMERA
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.5, 3000);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.5, 25000);
     camera.position.set(-50, 35, 55);
     cameraRef.current = camera;
 
@@ -445,7 +332,7 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
     controls.dampingFactor = 0.08;
     controls.maxPolarAngle = Math.PI / 2 - 0.02; // Prevent going underground
     controls.minDistance = 5;
-    controls.maxDistance = 600;
+    controls.maxDistance = 15000;
     controls.target.set(0, 0, 0);
     controlsRef.current = controls;
 
@@ -676,15 +563,37 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
       const length = Math.max(0.4, Math.abs(seg.endX - seg.startX));
       const centerX = (seg.startX + seg.endX) / 2;
 
+      // Out-of-Scope (Work by DPS, Himalayan, Under Construction):
+      // Keep in "no fill" format: leave the road completely blank in these chainages.
+      // Attach an invisible hit-box mesh with opacity 0 so raycasting/inspection still identifies the section.
+      if (seg.isOutOfScope || seg.status === 'dps' || seg.status === 'under_construction' || seg.status === 'himalayan') {
+        const invisibleGeo = new THREE.BoxGeometry(length, 0.05, seg.widthZ);
+        const invisibleMat = new THREE.MeshBasicMaterial({
+          transparent: true,
+          opacity: 0,
+          depthWrite: false,
+        });
+        const hitMesh = new THREE.Mesh(invisibleGeo, invisibleMat);
+        hitMesh.position.set(centerX, 0.02, seg.centerZ);
+        hitMesh.userData = { segmentData: seg };
+        scene.add(hitMesh);
+        segmentMeshesRef.current.set(seg.id, hitMesh);
+        return;
+      }
+
       // Realistic 3D lift: DBM is raised +0.07m above asphalt; Milling is grooved; Tackcoat is intermediate
       let layerHeight = 0.06;
       let posY = 0.04;
-      if (seg.activity === 'DBM') {
-        layerHeight = 0.08;
-        posY = 0.05;
-      } else if (seg.activity === 'Milling') {
+      const actLower = (seg.activity || '').toLowerCase();
+      if (actLower.includes('dbm')) {
+        layerHeight = 0.07;
+        posY = 0.045;
+      } else if (actLower.includes('milling')) {
         layerHeight = 0.04;
         posY = 0.025;
+      } else if (actLower.includes('bc')) {
+        layerHeight = 0.08;
+        posY = 0.05;
       }
 
       const geo = new THREE.BoxGeometry(length, layerHeight, seg.widthZ);
@@ -693,8 +602,8 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
       const mat = new THREE.MeshStandardMaterial({
         color: style.color,
         emissive: style.emissive,
-        emissiveIntensity: seg.isAnomaly ? 0.6 : 0.25,
-        roughness: 0.4,
+        emissiveIntensity: 0.45,
+        roughness: 0.35,
         metalness: 0.2,
         transparent: true,
         opacity: style.opacity
@@ -766,7 +675,7 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
       if (seg) {
         setSelectedSegment(seg);
         setInspectorActiveActivity(seg.activity);
-        if (onSelectRow) onSelectRow(seg.primaryRow);
+        if (onSelectRow) onSelectRow(seg.primaryRow ?? null);
       }
     }
   };
@@ -1042,7 +951,7 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
     if (found) {
       setSelectedSegment(found);
       setInspectorActiveActivity(found.activity);
-      if (onSelectRow) onSelectRow(found.primaryRow);
+      if (onSelectRow) onSelectRow(found.primaryRow ?? null);
       smoothFlyToChainage(targetKm);
     }
   };
@@ -1193,18 +1102,38 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
             })}
           </div>
 
-          {/* Activity Dropdown */}
+          {/* Activity Dropdown - Strictly individual activities, no ALL option */}
           <div className="relative">
             <select
-              value={selectedActivityFilter}
-              onChange={e => setSelectedActivityFilter(e.target.value as any)}
-              className="bg-[#181B22] text-slate-200 text-xs rounded-xl px-3 py-1.5 border border-white/[0.1] hover:border-cyan-500/40 focus:outline-none focus:border-cyan-500 cursor-pointer"
+              value={internalActivity}
+              onChange={e => handleActivityChange(e.target.value)}
+              className="bg-[#181B22] text-slate-200 text-xs rounded-xl px-3 py-1.5 border border-white/[0.1] hover:border-cyan-500/40 focus:outline-none focus:border-cyan-500 cursor-pointer font-semibold"
             >
-              <option value="ALL">All Activities</option>
-              <option value="Milling">Milling</option>
-              <option value="Tackcoat">Tackcoat</option>
-              <option value="DBM">DBM</option>
+              {STRIP_ACTIVITIES.map(act => (
+                <option key={act.id} value={act.id}>
+                  {act.name}
+                </option>
+              ))}
             </select>
+          </div>
+
+          {/* Side Selector (Both, LHS, RHS) */}
+          <div className="flex items-center bg-[#181B22] p-1 rounded-xl border border-white/[0.06]">
+            {(['Both', 'LHS', 'RHS'] as HighwaySide[]).map(side => (
+              <button
+                key={side}
+                onClick={() => {
+                  if (onSideChange) onSideChange(side);
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  sideFilter === side
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                    : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                }`}
+              >
+                {side === 'Both' ? 'Both (BHS)' : side}
+              </button>
+            ))}
           </div>
 
           {/* Chainage Search Box with Go Button */}
@@ -1452,24 +1381,24 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
             </div>
           )}
 
-          {/* View Mode Legend Overlay */}
-          <div className="absolute bottom-4 left-4 z-10 bg-[#12141A]/85 backdrop-blur-md border border-white/[0.08] rounded-xl px-3 py-2 text-[11px] text-slate-300 flex items-center gap-3">
-            <span className="text-slate-400 font-mono text-[10px] uppercase">Legend:</span>
+          {/* View Mode Legend Overlay - Strictly 4 Statuses: Completed, In Progress, Planned, Delayed */}
+          <div className="absolute bottom-4 left-4 z-10 bg-[#12141A]/85 backdrop-blur-md border border-white/[0.08] rounded-xl px-3 py-2 text-[11px] text-slate-300 flex items-center gap-3 font-mono">
+            <span className="text-slate-400 text-[10px] uppercase font-bold">Legend:</span>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
-              <span>Completed</span>
+              <span className="w-2.5 h-2.5 rounded-sm bg-[#10B981] shadow-sm shadow-[#10B981]/50" />
+              <span className="text-emerald-300 font-medium">Completed</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-cyan-400" />
-              <span>In Progress</span>
+              <span className="w-2.5 h-2.5 rounded-sm bg-[#06B6D4] shadow-sm shadow-[#06B6D4]/50" />
+              <span className="text-cyan-300 font-medium">In Progress</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-blue-500" />
-              <span>Planned</span>
+              <span className="w-2.5 h-2.5 rounded-sm bg-[#3B82F6] shadow-sm shadow-[#3B82F6]/50" />
+              <span className="text-blue-300 font-medium">Planned</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-rose-500 animate-pulse" />
-              <span className="text-rose-300">Anomaly (&gt;50mm / Offset)</span>
+              <span className="w-2.5 h-2.5 rounded-sm bg-[#EF4444] shadow-sm shadow-[#EF4444]/50" />
+              <span className="text-rose-300 font-medium">Delayed</span>
             </div>
           </div>
         </div>
@@ -1530,25 +1459,25 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
                   <span className="text-[10px] font-mono uppercase text-slate-500">Quick Corridor Jumps:</span>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <button
+                      onClick={() => { setSearchInput('131+000'); searchToChainage('131+000'); }}
+                      className="p-2 rounded-xl bg-[#181B22] border border-white/[0.06] hover:border-cyan-500/40 text-left hover:bg-white/5 cursor-pointer"
+                    >
+                      <div className="text-cyan-300 font-mono font-bold">Ch. 131+000</div>
+                      <div className="text-[10px] text-slate-400">Muzaffarnagar Start</div>
+                    </button>
+                    <button
+                      onClick={() => { setSearchInput('168+000'); searchToChainage('168+000'); }}
+                      className="p-2 rounded-xl bg-[#181B22] border border-white/[0.06] hover:border-cyan-500/40 text-left hover:bg-white/5 cursor-pointer"
+                    >
+                      <div className="text-emerald-300 font-mono font-bold">Ch. 168+000</div>
+                      <div className="text-[10px] text-slate-400">Manglaur Toll</div>
+                    </button>
+                    <button
                       onClick={() => { setSearchInput('189+230'); searchToChainage('189+230'); }}
                       className="p-2 rounded-xl bg-[#181B22] border border-white/[0.06] hover:border-cyan-500/40 text-left hover:bg-white/5 cursor-pointer"
                     >
                       <div className="text-cyan-300 font-mono font-bold">Ch. 189+230</div>
                       <div className="text-[10px] text-slate-400">Roorkee Bypass</div>
-                    </button>
-                    <button
-                      onClick={() => { setSearchInput('190+220'); searchToChainage('190+220'); }}
-                      className="p-2 rounded-xl bg-[#181B22] border border-white/[0.06] hover:border-cyan-500/40 text-left hover:bg-white/5 cursor-pointer"
-                    >
-                      <div className="text-emerald-300 font-mono font-bold">Ch. 190+220</div>
-                      <div className="text-[10px] text-slate-400">DBM 126 Cum Span</div>
-                    </button>
-                    <button
-                      onClick={() => { setSearchInput('201+250'); searchToChainage('201+250'); }}
-                      className="p-2 rounded-xl bg-[#181B22] border border-rose-500/30 hover:border-rose-400 text-left hover:bg-rose-950/20 cursor-pointer"
-                    >
-                      <div className="text-rose-300 font-mono font-bold">Ch. 201+250 ⚠️</div>
-                      <div className="text-[10px] text-slate-400">90mm Milling Depth</div>
                     </button>
                     <button
                       onClick={() => { setSearchInput('204+000'); searchToChainage('204+000'); }}
@@ -1563,58 +1492,78 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
             ) : (
               /* Selected Highway Section Details */
               <div className="space-y-4">
-                {/* 1. Main Chainage Badge */}
-                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-[#181B22] to-blue-950/30 border border-cyan-500/30 shadow-lg space-y-1.5">
+                {/* 1. Main Chainage Badge with Execution Status Badge */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-[#181B22] to-blue-950/30 border border-cyan-500/30 shadow-lg space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-[10px] font-mono uppercase text-cyan-400 font-bold tracking-wider">
                       Selected Section
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-white/10 text-white font-mono text-[11px]">
-                      Span: {selectedSegment.lengthM} m
-                    </span>
+                    {/* Execution Status Badge */}
+                    <div className={`px-2 py-0.5 rounded-md text-[11px] font-bold font-mono border flex items-center gap-1.5 ${
+                      selectedSegment.isOutOfScope || selectedSegment.status === 'dps' || selectedSegment.status === 'under_construction' || selectedSegment.status === 'himalayan'
+                        ? 'bg-slate-800/80 text-slate-300 border-white/10'
+                        : selectedSegment.status === 'completed'
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/20'
+                        : selectedSegment.status === 'in_progress'
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/20'
+                        : selectedSegment.status === 'delayed'
+                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm shadow-rose-500/20'
+                        : 'bg-blue-500/20 text-blue-300 border-blue-500/40 shadow-sm shadow-blue-500/20'
+                    }`}>
+                      <span className={`w-2 h-2 rounded-full ${
+                        selectedSegment.isOutOfScope || selectedSegment.status === 'dps' || selectedSegment.status === 'under_construction' || selectedSegment.status === 'himalayan'
+                          ? 'bg-slate-400'
+                          : selectedSegment.status === 'completed' ? 'bg-emerald-400' :
+                        selectedSegment.status === 'in_progress' ? 'bg-cyan-400 animate-pulse' :
+                        selectedSegment.status === 'delayed' ? 'bg-rose-400' : 'bg-blue-400'
+                      }`} />
+                      <span>
+                        {selectedSegment.isOutOfScope || selectedSegment.status === 'dps' || selectedSegment.status === 'under_construction' || selectedSegment.status === 'himalayan'
+                          ? (selectedSegment.statusLabel || 'Out of Scope')
+                          : selectedSegment.status === 'completed' ? 'Completed' :
+                         selectedSegment.status === 'in_progress' ? 'In Progress' :
+                         selectedSegment.status === 'delayed' ? 'Delayed' : 'Planned'}
+                      </span>
+                    </div>
                   </div>
                   <div className="text-base font-bold text-white font-mono flex items-center gap-2">
                     <span className="text-cyan-300">{formatChainagePlus(selectedSegment.fromChainage)}</span>
                     <ChevronRight className="w-4 h-4 text-slate-400" />
                     <span className="text-cyan-300">{formatChainagePlus(selectedSegment.toChainage)}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-300 pt-1">
+                  <div className="flex items-center gap-2 text-xs text-slate-300 pt-1 flex-wrap">
                     <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-semibold text-[11px]">
                       {selectedSegment.side}
                     </span>
                     <span className="text-slate-400">•</span>
-                    <span>Lane: <strong className="text-white">{selectedSegment.lane}</strong></span>
+                    <span>Span: <strong className="text-white">{selectedSegment.lengthM} m</strong></span>
                     <span className="text-slate-400">•</span>
-                    <span>Date: <strong className="text-white">{selectedSegment.date}</strong></span>
+                    <span>Activity: <strong className="text-cyan-300 font-semibold">{selectedSegment.activity}</strong></span>
                   </div>
                 </div>
 
-                {/* 2. Activity Selector Tabs (Milling, Tackcoat, DBM) */}
+                {/* 2. Activity Layer Selector */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-slate-400 font-medium">Activity Layer:</span>
-                    <span className="text-[11px] text-slate-400">
-                      {selectedSegment.allRowsAtChainage.length} recorded layer(s)
+                    <span className="text-[11px] text-cyan-400 font-mono">
+                      {selectedSegment.activity}
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#181B22] rounded-xl border border-white/[0.06]">
-                    {(['Milling', 'Tackcoat', 'DBM'] as ActivityType[]).map(act => {
-                      const exists = selectedSegment.allRowsAtChainage.some(r => r.activity === act);
-                      const isTabActive = inspectorActiveActivity === act;
+                  <div className="flex flex-wrap gap-1 p-1 bg-[#181B22] rounded-xl border border-white/[0.06]">
+                    {STRIP_ACTIVITIES.map(act => {
+                      const isTabActive = internalActivity === act.id;
                       return (
                         <button
-                          key={act}
-                          disabled={!exists}
-                          onClick={() => setInspectorActiveActivity(act)}
-                          className={`py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
+                          key={act.id}
+                          onClick={() => handleActivityChange(act.id)}
+                          className={`px-2 py-1 text-[11px] font-medium rounded-lg transition-all cursor-pointer ${
                             isTabActive
                               ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
-                              : exists
-                              ? 'text-slate-200 hover:bg-white/5'
-                              : 'text-slate-600 opacity-40 cursor-not-allowed'
+                              : 'text-slate-300 hover:text-white hover:bg-white/5'
                           }`}
                         >
-                          {act}
+                          {act.name}
                         </button>
                       );
                     })}
@@ -1622,43 +1571,71 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
                 </div>
 
                 {/* 3. Physical Parameters & Execution Metrics */}
-                {(() => {
-                  const activeRow = selectedSegment.allRowsAtChainage.find(
+                {selectedSegment.isOutOfScope || selectedSegment.status === 'dps' || selectedSegment.status === 'under_construction' || selectedSegment.status === 'himalayan' ? (
+                  <div className="space-y-3">
+                    <div className="p-3.5 rounded-xl bg-[#14171E] border border-white/[0.08] space-y-2">
+                      <div className="flex items-center gap-2 text-slate-300 font-semibold text-xs">
+                        <Info className="w-4 h-4 text-cyan-400" />
+                        <span className="text-white font-mono uppercase tracking-wider text-[11px]">Out of Contract Scope</span>
+                      </div>
+                      <p className="text-xs text-slate-400 leading-relaxed font-mono">
+                        This chainage stretch is categorized in the Strip Chart as{' '}
+                        <strong className="text-cyan-300">{selectedSegment.statusLabel || 'Out of Scope'}</strong>.
+                        It is rendered in <strong className="text-white font-semibold">no fill (blank road)</strong> format as no execution is scheduled for this chainage under the active DPR package.
+                      </p>
+                      <div className="pt-1 text-[11px] font-mono text-slate-500">
+                        Status: <span className="text-slate-300 font-medium">Excluded / Blank Road</span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-[#16181F] border border-white/[0.06] text-xs space-y-2">
+                      <span className="text-[10px] font-mono uppercase text-slate-400 font-bold">
+                        Section Geometry
+                      </span>
+                      <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
+                        <div>Length: <strong className="text-white">{selectedSegment.lengthM}m</strong></div>
+                        <div>Carriageway: <strong className="text-white">{selectedSegment.side}</strong></div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (() => {
+                  const activeRow = selectedSegment.allRowsAtChainage?.find(
                     r => r.activity === inspectorActiveActivity
                   ) || selectedSegment.primaryRow;
 
-                  const planned = activeRow.plannedToday || 0;
-                  const achieved = activeRow.achievedToday;
-                  const remaining = Math.max(0, planned - achieved);
-                  const pct = planned > 0 ? Math.min(100, Math.round((achieved / planned) * 100)) : 100;
+                  const planned = selectedSegment.plannedQty || activeRow?.plannedToday || 0;
+                  const achieved = selectedSegment.achievedQty || activeRow?.achievedToday || 0;
+                  const remaining = selectedSegment.remainingQty ?? Math.max(0, planned - achieved);
+                  const pct = selectedSegment.progressPercent ?? (planned > 0 ? Math.min(100, Math.round((achieved / planned) * 100)) : 100);
+                  const unit = selectedSegment.unit || activeRow?.unit || 'm';
 
                   return (
                     <div className="space-y-3">
                       {/* Metric 4-Grid */}
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div className="p-3 rounded-xl bg-[#181B22] border border-white/[0.06] space-y-1">
-                          <span className="text-[10px] font-mono text-slate-400 uppercase">Planned Today</span>
+                          <span className="text-[10px] font-mono text-slate-400 uppercase">Planned Span</span>
                           <div className="text-sm font-bold text-white font-mono">
-                            {planned > 0 ? `${planned} ${activeRow.unit}` : 'Per Program'}
+                            {planned > 0 ? `${planned} ${unit}` : 'Per Program'}
                           </div>
                         </div>
 
                         <div className="p-3 rounded-xl bg-[#181B22] border border-white/[0.06] space-y-1">
-                          <span className="text-[10px] font-mono text-emerald-400 uppercase">Achieved Today</span>
+                          <span className="text-[10px] font-mono text-emerald-400 uppercase">Achieved</span>
                           <div className="text-sm font-bold text-emerald-300 font-mono">
-                            {achieved} {activeRow.unit}
+                            {achieved} {unit}
                           </div>
                         </div>
 
                         <div className="p-3 rounded-xl bg-[#181B22] border border-white/[0.06] space-y-1">
                           <span className="text-[10px] font-mono text-amber-400 uppercase">Remaining Span</span>
                           <div className="text-sm font-bold text-amber-300 font-mono">
-                            {remaining} {activeRow.unit}
+                            {remaining} {unit}
                           </div>
                         </div>
 
                         <div className="p-3 rounded-xl bg-[#181B22] border border-white/[0.06] space-y-1">
-                          <span className="text-[10px] font-mono text-cyan-400 uppercase">Adherence Pace</span>
+                          <span className="text-[10px] font-mono text-cyan-400 uppercase">Completion</span>
                           <div className="text-sm font-bold text-cyan-300 font-mono">
                             {pct}%
                           </div>
@@ -1668,7 +1645,7 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
                       {/* Progress Bar */}
                       <div className="space-y-1 pt-1">
                         <div className="flex justify-between text-[11px] font-mono text-slate-400">
-                          <span>Layer Execution Progress</span>
+                          <span>Execution Progress</span>
                           <span className="text-white font-bold">{pct}%</span>
                         </div>
                         <div className="h-2 w-full bg-[#181B22] rounded-full overflow-hidden border border-white/10">
@@ -1685,19 +1662,19 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
                           Cross-Section Dimensions
                         </span>
                         <div className="grid grid-cols-3 gap-2 font-mono text-[11px]">
-                          <div>Length: <strong className="text-white">{activeRow.lengthM}m</strong></div>
-                          <div>Width: <strong className="text-white">{activeRow.widthM}m</strong></div>
+                          <div>Length: <strong className="text-white">{selectedSegment.lengthM}m</strong></div>
+                          <div>Width: <strong className="text-white">{selectedSegment.widthM}m</strong></div>
                           <div>
                             Depth:{' '}
-                            <strong className={activeRow.depthM && activeRow.depthM > 0.055 ? 'text-rose-400 font-bold' : 'text-white'}>
-                              {activeRow.depthM ? `${Math.round(activeRow.depthM * 1000)}mm` : 'Standard'}
+                            <strong className={activeRow?.depthM && activeRow.depthM > 0.055 ? 'text-rose-400 font-bold' : 'text-white'}>
+                              {activeRow?.depthM ? `${Math.round(activeRow.depthM * 1000)}mm` : 'Standard'}
                             </strong>
                           </div>
                         </div>
                       </div>
 
                       {/* Anomaly & QC Alert */}
-                      {activeRow.isAnomaly && (
+                      {activeRow?.isAnomaly && (
                         <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-xs space-y-1.5 glow-crimson">
                           <div className="flex items-center gap-1.5 text-rose-300 font-bold font-mono">
                             <AlertTriangle className="w-4 h-4 text-rose-400" />
@@ -1828,7 +1805,7 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
 
         {/* Real-time Status Badge */}
         <div className="hidden sm:flex items-center gap-3 text-[11px] font-mono text-slate-400">
-          <span>Corridor: Roorkee–Haridwar (Ch. 189+230 to 204+000)</span>
+          <span>Corridor: Muzaffarnagar–Haridwar (Ch. 130+560 to 206+220)</span>
           <span>•</span>
           <span className="text-emerald-400 font-bold">
             {isPlayingChainageTour ? 'Tour Running' : 'Tour Paused'}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { StripChartDataset } from '../../types/stripChart';
 import { fetchOrLoadStripChartDataset } from '../../utils/stripChartExcelParser';
 import { StripMapHeader } from '../stripmap/StripMapHeader';
@@ -7,6 +7,8 @@ import { ActivitySidebar } from '../stripmap/ActivitySidebar';
 import { StripMapGrid } from '../stripmap/StripMapGrid';
 import { StripMapNavigation } from '../stripmap/StripMapNavigation';
 import { Loader2 } from 'lucide-react';
+import { useFilters } from '../../context/FilterContext';
+import { filterStripChartDatasetByState } from '../../utils/stateFilterUtils';
 
 export interface SpatialMapModuleProps {
   onSelectChainage?: (chainageM: number) => void;
@@ -19,7 +21,10 @@ export const SpatialMapModule: React.FC<SpatialMapModuleProps> = ({
   targetChainageM,
   onDatasetLoaded,
 }) => {
-  const [dataset, setDataset] = useState<StripChartDataset | null>(null);
+  const { filters } = useFilters();
+  const selectedState = filters.state || 'All';
+
+  const [rawDataset, setRawDataset] = useState<StripChartDataset | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedActivityId, setSelectedActivityId] = useState<string>('all');
   const [selectedDate, setSelectedDate] = useState<string | null>('all');
@@ -33,6 +38,17 @@ export const SpatialMapModule: React.FC<SpatialMapModuleProps> = ({
   } | null>(null);
   const [targetRatio, setTargetRatio] = useState<number | null>(null);
 
+  // Apply State filter dynamically across Strip Chart dataset
+  const dataset = useMemo(() => {
+    return filterStripChartDatasetByState(rawDataset, selectedState);
+  }, [rawDataset, selectedState]);
+
+  useEffect(() => {
+    if (dataset && onDatasetLoaded) {
+      onDatasetLoaded(dataset);
+    }
+  }, [dataset, onDatasetLoaded]);
+
   useEffect(() => {
     let isMounted = true;
     const load = async () => {
@@ -40,14 +56,11 @@ export const SpatialMapModule: React.FC<SpatialMapModuleProps> = ({
         setLoading(true);
         const data = await fetchOrLoadStripChartDataset();
         if (isMounted) {
-          setDataset(data);
+          setRawDataset(data);
           setCurrentStartCh(data.metadata.startChainage);
           setCurrentEndCh(
             data.intervals[Math.min(14, data.intervals.length - 1)]?.toChainage || data.metadata.endChainage
           );
-          if (onDatasetLoaded) {
-            onDatasetLoaded(data);
-          }
         }
       } catch (err) {
         console.error('Failed to load strip chart dataset:', err);
@@ -59,7 +72,19 @@ export const SpatialMapModule: React.FC<SpatialMapModuleProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [onDatasetLoaded]);
+  }, []);
+
+  // Update visible range and scroller position when state filter changes
+  useEffect(() => {
+    if (dataset && dataset.intervals.length > 0) {
+      setCurrentStartCh(dataset.metadata.startChainage);
+      setCurrentEndCh(
+        dataset.intervals[Math.min(14, dataset.intervals.length - 1)]?.toChainage || dataset.metadata.endChainage
+      );
+      setScrollRatio(0);
+      setTargetRatio(0);
+    }
+  }, [selectedState]);
 
   // Two-way synchronization: Scroll strip chart to target chainage if selected externally
   useEffect(() => {

@@ -1,0 +1,1482 @@
+{
+  "older": [
+    {
+      "activity": "milling",
+      "side": "LHS",
+      "stretch": "Bahadara Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "12.10.2026",
+          "to": "18.10.2026",
+          "qty": 35875,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "LHS",
+      "stretch": "Bahadara Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "12.10.2026",
+          "to": "18.10.2026",
+          "qty": 35875,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "LHS",
+      "stretch": "Bahadara Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "12.10.2026",
+          "to": "18.10.2026",
+          "qty": 1811.25,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "LHS",
+      "stretch": "Bahadara Toll to Roorkee Bypass",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "12.10.2026",
+          "to": "18.10.2026",
+          "qty": 5708.700968620056,
+          "isCompleted": false
+        },
+        {
+          "from": "19.10.2026",
+          "to": "25.10.2026",
+          "qty": 57979.47954686676,
+          "isCompleted": false
+        },
+        {
+          "from": "26.10.2026",
+          "to": "01.11.2026",
+          "qty": 22334.81948451319,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "LHS",
+      "stretch": "Bahadara Toll to Roorkee Bypass",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "12.10.2026",
+          "to": "18.10.2026",
+          "qty": 5708.700968620056,
+          "isCompleted": false
+        },
+        {
+          "from": "19.10.2026",
+          "to": "25.10.2026",
+          "qty": 57979.47954686676,
+          "isCompleted": false
+        },
+        {
+          "from": "26.10.2026",
+          "to": "01.11.2026",
+          "qty": 22334.81948451319,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "LHS",
+      "stretch": "Bahadara Toll to Roorkee Bypass",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "12.10.2026",
+          "to": "18.10.2026",
+          "qty": 289.5903361,
+          "isCompleted": false
+        },
+        {
+          "from": "19.10.2026",
+          "to": "25.10.2026",
+          "qty": 2941.176471,
+          "isCompleted": false
+        },
+        {
+          "from": "26.10.2026",
+          "to": "01.11.2026",
+          "qty": 1132.9981929,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "RHS",
+      "stretch": "Haridwar to Bahadara Toll",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "26.10.2026",
+          "to": "01.11.2026",
+          "qty": 36163.565562,
+          "isCompleted": false
+        },
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 8706.434437999997,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "RHS",
+      "stretch": "Haridwar to Bahadara Toll",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "26.10.2026",
+          "to": "01.11.2026",
+          "qty": 36163.565562,
+          "isCompleted": false
+        },
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 8706.434437999997,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "RHS",
+      "stretch": "Haridwar to Bahadara Toll",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "26.10.2026",
+          "to": "01.11.2026",
+          "qty": 1808.1782781000002,
+          "isCompleted": false
+        },
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 435.32172189999983,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "LHS",
+      "stretch": "Bahadara Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "26.10.2026",
+          "to": "01.11.2026",
+          "qty": 105252.5,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "LHS",
+      "stretch": "Bahadara Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "26.10.2026",
+          "to": "01.11.2026",
+          "qty": 4210.1,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Bahadara Toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 38293.726979814404,
+          "isCompleted": false
+        },
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 38571.95185412383,
+          "isCompleted": false
+        },
+        {
+          "from": "16.11.2026",
+          "to": "20.11.2026",
+          "qty": 23647.321166061753,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Bahadara Toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 38293.726979814404,
+          "isCompleted": false
+        },
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 38571.95185412383,
+          "isCompleted": false
+        },
+        {
+          "from": "16.11.2026",
+          "to": "20.11.2026",
+          "qty": 23647.321166061753,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Bahadara Toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 2085.686681461345,
+          "isCompleted": false
+        },
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 2100.840336134454,
+          "isCompleted": false
+        },
+        {
+          "from": "16.11.2026",
+          "to": "20.11.2026",
+          "qty": 1287.9629824042004,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "RHS",
+      "stretch": "Haridwar to Bahadara Toll",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 106382.97872500001,
+          "isCompleted": false
+        },
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 44684.52127499999,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "RHS",
+      "stretch": "Haridwar to Bahadara Toll",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 4255.319149,
+          "isCompleted": false
+        },
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 1787.380851,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Muzaffarnagar",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "16.11.2026",
+          "to": "20.11.2026",
+          "qty": 44701.01454258345,
+          "isCompleted": false
+        },
+        {
+          "from": "21.11.2026",
+          "to": "27.11.2026",
+          "qty": 37250.84545215288,
+          "isCompleted": false
+        },
+        {
+          "from": "28.11.2026",
+          "to": "04.12.2026",
+          "qty": 34713.640005263675,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Muzaffarnagar",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "16.11.2026",
+          "to": "20.11.2026",
+          "qty": 44701.01454258345,
+          "isCompleted": false
+        },
+        {
+          "from": "21.11.2026",
+          "to": "27.11.2026",
+          "qty": 37250.84545215288,
+          "isCompleted": false
+        },
+        {
+          "from": "28.11.2026",
+          "to": "04.12.2026",
+          "qty": 34713.640005263675,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Muzaffarnagar",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "16.11.2026",
+          "to": "20.11.2026",
+          "qty": 2521.008403361345,
+          "isCompleted": false
+        },
+        {
+          "from": "21.11.2026",
+          "to": "27.11.2026",
+          "qty": 2100.840336134454,
+          "isCompleted": false
+        },
+        {
+          "from": "28.11.2026",
+          "to": "04.12.2026",
+          "qty": 1957.7492605042007,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "LHS",
+      "stretch": "Bahadara Toll to Roorkee Bypass",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "21.11.2026",
+          "to": "27.11.2026",
+          "qty": 77659.5744680851,
+          "isCompleted": false
+        },
+        {
+          "from": "28.11.2026",
+          "to": "04.12.2026",
+          "qty": 61160.925531914894,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "LHS",
+      "stretch": "Bahadara Toll to Roorkee Bypass",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "21.11.2026",
+          "to": "27.11.2026",
+          "qty": 3106.382978723404,
+          "isCompleted": false
+        },
+        {
+          "from": "28.11.2026",
+          "to": "04.12.2026",
+          "qty": 2446.4370212765957,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "LHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "21.11.2026",
+          "to": "27.11.2026",
+          "qty": 27825.656325777676,
+          "isCompleted": false
+        },
+        {
+          "from": "28.11.2026",
+          "to": "04.12.2026",
+          "qty": 37151.12855654181,
+          "isCompleted": false
+        },
+        {
+          "from": "05.12.2026",
+          "to": "11.12.2026",
+          "qty": 66374.7151176805,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "LHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "21.11.2026",
+          "to": "27.11.2026",
+          "qty": 27825.656325777676,
+          "isCompleted": false
+        },
+        {
+          "from": "28.11.2026",
+          "to": "04.12.2026",
+          "qty": 37151.12855654181,
+          "isCompleted": false
+        },
+        {
+          "from": "05.12.2026",
+          "to": "11.12.2026",
+          "qty": 66374.7151176805,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "LHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "21.11.2026",
+          "to": "27.11.2026",
+          "qty": 1680.6722689075632,
+          "isCompleted": false
+        },
+        {
+          "from": "28.11.2026",
+          "to": "04.12.2026",
+          "qty": 2243.931672,
+          "isCompleted": false
+        },
+        {
+          "from": "05.12.2026",
+          "to": "11.12.2026",
+          "qty": 4009.0390590924367,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Bahadara Toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "28.11.2026",
+          "to": "04.12.2026",
+          "qty": 16498.6489361702,
+          "isCompleted": false
+        },
+        {
+          "from": "05.12.2026",
+          "to": "11.12.2026",
+          "qty": 77659.5744680851,
+          "isCompleted": false
+        },
+        {
+          "from": "12.12.2026",
+          "to": "18.12.2026",
+          "qty": 44662.27659574468,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Bahadara Toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "28.11.2026",
+          "to": "04.12.2026",
+          "qty": 659.945957446808,
+          "isCompleted": false
+        },
+        {
+          "from": "05.12.2026",
+          "to": "11.12.2026",
+          "qty": 3106.382978723404,
+          "isCompleted": false
+        },
+        {
+          "from": "12.12.2026",
+          "to": "18.12.2026",
+          "qty": 1786.491063829788,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Muzaffarnagar",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "05.12.2026",
+          "to": "11.12.2026",
+          "qty": 74468.08510638298,
+          "isCompleted": false
+        },
+        {
+          "from": "12.12.2026",
+          "to": "18.12.2026",
+          "qty": 53191.48936170212,
+          "isCompleted": false
+        },
+        {
+          "from": "19.12.2026",
+          "to": "25.12.2026",
+          "qty": 63829.787234042546,
+          "isCompleted": false
+        },
+        {
+          "from": "26.12.2026",
+          "to": "01.01.2027",
+          "qty": 35977.388297872334,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Muzaffarnagar",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "05.12.2026",
+          "to": "11.12.2026",
+          "qty": 2978.723404255319,
+          "isCompleted": false
+        },
+        {
+          "from": "12.12.2026",
+          "to": "18.12.2026",
+          "qty": 2127.659574468085,
+          "isCompleted": false
+        },
+        {
+          "from": "19.12.2026",
+          "to": "25.12.2026",
+          "qty": 2553.191489361702,
+          "isCompleted": false
+        },
+        {
+          "from": "26.12.2026",
+          "to": "01.01.2027",
+          "qty": 1439.0955319148934,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "LHS",
+      "stretch": "Muzaffarnagar  to  Roorkey Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "12.12.2026",
+          "to": "18.12.2026",
+          "qty": 53191.489361702115,
+          "isCompleted": false
+        },
+        {
+          "from": "19.12.2026",
+          "to": "25.12.2026",
+          "qty": 74468.08510638298,
+          "isCompleted": false
+        },
+        {
+          "from": "26.12.2026",
+          "to": "01.01.2027",
+          "qty": 63829.78723404255,
+          "isCompleted": false
+        },
+        {
+          "from": "02.01.2027",
+          "to": "04.01.2027",
+          "qty": 26369.888297872352,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "LHS",
+      "stretch": "Muzaffarnagar  to  Roorkey Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "12.12.2026",
+          "to": "18.12.2026",
+          "qty": 2127.659574468085,
+          "isCompleted": false
+        },
+        {
+          "from": "19.12.2026",
+          "to": "25.12.2026",
+          "qty": 2978.723404255319,
+          "isCompleted": false
+        },
+        {
+          "from": "26.12.2026",
+          "to": "01.01.2027",
+          "qty": 2553.191489361702,
+          "isCompleted": false
+        },
+        {
+          "from": "02.01.2027",
+          "to": "04.01.2027",
+          "qty": 1054.7955319148941,
+          "isCompleted": false
+        }
+      ]
+    }
+  ],
+  "rev": [
+    {
+      "activity": "milling",
+      "side": "LHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 0,
+          "isCompleted": true
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "LHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 0,
+          "isCompleted": true
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "LHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 0,
+          "isCompleted": true
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "RHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 0,
+          "isCompleted": true
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "RHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 0,
+          "isCompleted": true
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "RHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 0,
+          "isCompleted": true
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Bahadarabad toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 24497.94466386841,
+          "isCompleted": false
+        },
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 46366.5641923489,
+          "isCompleted": false
+        },
+        {
+          "from": "16.11.2026",
+          "to": "22.11.2026",
+          "qty": 6849.491143782681,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Bahadarabad toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 24497.94466386841,
+          "isCompleted": false
+        },
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 45366.56419234891,
+          "isCompleted": false
+        },
+        {
+          "from": "16.11.2026",
+          "to": "22.11.2026",
+          "qty": 18028.49114378268,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Bahadarabad toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 1350,
+          "isCompleted": false
+        },
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 2500,
+          "isCompleted": false
+        },
+        {
+          "from": "16.11.2026",
+          "to": "22.11.2026",
+          "qty": 993.4899999999998,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "LHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 10328,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "LHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 89477.5,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "LHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 3579.1000000000004,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "LHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 5800,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "RHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 21500,
+          "isCompleted": false
+        },
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 129567.5,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "RHS",
+      "stretch": "Bahadarabad Toll to Haridwar",
+      "fromM": 188900,
+      "toM": 206220,
+      "weeks": [
+        {
+          "from": "02.11.2026",
+          "to": "07.11.2026",
+          "qty": 860,
+          "isCompleted": false
+        },
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 5182.7,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "LHS",
+      "stretch": "Roorkee Bypass to Bahadarabad toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 31048.01129300042,
+          "isCompleted": false
+        },
+        {
+          "from": "16.11.2026",
+          "to": "22.11.2026",
+          "qty": 32555,
+          "isCompleted": false
+        },
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 22419.988706999575,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "LHS",
+      "stretch": "Roorkee Bypass to Bahadarabad toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 31048.01129300042,
+          "isCompleted": false
+        },
+        {
+          "from": "16.11.2026",
+          "to": "22.11.2026",
+          "qty": 30555.185716921053,
+          "isCompleted": false
+        },
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 34747.802990078526,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "LHS",
+      "stretch": "Roorkee Bypass to Bahadarabad toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "10.11.2026",
+          "to": "15.11.2026",
+          "qty": 1575,
+          "isCompleted": false
+        },
+        {
+          "from": "16.11.2026",
+          "to": "22.11.2026",
+          "qty": 1550,
+          "isCompleted": false
+        },
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 1781.0150000000003,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "LHS",
+      "stretch": "Roorkee Bypass to Bahadarabad toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "16.11.2026",
+          "to": "22.11.2026",
+          "qty": 127825.00000000001,
+          "isCompleted": false
+        },
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 10995.499999999995,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "LHS",
+      "stretch": "Roorkee Bypass to Bahadarabad toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "16.11.2026",
+          "to": "22.11.2026",
+          "qty": 5113,
+          "isCompleted": false
+        },
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 439.8199999999997,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Bahadarabad toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 113750,
+          "isCompleted": false
+        },
+        {
+          "from": "30.11.2026",
+          "to": "06.12.2026",
+          "qty": 25070.5,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "RHS",
+      "stretch": "Roorkee Bypass to Bahadarabad toll",
+      "fromM": 167250,
+      "toM": 188900,
+      "weeks": [
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 3950,
+          "isCompleted": false
+        },
+        {
+          "from": "30.11.2026",
+          "to": "06.12.2026",
+          "qty": 1602.8199999999997,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "RHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "16.11.2026",
+          "to": "22.11.2026",
+          "qty": 25710.53353107591,
+          "isCompleted": false
+        },
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 45450,
+          "isCompleted": false
+        },
+        {
+          "from": "30.11.2026",
+          "to": "06.12.2026",
+          "qty": 45504.96646892409,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "RHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "16.11.2026",
+          "to": "22.11.2026",
+          "qty": 25710.53353107591,
+          "isCompleted": false
+        },
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 43441.935966300676,
+          "isCompleted": false
+        },
+        {
+          "from": "30.11.2026",
+          "to": "06.12.2026",
+          "qty": 53313.03050262341,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "RHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "16.11.2026",
+          "to": "22.11.2026",
+          "qty": 1450,
+          "isCompleted": false
+        },
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 2450,
+          "isCompleted": false
+        },
+        {
+          "from": "30.11.2026",
+          "to": "06.12.2026",
+          "qty": 2969.098,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "RHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "30.11.2026",
+          "to": "06.12.2026",
+          "qty": 81750,
+          "isCompleted": false
+        },
+        {
+          "from": "07.12.2026",
+          "to": "13.12.2026",
+          "qty": 106250,
+          "isCompleted": false
+        },
+        {
+          "from": "14.12.2026",
+          "to": "20.12.2026",
+          "qty": 39466.75,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "RHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "30.11.2026",
+          "to": "06.12.2026",
+          "qty": 3270,
+          "isCompleted": false
+        },
+        {
+          "from": "07.12.2026",
+          "to": "13.12.2026",
+          "qty": 4250,
+          "isCompleted": false
+        },
+        {
+          "from": "14.12.2026",
+          "to": "20.12.2026",
+          "qty": 1578.67,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "milling",
+      "side": "LHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 11589.385859686401,
+          "isCompleted": false
+        },
+        {
+          "from": "30.11.2026",
+          "to": "06.12.2026",
+          "qty": 32284.717751983546,
+          "isCompleted": false
+        },
+        {
+          "from": "07.12.2026",
+          "to": "13.12.2026",
+          "qty": 30215.18456275383,
+          "isCompleted": false
+        },
+        {
+          "from": "14.12.2026",
+          "to": "20.12.2026",
+          "qty": 32284.717751983546,
+          "isCompleted": false
+        },
+        {
+          "from": "21.12.2026",
+          "to": "27.12.2026",
+          "qty": 24977.49407359268,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_dbm",
+      "side": "LHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 11589.385859686401,
+          "isCompleted": false
+        },
+        {
+          "from": "30.11.2026",
+          "to": "06.12.2026",
+          "qty": 32284.717751983546,
+          "isCompleted": false
+        },
+        {
+          "from": "07.12.2026",
+          "to": "13.12.2026",
+          "qty": 30215.18456275383,
+          "isCompleted": false
+        },
+        {
+          "from": "14.12.2026",
+          "to": "20.12.2026",
+          "qty": 32284.717751983546,
+          "isCompleted": false
+        },
+        {
+          "from": "21.12.2026",
+          "to": "27.12.2026",
+          "qty": 24977.49407359268,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "dbm",
+      "side": "LHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "23.11.2026",
+          "to": "29.11.2026",
+          "qty": 700,
+          "isCompleted": false
+        },
+        {
+          "from": "30.11.2026",
+          "to": "06.12.2026",
+          "qty": 1950,
+          "isCompleted": false
+        },
+        {
+          "from": "07.12.2026",
+          "to": "13.12.2026",
+          "qty": 1825,
+          "isCompleted": false
+        },
+        {
+          "from": "14.12.2026",
+          "to": "20.12.2026",
+          "qty": 1950,
+          "isCompleted": false
+        },
+        {
+          "from": "21.12.2026",
+          "to": "27.12.2026",
+          "qty": 1508.643,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "tack_coat_bc",
+      "side": "LHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "07.12.2026",
+          "to": "13.12.2026",
+          "qty": 11250,
+          "isCompleted": false
+        },
+        {
+          "from": "14.12.2026",
+          "to": "20.12.2026",
+          "qty": 78124.99999999999,
+          "isCompleted": false
+        },
+        {
+          "from": "21.12.2026",
+          "to": "27.12.2026",
+          "qty": 128484.25000000001,
+          "isCompleted": false
+        }
+      ]
+    },
+    {
+      "activity": "bc",
+      "side": "LHS",
+      "stretch": "Muzaffarnagar to Roorkee Bypass",
+      "fromM": 130560,
+      "toM": 167250,
+      "weeks": [
+        {
+          "from": "07.12.2026",
+          "to": "13.12.2026",
+          "qty": 450,
+          "isCompleted": false
+        },
+        {
+          "from": "14.12.2026",
+          "to": "20.12.2026",
+          "qty": 3125,
+          "isCompleted": false
+        },
+        {
+          "from": "21.12.2026",
+          "to": "27.12.2026",
+          "qty": 5139.370000000001,
+          "isCompleted": false
+        }
+      ]
+    }
+  ]
+}

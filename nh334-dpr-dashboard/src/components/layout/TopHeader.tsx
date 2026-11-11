@@ -26,6 +26,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 }) => {
   const {
     side, setSide,
+    state, setState,
     selectedActivities, setSelectedActivities,
     scope, setScope,
     dateRange, setDateRange,
@@ -181,7 +182,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 PROJECT MONITORING DASHBOARD
               </span>
               <h1 className="text-xl lg:text-[26px] font-extrabold tracking-tight text-white mt-0.5 leading-tight">
-                Muzaffarnagar - Haridwar Section, NH-334 (Ch. 130+560KM to 206+220KM)
+                Muzaffarnagar - Haridwar Section, NH-334 (KM130+560 TO KM 206+220)
               </h1>
             </div>
           </div>
@@ -512,6 +513,41 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                       </option>
                     );
                   })}
+                </select>
+              </div>
+            </div>
+
+            {/* 5. STATE FILTER */}
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-1.5 text-gray-300 text-[11px] font-medium">
+                <svg className="w-3.5 h-3.5 text-[#00E599]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>State</span>
+                {state && state !== 'All' && (
+                  <span className="text-[10px] text-[#00E599] font-mono font-bold">● Active</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 bg-[#0B121E] px-3 py-1.5 rounded-xl border border-white/10 hover:border-[#00E599]/40 text-slate-200 font-mono text-xs shadow-inner">
+                <svg className="w-4 h-4 text-[#00E599] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <select
+                  value={state || 'All'}
+                  onChange={e => setState(e.target.value as any)}
+                  className="bg-transparent border-none text-white font-bold focus:outline-none cursor-pointer text-xs font-mono pr-2"
+                >
+                  <option value="All" className="bg-[#09121D] text-[#00E599] font-bold">
+                    All States
+                  </option>
+                  <option value="Uttar Pradesh" className="bg-[#09121D] text-slate-200">
+                    Uttar Pradesh
+                  </option>
+                  <option value="Uttarakhand" className="bg-[#09121D] text-slate-200">
+                    Uttarakhand
+                  </option>
                 </select>
               </div>
             </div>

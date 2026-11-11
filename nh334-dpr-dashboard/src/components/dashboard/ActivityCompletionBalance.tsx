@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ActualDPRRow, ProjectBaseline, ActivityType, HighwaySide } from '../../types/dpr';
 import { computeActivityProgressMetrics, MetricMode } from '../../utils/analyticsCalculations';
 import {
@@ -23,6 +23,19 @@ export const ActivityCompletionBalance: React.FC<ActivityCompletionBalanceProps>
 }) => {
   const [metricMode, setMetricMode] = useState<MetricMode>('quantity');
   const [hoveredActivity, setHoveredActivity] = useState<string | null>(null);
+  const [frozenActivity, setFrozenActivity] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close frozen tooltip when clicking outside the component
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setFrozenActivity(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Authoritative calculations from shared analyticsCalculations
   const allMetrics = useMemo(() => {
@@ -77,7 +90,10 @@ export const ActivityCompletionBalance: React.FC<ActivityCompletionBalanceProps>
   };
 
   return (
-    <div className="h-full rounded-2xl bg-[#101820] border border-cyan-500/30 p-5 sm:p-6 shadow-2xl shadow-cyan-950/20 flex flex-col justify-between font-sans select-none relative overflow-hidden">
+    <div
+      ref={containerRef}
+      className="h-full rounded-2xl bg-[#101820] border border-cyan-500/30 p-5 sm:p-6 shadow-2xl shadow-cyan-950/20 flex flex-col justify-between font-sans select-none relative overflow-hidden"
+    >
       {/* Background ambient radial tint */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -170,14 +186,21 @@ export const ActivityCompletionBalance: React.FC<ActivityCompletionBalanceProps>
             const visualRemaining = 100 - visualCompleted;
 
             const isHovered = hoveredActivity === item.activity;
+            const isFrozen = frozenActivity === item.activity;
+            const isVisible = isFrozen || (frozenActivity === null && isHovered);
 
             return (
               <div
                 key={item.activity}
                 onMouseEnter={() => setHoveredActivity(item.activity)}
                 onMouseLeave={() => setHoveredActivity(null)}
-                className={`relative group rounded-xl transition-all duration-150 p-1.5 -mx-1.5 ${
-                  isHovered ? 'bg-cyan-500/[0.04]' : ''
+                onClick={() => setFrozenActivity(prev => prev === item.activity ? null : item.activity)}
+                className={`relative group rounded-xl transition-all duration-150 p-1.5 -mx-1.5 cursor-pointer ${
+                  isFrozen
+                    ? 'bg-cyan-500/[0.1] ring-1 ring-teal-400/50'
+                    : isHovered
+                    ? 'bg-cyan-500/[0.04]'
+                    : ''
                 }`}
               >
                 <div className="flex items-center gap-3 sm:gap-4">
@@ -248,12 +271,45 @@ export const ActivityCompletionBalance: React.FC<ActivityCompletionBalanceProps>
                   </div>
                 </div>
 
-                {/* Interactive Tooltip Card on Hover */}
-                {isHovered && (
-                  <div className="absolute left-36 sm:left-44 top-full mt-1 z-30 p-3 rounded-xl bg-[#081017] border border-teal-500/40 shadow-2xl backdrop-blur-md text-xs font-mono text-slate-200 pointer-events-none min-w-[270px]">
+                {/* Interactive Tooltip Card (Freezable on Click) */}
+                {isVisible && (
+                  <div
+                    onClick={(e) => {
+                      // Clicking the tooltip also toggles/keeps freeze
+                      e.stopPropagation();
+                      setFrozenActivity(prev => prev === item.activity ? null : item.activity);
+                    }}
+                    className={`absolute left-36 sm:left-44 top-full mt-1 z-30 p-3 rounded-xl bg-[#081017] shadow-2xl backdrop-blur-md text-xs font-mono text-slate-200 min-w-[270px] ${
+                      isFrozen
+                        ? 'border-2 border-teal-400 shadow-teal-500/30 ring-2 ring-teal-500/20'
+                        : 'border border-teal-500/40'
+                    }`}
+                  >
                     <div className="flex items-center justify-between pb-1.5 border-b border-white/10 font-bold">
-                      <span className="text-white">{item.activity} Details</span>
-                      <span className="text-emerald-400">{fmt(percent, 1)}%</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-white">{item.activity} Details</span>
+                        {isFrozen && (
+                          <span className="text-[9px] px-1.5 py-0.5 bg-teal-500/20 text-teal-300 rounded border border-teal-500/40 font-mono">
+                            🔒 Frozen
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-emerald-400">{fmt(percent, 1)}%</span>
+                        {isFrozen && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFrozenActivity(null);
+                            }}
+                            className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer transition-colors"
+                            title="Unfreeze tooltip"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="space-y-1 mt-2 text-[11px]">
                       <div className="flex justify-between">

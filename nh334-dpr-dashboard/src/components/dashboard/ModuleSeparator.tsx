@@ -12,7 +12,7 @@ export const ModuleSeparator: React.FC<ModuleSeparatorProps> = ({
   filteredRowsCount,
   overallAdherence
 }) => {
-  const { filters, activeModule, selectedDate } = useFilters();
+  const { filters, activeModule, selectedDate, linearLane, setLinearLane, linearStretch, setLinearStretch } = useFilters();
 
   const moduleMetaMap = {
     overview: {
@@ -121,6 +121,65 @@ export const ModuleSeparator: React.FC<ModuleSeparatorProps> = ({
             </p>
           </div>
         </div>
+
+        {/* Center / Global Stretch & Lane Segmented Filters */}
+        {(activeModule === 'analytics' || activeModule === 'all') && (
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3.5 select-none">
+            {/* Stretch Filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-400 font-mono text-xs font-semibold">Stretch:</span>
+              <div className="bg-[#0B121E] border border-white/10 p-1 rounded-full flex items-center gap-1 shadow-inner">
+                {([
+                  { id: 'All', label: 'All Stretches', title: 'Full Corridor: Ch. 130+560 to 206+220 (75.66 km)' },
+                  { id: 'Stretch 1', label: 'Stretch 1', title: 'Stretch 1: Ch. 130+560 to 167+250 (36.69 km)' },
+                  { id: 'Stretch 2', label: 'Stretch 2', title: 'Stretch 2: Ch. 167+250 to 190+000 (22.75 km)' },
+                  { id: 'Stretch 3', label: 'Stretch 3', title: 'Stretch 3: Ch. 190+000 to 206+220 (16.22 km)' },
+                ] as const).map((s) => {
+                  const isSelected = (linearStretch || 'All') === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setLinearStretch(s.id)}
+                      title={s.title}
+                      className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                        isSelected
+                          ? 'bg-cyan-400 text-black font-extrabold shadow-[0_0_12px_rgba(6,182,212,0.6)]'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Lane Filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-400 font-mono text-xs font-semibold">Lane:</span>
+              <div className="bg-[#0B121E] border border-white/10 p-1 rounded-full flex items-center gap-1 shadow-inner">
+                {(['All', 'Fast Lane', 'Slow Lane'] as const).map((l) => {
+                  const isSelected = (linearLane || 'All') === l;
+                  return (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => setLinearLane(l)}
+                      className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                        isSelected
+                          ? 'bg-cyan-400 text-black font-extrabold shadow-[0_0_12px_rgba(6,182,212,0.6)]'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {l}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Right Matter: Contextual Indicators & Active Scope Stats */}
         <div className="flex items-center gap-2 text-xs font-mono">

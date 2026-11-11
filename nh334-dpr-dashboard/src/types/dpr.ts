@@ -59,6 +59,18 @@ export interface PhaseDailyTarget {
   days?: number;
 }
 
+export interface StretchWiseTemplateRow {
+  rowNum: number;
+  side: HighwaySide;
+  activity: string;
+  normalizedActivity: string;
+  lane: string;
+  stretch1PlannedKm: number;
+  stretch2PlannedKm: number;
+  stretch3PlannedKm: number;
+  totalPlannedKm: number;
+}
+
 export interface ProjectBaseline {
   totalMillingTargetSqm: number; // Absolute sum of Milling (Sqm) e.g. 515298
   totalDbmTargetCum: number;     // Absolute sum of DBM (Cum) e.g. 28406.245
@@ -100,7 +112,12 @@ export interface ProjectBaseline {
     tackcoatLengthM: number;
     bcLengthM?: number;
   };
+  stretchWiseTemplate?: StretchWiseTemplateRow[];
 }
+
+export type LinearLaneFilter = 'All' | 'Fast Lane' | 'Slow Lane';
+export type LinearStretchFilter = 'All' | 'Stretch 1' | 'Stretch 2' | 'Stretch 3';
+export type StateFilter = 'All' | 'Uttar Pradesh' | 'Uttarakhand';
 
 export type AnomalyCategory = 'excess_qty' | 'milling_excess_depth' | 'offset' | 'none';
 
@@ -115,6 +132,7 @@ export interface ActualDPRRow {
   side: HighwaySide;
   lane: string;            // e.g. "F/L", "F/L& S/L", "S/L"
   activity: ActivityType;
+  rawActivity?: string; // Original activity label from Chainage Log (e.g. "Tack Coat (DBM)" vs "Tack Coat (BC)")
   unit: string;            // "sqm", "Cum", "MT"
   plannedToday: number | null;
   lengthM: number;
@@ -147,7 +165,10 @@ export interface DPRMetadata {
 
 export interface GlobalFilterState {
   side: 'LHS' | 'RHS' | 'Both';
+  state?: StateFilter;
   lane?: 'All' | 'F/L' | 'S/L' | 'FW' | 'SR';
+  linearLane?: LinearLaneFilter;
+  linearStretch?: LinearStretchFilter;
   selectedActivities: ('Milling' | 'Tackcoat' | 'DBM' | 'BC')[];
   dateRange: { start: string; end: string }; // ISO or DD.MM.YYYY
   selectedSingleDate: string | null; // e.g. "16.10.2026"
@@ -226,6 +247,7 @@ export interface DailyGroupedExecutionRow {
 
 export interface BOQCardMetric {
   activity: ActivityType;
+  rawActivity?: string; // Original activity label from Chainage Log (e.g. "Tack Coat (DBM)" vs "Tack Coat (BC)")
   unit: string;
   targetQuantity: number;
   achievedToday: number;
@@ -372,6 +394,7 @@ export interface HighwayCorridorSegment {
   fromChainage: number;
   toChainage: number;
   activity: ActivityType;
+  rawActivity?: string; // Original activity label from Chainage Log (e.g. "Tack Coat (DBM)" vs "Tack Coat (BC)")
   lane: string;
   date: string;
   achievedQty: number;

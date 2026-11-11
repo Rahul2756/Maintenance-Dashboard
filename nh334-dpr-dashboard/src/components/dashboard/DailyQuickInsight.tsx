@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ActualDPRRow, ProjectBaseline, DashboardFilters } from '../../types/dpr';
 import { getPhasedTargetForDate, getPhasedMillingTargetForDate } from '../../utils/excelParser';
+import { DEFAULT_DAILY_PLANNED_TARGETS } from '../../utils/dailyPlannedTargetsData';
 import { useFilters } from '../../context/FilterContext';
 
 export interface DailyQuickInsightProps {
@@ -26,6 +27,9 @@ export interface DailyQuickInsightProps {
   onSelectRow?: (row: ActualDPRRow) => void;
   className?: string;
 }
+
+// Feature flag: Hide target metrics, percentages, and progress bars from quick insight cards (Set to true to re-enable)
+const SHOW_DAILY_TARGET_PROGRESS = false;
 
 // Format date from "14.10.2026" to "14 Oct"
 function formatPillDate(dateStr: string): string {
@@ -109,24 +113,23 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
   const activeMaxCh = context ? context.filters.chainageBounds.to : (propsFilters?.maxChainage ?? 206.220);
   const activeAnomaliesOnly = context ? context.filters.anomaliesOnly : (propsFilters?.anomaliesOnly ?? false);
   const activeStartDate = context ? context.filters.dateRange.start : (propsFilters?.startDate || dates[0] || '14.10.2026');
-  const activeEndDate = context ? context.filters.dateRange.end : (propsFilters?.endDate || dates[dates.length - 1] || '01.11.2026');
+  const activeEndDate = context ? context.filters.dateRange.end : (propsFilters?.endDate || dates[dates.length - 1] || '05.11.2026');
   const singleFocusedDate = context?.filters.selectedSingleDate || null;
 
-  // Determine if filter bar is currently set to a single day or a multi-day range
-  const isSingleDay = singleFocusedDate ? true : activeStartDate === activeEndDate;
-  const isFullRange =
-    !singleFocusedDate &&
-    activeStartDate === dates[0] &&
-    activeEndDate === dates[dates.length - 1];
+  // Determine if All (Cumulative) or Single Day is active
+  const isAllSelected = !singleFocusedDate || singleFocusedDate === 'ALL';
+  const isSingleDay = !isAllSelected;
+  const isFullRange = isAllSelected;
 
-  // Active date for scrubber: if single day, use singleFocusedDate or activeStartDate; otherwise use activeEndDate as focal point
-  const activeDate = singleFocusedDate || (isSingleDay ? activeStartDate : activeEndDate || dates[dates.length - 1]);
+  // Active date for scrubber: if All, focal point is latest date; otherwise singleFocusedDate
+  const activeDate = isAllSelected ? (dates[dates.length - 1] || '05.11.2026') : (singleFocusedDate || activeStartDate);
 
-  // Active index on timeline track
+  // Active index on timeline track (position vehicle at end in All mode)
   const activeIndex = useMemo(() => {
+    if (isAllSelected) return dates.length - 1;
     const idx = dates.indexOf(activeDate);
     return idx >= 0 ? idx : dates.length - 1;
-  }, [dates, activeDate]);
+  }, [dates, activeDate, isAllSelected]);
 
   // Auto-play state for timeline simulation
   const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
@@ -151,30 +154,33 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
     }
   }, [context, propsOnFilterChange, propsFilters, onSelectRow, actualRows]);
 
-  // Select full date range
+  // Select full date range (All Cumulative)
   const handleSelectFullRange = useCallback(() => {
+    const latestDate = dates[dates.length - 1] || '05.11.2026';
+    const earliestDate = dates[0] || '14.10.2026';
     if (context) {
       context.setSelectedSingleDate(null);
       context.setDateRange({
-        start: dates[0] || '14.10.2026',
-        end: dates[dates.length - 1] || '01.11.2026'
+        start: earliestDate,
+        end: latestDate
       });
     }
     if (propsOnFilterChange && propsFilters) {
       propsOnFilterChange({
         ...propsFilters,
-        startDate: dates[0] || '14.10.2026',
-        endDate: dates[dates.length - 1] || '23.10.2026'
+        startDate: earliestDate,
+        endDate: latestDate
       });
     }
   }, [context, dates, propsOnFilterChange, propsFilters]);
 
   // Step backward or forward 1 day
   const handleStep = useCallback((direction: 'prev' | 'next') => {
-    const newIdx = direction === 'prev' ? Math.max(0, activeIndex - 1) : Math.min(dates.length - 1, activeIndex + 1);
+    const currentIdx = isAllSelected ? dates.length - 1 : activeIndex;
+    const newIdx = direction === 'prev' ? Math.max(0, currentIdx - 1) : Math.min(dates.length - 1, currentIdx + 1);
     const newDate = dates[newIdx];
     handleSelectDate(newDate);
-  }, [activeIndex, dates, handleSelectDate]);
+  }, [activeIndex, dates, handleSelectDate, isAllSelected]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -194,9 +200,14 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
   // Filter rows based on active Date, Side, Chainage, and Anomalies
   const dayRows = useMemo(() => {
     return actualRows.filter(r => {
-      // Date filter: if full range is active, include all in range; otherwise match activeDate
-      if (!isSingleDay && isFullRange) {
-        if (!isDateInRange(r.date, activeStartDate, activeEndDate)) return false;
+      // Date filter: if All / cumulative is active, include all rows up to activeEndDate
+      if (isAllSelected) {
+        if (!r.date) return false;
+        const [d, m, y] = r.date.split('.').map(Number);
+        const rowTime = new Date(y, m - 1, d).getTime();
+        const [ed, em, ey] = (activeEndDate || dates[dates.length - 1] || '05.11.2026').split('.').map(Number);
+        const maxTime = new Date(ey, em - 1, ed, 23, 59, 59).getTime();
+        if (rowTime > maxTime) return false;
       } else {
         if (r.date !== activeDate) return false;
       }
@@ -217,7 +228,7 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
 
       return true;
     });
-  }, [actualRows, activeDate, isSingleDay, isFullRange, activeStartDate, activeEndDate, activeSide, activeActivities, activeMinCh, activeMaxCh, activeAnomaliesOnly]);
+  }, [actualRows, isAllSelected, activeEndDate, dates, activeDate, activeSide, activeActivities, activeMinCh, activeMaxCh, activeAnomaliesOnly]);
 
   // Calculate metrics for the active date (or range) respecting all filters
   const metrics = useMemo(() => {
@@ -242,10 +253,25 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
     // 1. Milling
     const millingRows = dayRows.filter(r => r.activity === 'Milling');
     const actualMilling = millingRows.reduce((sum, r) => sum + (r.achievedToday || 0), 0);
-    const explicitPlannedMilling = millingRows.reduce((sum, r) => sum + (r.plannedToday || 0), 0);
-    const targetMilling = explicitPlannedMilling > 0
-      ? explicitPlannedMilling
-      : getPhasedMillingTargetForDate(activeDate, baseline?.dailyPhases);
+    let targetMilling = 0;
+    if (isAllSelected) {
+      const [ed, em, ey] = (activeEndDate || dates[dates.length - 1] || '05.11.2026').split('.').map(Number);
+      const maxTime = new Date(ey, em - 1, ed, 23, 59, 59).getTime();
+      let cumPlanned = 0;
+      for (const [dateStr, val] of Object.entries(DEFAULT_DAILY_PLANNED_TARGETS)) {
+        const [d, m, y] = dateStr.split('.').map(Number);
+        const t = new Date(y, m - 1, d).getTime();
+        if (t <= maxTime) {
+          cumPlanned += val.Milling || 0;
+        }
+      }
+      targetMilling = cumPlanned;
+    } else {
+      const explicitPlannedMilling = millingRows.reduce((sum, r) => sum + (r.plannedToday || 0), 0);
+      targetMilling = explicitPlannedMilling > 0
+        ? explicitPlannedMilling
+        : getPhasedMillingTargetForDate(activeDate, baseline?.dailyPhases);
+    }
     const millingVariance = actualMilling - targetMilling;
     const millingVariancePct = targetMilling > 0 ? (millingVariance / targetMilling) * 100 : 0;
     const millingProgressPct = targetMilling > 0
@@ -255,10 +281,25 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
     // 2. Tackcoat
     const tackRows = dayRows.filter(r => r.activity === 'Tackcoat');
     const actualTack = tackRows.reduce((sum, r) => sum + (r.achievedToday || 0), 0);
-    const explicitPlannedTack = tackRows.reduce((sum, r) => sum + (r.plannedToday || 0), 0);
-    const targetTack = explicitPlannedTack > 0
-      ? explicitPlannedTack
-      : Math.round(targetMilling * 0.85);
+    let targetTack = 0;
+    if (isAllSelected) {
+      const [ed, em, ey] = (activeEndDate || dates[dates.length - 1] || '05.11.2026').split('.').map(Number);
+      const maxTime = new Date(ey, em - 1, ed, 23, 59, 59).getTime();
+      let cumPlannedTack = 0;
+      for (const [dateStr, val] of Object.entries(DEFAULT_DAILY_PLANNED_TARGETS)) {
+        const [d, m, y] = dateStr.split('.').map(Number);
+        const t = new Date(y, m - 1, d).getTime();
+        if (t <= maxTime) {
+          cumPlannedTack += val['Tackcoat (DBM)'] || val.Tackcoat || 0;
+        }
+      }
+      targetTack = cumPlannedTack;
+    } else {
+      const explicitPlannedTack = tackRows.reduce((sum, r) => sum + (r.plannedToday || 0), 0);
+      targetTack = explicitPlannedTack > 0
+        ? explicitPlannedTack
+        : Math.round(targetMilling * 0.85);
+    }
     const tackVariance = actualTack - targetTack;
     const tackVariancePct = targetTack > 0 ? (tackVariance / targetTack) * 100 : 0;
     const tackProgressPct = targetTack > 0
@@ -269,14 +310,31 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
     const dbmRows = dayRows.filter(r => r.activity === 'DBM');
     const actualDbmCum = dbmRows.reduce((sum, r) => sum + (r.achievedToday || 0), 0);
     const actualDbmMT = Number((actualDbmCum * 2.38).toFixed(1));
-    const explicitPlannedDbmCum = dbmRows.reduce((sum, r) => sum + (r.plannedToday || 0), 0);
-
-    // Work Program Fixed Daily Target Alignment
-    const phasedTargetMT = getPhasedTargetForDate(activeDate, baseline?.dailyPhases);
-    const targetDbmCum = explicitPlannedDbmCum > 0
-      ? explicitPlannedDbmCum
-      : Number((phasedTargetMT / 2.38).toFixed(1));
-
+    let targetDbmCum = 0;
+    let targetDbmMT = 0;
+    let phasedTargetMT = 0;
+    if (isAllSelected) {
+      const [ed, em, ey] = (activeEndDate || dates[dates.length - 1] || '05.11.2026').split('.').map(Number);
+      const maxTime = new Date(ey, em - 1, ed, 23, 59, 59).getTime();
+      let cumPlannedDbm = 0;
+      for (const [dateStr, val] of Object.entries(DEFAULT_DAILY_PLANNED_TARGETS)) {
+        const [d, m, y] = dateStr.split('.').map(Number);
+        const t = new Date(y, m - 1, d).getTime();
+        if (t <= maxTime) {
+          cumPlannedDbm += val.DBM || 0;
+        }
+      }
+      targetDbmCum = Number(cumPlannedDbm.toFixed(1));
+      targetDbmMT = Number((cumPlannedDbm * 2.38).toFixed(1));
+      phasedTargetMT = targetDbmMT;
+    } else {
+      const explicitPlannedDbmCum = dbmRows.reduce((sum, r) => sum + (r.plannedToday || 0), 0);
+      phasedTargetMT = getPhasedTargetForDate(activeDate, baseline?.dailyPhases);
+      targetDbmCum = explicitPlannedDbmCum > 0
+        ? explicitPlannedDbmCum
+        : Number((phasedTargetMT / 2.38).toFixed(1));
+      targetDbmMT = phasedTargetMT;
+    }
     const dbmVariance = actualDbmCum - targetDbmCum;
     const dbmVariancePct = targetDbmCum > 0 ? (dbmVariance / targetDbmCum) * 100 : 0;
     const dbmProgressPct = targetDbmCum > 0
@@ -300,7 +358,9 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
     const isPhase1 = activeDate.startsWith('10.') || activeDate.startsWith('11.') ||
       activeDate.startsWith('12.') || activeDate.startsWith('13.') ||
       activeDate.startsWith('14.') || activeDate.startsWith('15.');
-    const phaseLabel = isPhase1 ? 'Phase 1 Target: 770.53 MT/day' : 'Phase 2 Target: 988.03 MT/day';
+    const phaseLabel = isAllSelected
+      ? `Cumulative Scope (to ${formatPillDate(activeEndDate || dates[dates.length - 1] || '05.11.2026')})`
+      : (isPhase1 ? 'Phase 1 Target: 770.53 MT/day' : 'Phase 2 Target: 988.03 MT/day');
 
     return {
       count,
@@ -319,6 +379,7 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
       actualDbmCum,
       actualDbmMT,
       targetDbmCum,
+      targetDbmMT,
       phasedTargetMT,
       dbmVariancePct,
       dbmProgressPct,
@@ -326,10 +387,10 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
       anomalyDescriptions,
       phaseLabel
     };
-  }, [dayRows, activeDate, baseline, activeSide, activeActivities, activeMinCh, activeMaxCh]);
+  }, [dayRows, activeDate, baseline, activeSide, activeActivities, activeMinCh, activeMaxCh, isAllSelected, activeEndDate, dates]);
 
   // Track progress calculation (percentage from 0 to 100%)
-  const progressPercent = dates.length > 1 ? (activeIndex / (dates.length - 1)) * 100 : 100;
+  const progressPercent = isAllSelected ? 100 : (dates.length > 1 ? (activeIndex / (dates.length - 1)) * 100 : 100);
 
   return (
     <div
@@ -363,23 +424,23 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
               )}
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">
-              {isSingleDay
-                ? `Viewing Single Day: ${formatPillDate(activeDate)} 2026 (${activeDate}) • Real-time Filter Bound`
-                : `Viewing Range: ${formatPillDate(activeStartDate)} to ${formatPillDate(activeEndDate)} • Scrubber on ${formatPillDate(activeDate)}`}
+              {isAllSelected
+                ? `Viewing Cumulative Progress: All Dates (${formatPillDate(dates[0])} to ${formatPillDate(activeEndDate)}) • All DPR Records`
+                : `Viewing Single Day: ${formatPillDate(activeDate)} 2026 (${activeDate}) • Real-time Filter Bound`}
             </p>
           </div>
         </div>
 
         {/* Playback Controls & Range Reset */}
         <div className="flex items-center gap-2">
-          {!isFullRange && (
+          {!isAllSelected && (
             <button
               onClick={handleSelectFullRange}
               className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono transition-all border bg-white/[0.04] text-slate-300 border-white/10 hover:text-white hover:border-cyan-500/30 cursor-pointer"
-              title="Reset date filter to full project range (14 to 23 Oct)"
+              title="Reset date filter to All (Cumulative)"
             >
               <RotateCcw className="w-3 h-3 text-cyan-400" />
-              <span>Full Range</span>
+              <span>All Dates</span>
             </button>
           )}
 
@@ -514,7 +575,7 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
               <div className="absolute -top-7 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none select-none">
                 <div className="whitespace-nowrap px-2 py-0.5 rounded-md bg-[#0B1120]/95 border border-sky-400/60 text-sky-300 font-mono text-[9px] font-bold shadow-lg shadow-black/90 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
-                  <span>{formatPillDate(activeDate)}</span>
+                  <span>{isAllSelected ? 'All Dates (Cumulative)' : formatPillDate(activeDate)}</span>
                 </div>
                 {/* Pointer Caret pointing to vehicle roof */}
                 <div className="w-0 h-0 border-x-[3.5px] border-x-transparent border-t-[4px] border-t-sky-400/60 -mt-[0.5px]" />
@@ -540,23 +601,23 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
 
       {/* Row 2: Date Selection Pills */}
       <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 mb-4">
-        {/* "Full Scope" Pill */}
+        {/* "Full Scope / All" Pill */}
         <button
           onClick={handleSelectFullRange}
           className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
-            isFullRange
+            isAllSelected
               ? 'bg-indigo-600 text-white font-bold border border-indigo-400 shadow-md shadow-indigo-500/30 scale-105'
               : 'bg-white/[0.03] border border-white/10 text-gray-400 hover:text-white hover:border-white/20'
           }`}
-          title="View entire 10-day project scope (14 to 23 Oct)"
+          title="View cumulative progress across all dates"
         >
           <Sparkles className="w-3 h-3 text-cyan-300" />
-          <span>All (14–23 Oct)</span>
+          <span>All</span>
         </button>
 
         {/* Individual Date Pills */}
         {dates.map(date => {
-          const isActive = isSingleDay && date === activeDate;
+          const isActive = !isAllSelected && date === activeDate;
           const dayHasAnomaly = actualRows.some(r => r.date === date && r.isAnomaly);
           // Check matching entries respecting side filter
           const dayEntries = actualRows.filter(
@@ -596,7 +657,7 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
               Records Logged
             </span>
             <span className="text-[10px] font-mono text-slate-500 bg-white/5 px-1.5 py-0.5 rounded">
-              {isSingleDay ? formatPillDate(activeDate) : 'Filtered Range'}
+              {isAllSelected ? 'All Dates' : (isSingleDay ? formatPillDate(activeDate) : 'Filtered Range')}
             </span>
           </div>
 
@@ -610,7 +671,7 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
           </div>
         </div>
 
-        {/* Metric 2: MILLING TODAY */}
+        {/* Metric 2: MILLING TODAY / CUMULATIVE */}
         <div
           className={`flex flex-col justify-between h-full space-y-1.5 p-1 border-b sm:border-b-0 lg:border-r border-white/5 pb-3 sm:pb-0 sm:pr-4 transition-opacity ${
             metrics.isMillingSelected ? 'opacity-100' : 'opacity-40 grayscale-[40%]'
@@ -620,26 +681,32 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
             <div className="flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-cyan-400" />
               <span className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase">
-                Milling Today
+                {metrics.isMillingSelected ? (isAllSelected ? 'Milling Cumulative' : 'Milling Today') : 'Milling'}
               </span>
             </div>
 
             {/* Variance Pill Badge */}
-            {metrics.isMillingSelected ? (
-              metrics.targetMilling > 0 && metrics.actualMilling > 0 ? (
-                <span
-                  className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                    metrics.millingVariancePct >= 0
-                      ? 'bg-emerald-950/70 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-amber-950/70 text-amber-400 border border-amber-500/30'
-                  }`}
-                >
-                  {metrics.millingVariancePct >= 0 ? '+' : ''}
-                  {metrics.millingVariancePct.toFixed(1)}%
-                </span>
-              ) : null
+            {SHOW_DAILY_TARGET_PROGRESS ? (
+              metrics.isMillingSelected ? (
+                metrics.targetMilling > 0 && metrics.actualMilling > 0 ? (
+                  <span
+                    className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                      metrics.millingVariancePct >= 0
+                        ? 'bg-emerald-950/70 text-emerald-400 border border-emerald-500/30'
+                        : 'bg-amber-950/70 text-amber-400 border border-amber-500/30'
+                    }`}
+                  >
+                    {metrics.millingVariancePct >= 0 ? '+' : ''}
+                    {metrics.millingVariancePct.toFixed(1)}%
+                  </span>
+                ) : null
+              ) : (
+                <span className="text-[9px] font-mono text-slate-500 bg-white/5 px-1 rounded">Filtered</span>
+              )
             ) : (
-              <span className="text-[9px] font-mono text-slate-500 bg-white/5 px-1 rounded">Filtered</span>
+              !metrics.isMillingSelected && (
+                <span className="text-[9px] font-mono text-slate-500 bg-white/5 px-1 rounded">Filtered</span>
+              )
             )}
           </div>
 
@@ -648,26 +715,28 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
             <span className="text-xs font-normal text-slate-400">sqm</span>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-              <span>Target: {formatFmt(metrics.targetMilling)} sqm</span>
-              <span className="font-mono text-[10px] text-slate-500">
-                {metrics.isMillingSelected ? `${Math.round(metrics.millingProgressPct)}%` : '0%'}
-              </span>
+          {SHOW_DAILY_TARGET_PROGRESS && (
+            <div>
+              <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                <span>Target: {formatFmt(metrics.targetMilling)} sqm</span>
+                <span className="font-mono text-[10px] text-slate-500">
+                  {metrics.isMillingSelected ? `${Math.round(metrics.millingProgressPct)}%` : '0%'}
+                </span>
+              </div>
+              {/* Slim 4px Micro Progress Bar */}
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden w-full">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    metrics.actualMilling >= metrics.targetMilling ? 'bg-emerald-500' : 'bg-amber-500'
+                  }`}
+                  style={{ width: `${metrics.isMillingSelected ? metrics.millingProgressPct : 0}%` }}
+                />
+              </div>
             </div>
-            {/* Slim 4px Micro Progress Bar */}
-            <div className="h-1 bg-white/10 rounded-full overflow-hidden w-full">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  metrics.actualMilling >= metrics.targetMilling ? 'bg-emerald-500' : 'bg-amber-500'
-                }`}
-                style={{ width: `${metrics.isMillingSelected ? metrics.millingProgressPct : 0}%` }}
-              />
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Metric 3: TACK COAT TODAY */}
+        {/* Metric 3: TACK COAT TODAY / CUMULATIVE */}
         <div
           className={`flex flex-col justify-between h-full space-y-1.5 p-1 border-b sm:border-b-0 sm:border-r border-white/5 pb-3 sm:pb-0 sm:pr-4 transition-opacity ${
             metrics.isTackSelected ? 'opacity-100' : 'opacity-40 grayscale-[40%]'
@@ -677,25 +746,31 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
             <div className="flex items-center gap-1.5">
               <Flame className="w-3.5 h-3.5 text-amber-400" />
               <span className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase">
-                Tack Coat Today
+                {metrics.isTackSelected ? (isAllSelected ? 'Tack Coat Cumulative' : 'Tack Coat Today') : 'Tack Coat'}
               </span>
             </div>
 
-            {metrics.isTackSelected ? (
-              metrics.targetTack > 0 && metrics.actualTack > 0 ? (
-                <span
-                  className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                    metrics.tackVariancePct >= 0
-                      ? 'bg-emerald-950/70 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-amber-950/70 text-amber-400 border border-amber-500/30'
-                  }`}
-                >
-                  {metrics.tackVariancePct >= 0 ? '+' : ''}
-                  {metrics.tackVariancePct.toFixed(1)}%
-                </span>
-              ) : null
+            {SHOW_DAILY_TARGET_PROGRESS ? (
+              metrics.isTackSelected ? (
+                metrics.targetTack > 0 && metrics.actualTack > 0 ? (
+                  <span
+                    className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                      metrics.tackVariancePct >= 0
+                        ? 'bg-emerald-950/70 text-emerald-400 border border-emerald-500/30'
+                        : 'bg-amber-950/70 text-amber-400 border border-amber-500/30'
+                    }`}
+                  >
+                    {metrics.tackVariancePct >= 0 ? '+' : ''}
+                    {metrics.tackVariancePct.toFixed(1)}%
+                  </span>
+                ) : null
+              ) : (
+                <span className="text-[9px] font-mono text-slate-500 bg-white/5 px-1 rounded">Filtered</span>
+              )
             ) : (
-              <span className="text-[9px] font-mono text-slate-500 bg-white/5 px-1 rounded">Filtered</span>
+              !metrics.isTackSelected && (
+                <span className="text-[9px] font-mono text-slate-500 bg-white/5 px-1 rounded">Filtered</span>
+              )
             )}
           </div>
 
@@ -704,26 +779,28 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
             <span className="text-xs font-normal text-slate-400">sqm</span>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-              <span>Target: {formatFmt(metrics.targetTack)} sqm</span>
-              <span className="font-mono text-[10px] text-slate-500">
-                {metrics.isTackSelected ? `${Math.round(metrics.tackProgressPct)}%` : '0%'}
-              </span>
+          {SHOW_DAILY_TARGET_PROGRESS && (
+            <div>
+              <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                <span>Target: {formatFmt(metrics.targetTack)} sqm</span>
+                <span className="font-mono text-[10px] text-slate-500">
+                  {metrics.isTackSelected ? `${Math.round(metrics.tackProgressPct)}%` : '0%'}
+                </span>
+              </div>
+              {/* Slim 4px Micro Progress Bar */}
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden w-full">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    metrics.actualTack >= metrics.targetTack ? 'bg-emerald-500' : 'bg-amber-500'
+                  }`}
+                  style={{ width: `${metrics.isTackSelected ? metrics.tackProgressPct : 0}%` }}
+                />
+              </div>
             </div>
-            {/* Slim 4px Micro Progress Bar */}
-            <div className="h-1 bg-white/10 rounded-full overflow-hidden w-full">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  metrics.actualTack >= metrics.targetTack ? 'bg-emerald-500' : 'bg-amber-500'
-                }`}
-                style={{ width: `${metrics.isTackSelected ? metrics.tackProgressPct : 0}%` }}
-              />
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Metric 4: DBM PAVEMENT TODAY */}
+        {/* Metric 4: DBM PAVEMENT TODAY / CUMULATIVE */}
         <div
           className={`flex flex-col justify-between h-full space-y-1.5 p-1 transition-opacity ${
             metrics.isDbmSelected ? 'opacity-100' : 'opacity-40 grayscale-[40%]'
@@ -733,7 +810,7 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
             <div className="flex items-center gap-1.5">
               <Truck className="w-3.5 h-3.5 text-emerald-400" />
               <span className="text-[11px] font-semibold tracking-wider text-gray-400 uppercase">
-                DBM Pavement
+                {metrics.isDbmSelected ? (isAllSelected ? 'DBM Cumulative' : 'DBM Pavement') : 'DBM Pavement'}
               </span>
             </div>
 
@@ -764,23 +841,25 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
             )}
           </div>
 
-          <div>
-            <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-              <span>Target: {formatFmt(metrics.targetDbmCum, 1)} Cum</span>
-              <span className="font-mono text-[10px] text-slate-500">
-                {metrics.isDbmSelected ? `${Math.round(metrics.dbmProgressPct)}%` : '0%'}
-              </span>
+          {SHOW_DAILY_TARGET_PROGRESS && (
+            <div>
+              <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                <span>Target: {formatFmt(metrics.targetDbmCum, 1)} Cum{isAllSelected && metrics.targetDbmMT > 0 ? ` (${formatFmt(metrics.targetDbmMT, 0)} MT)` : ''}</span>
+                <span className="font-mono text-[10px] text-slate-500">
+                  {metrics.isDbmSelected ? `${Math.round(metrics.dbmProgressPct)}%` : '0%'}
+                </span>
+              </div>
+              {/* Slim 4px Micro Progress Bar */}
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden w-full">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    metrics.actualDbmCum >= metrics.targetDbmCum ? 'bg-emerald-500' : 'bg-amber-500'
+                  }`}
+                  style={{ width: `${metrics.isDbmSelected ? metrics.dbmProgressPct : 0}%` }}
+                />
+              </div>
             </div>
-            {/* Slim 4px Micro Progress Bar */}
-            <div className="h-1 bg-white/10 rounded-full overflow-hidden w-full">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  metrics.actualDbmCum >= metrics.targetDbmCum ? 'bg-emerald-500' : 'bg-amber-500'
-                }`}
-                style={{ width: `${metrics.isDbmSelected ? metrics.dbmProgressPct : 0}%` }}
-              />
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
