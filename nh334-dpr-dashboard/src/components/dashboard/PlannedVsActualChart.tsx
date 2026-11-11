@@ -152,7 +152,7 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
       top: 40,
       left: 10,
       right: 15,
-      bottom: 25,
+      bottom: 35,
       containLabel: true
     },
     xAxis: [
@@ -167,8 +167,14 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
         },
         axisLabel: {
           color: '#94A3B8',
-          fontSize: 11,
-          fontFamily: 'JetBrains Mono, monospace'
+          fontSize: 10,
+          fontFamily: 'JetBrains Mono, monospace',
+          interval: 'auto',
+          hideOverlap: true,
+          rotate: dates.length > 12 ? 35 : 0,
+          showMinLabel: true,
+          showMaxLabel: true,
+          margin: 10
         }
       }
     ],

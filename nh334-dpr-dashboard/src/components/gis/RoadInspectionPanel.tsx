@@ -13,7 +13,10 @@ import {
   Copy, 
   Check, 
   ShieldCheck,
-  Maximize2
+  Maximize2,
+  ArrowLeft,
+  Calendar,
+  FileText
 } from 'lucide-react';
 
 interface RoadInspectionPanelProps {
@@ -21,13 +24,15 @@ interface RoadInspectionPanelProps {
   onClose: () => void;
   onOpenStreetView?: (lat: number, lon: number, chainageFmt: string) => void;
   onHighlightInStripChart?: (chainageM: number) => void;
+  onBackToTimeline?: () => void;
 }
 
 export const RoadInspectionPanel: React.FC<RoadInspectionPanelProps> = ({
   details,
   onClose,
   onOpenStreetView,
-  onHighlightInStripChart
+  onHighlightInStripChart,
+  onBackToTimeline
 }) => {
   const [copied, setCopied] = React.useState(false);
 
@@ -94,6 +99,78 @@ export const RoadInspectionPanel: React.FC<RoadInspectionPanelProps> = ({
 
       {/* Body Content */}
       <div className="p-4 space-y-3.5 max-h-[70vh] overflow-y-auto custom-scrollbar text-xs">
+        {/* Back to Daily Timeline button */}
+        {onBackToTimeline && (
+          <button
+            onClick={onBackToTimeline}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 hover:text-white font-mono text-xs font-semibold transition-all shadow-md shadow-cyan-500/10 cursor-pointer"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Daily Timeline</span>
+          </button>
+        )}
+
+        {/* Selected Daily DPR Work Entry Details (Requirement 3) */}
+        {actualRow && (
+          <div className="bg-cyan-950/30 rounded-xl p-3 border border-cyan-500/40 space-y-2.5">
+            <div className="flex items-center justify-between text-[11px] font-mono text-cyan-400 uppercase tracking-wider font-bold">
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-cyan-400" /> Selected Daily DPR Entry
+              </span>
+              <span className="text-[10px] bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">
+                {actualRow.date}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+              <div className="bg-black/50 p-2 rounded-lg border border-white/5">
+                <span className="text-[10px] text-slate-400 block">Activity</span>
+                <span className="text-cyan-300 font-bold">{actualRow.activity}</span>
+              </div>
+              <div className="bg-black/50 p-2 rounded-lg border border-white/5">
+                <span className="text-[10px] text-slate-400 block">Side & Lane</span>
+                <span className="text-white font-bold">{actualRow.side} • {actualRow.lane || 'MCW'}</span>
+              </div>
+              <div className="bg-black/50 p-2 rounded-lg border border-white/5">
+                <span className="text-[10px] text-slate-400 block">Executed Span</span>
+                <span className="text-white font-bold">{actualRow.lengthM || lengthM} m</span>
+                <span className="text-[10px] text-slate-500 block">
+                  {formatChainageM(actualRow.rawFromChainage || Math.round(actualRow.fromChainage * 1000))} → {formatChainageM(actualRow.rawToChainage || Math.round(actualRow.toChainage * 1000))}
+                </span>
+              </div>
+              <div className="bg-black/50 p-2 rounded-lg border border-white/5">
+                <span className="text-[10px] text-slate-400 block">Achieved Output</span>
+                <span className="text-emerald-400 font-bold">
+                  {actualRow.achievedToday > 0 ? `${actualRow.achievedToday.toLocaleString()} ${actualRow.unit || 'sqm'}` : 'Recorded'}
+                </span>
+                {actualRow.id && (
+                  <span className="text-[10px] text-slate-500 block">
+                    ID: #{actualRow.id}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {actualRow.boqItem && (
+              <div className="text-[11px] font-mono text-slate-300 bg-black/50 px-2.5 py-1.5 rounded-lg border border-white/5">
+                <span className="text-slate-400 text-[10px] block">BOQ Description:</span>
+                <span className="truncate block text-slate-200 font-semibold">{actualRow.boqItem}</span>
+              </div>
+            )}
+
+            {actualRow.isAnomaly ? (
+              <div className="flex items-center gap-1.5 text-[10px] font-mono text-rose-300 bg-rose-950/40 p-2 rounded-lg border border-rose-500/30">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <span>DPR Log Flagged Anomaly</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 bg-emerald-950/30 p-1.5 rounded-lg border border-emerald-500/20">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>Verified Field Log Record</span>
+              </div>
+            )}
+          </div>
+        )}
         {/* Status Category Badge Strip */}
         <div className="flex items-center justify-between bg-[#0B0C0E]/70 p-2.5 rounded-xl border border-white/5">
           <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Classification:</span>

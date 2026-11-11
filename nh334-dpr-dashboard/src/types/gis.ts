@@ -27,6 +27,7 @@ export interface SelectedRoadSection {
   toChainageFmt: string;
   lengthM: number;
   side: HighwaySide;
+  lane?: string;
   activity?: string;
   activityId?: string;
   status?: 'completed' | 'in_progress' | 'delayed' | 'planned' | 'future_planned' | 'dps' | 'under_construction' | 'himalayan' | 'eligible_scope';

@@ -142,6 +142,7 @@ export interface ActualDPRRow {
   achievedToday: number;
   cumulativeAchieved: number;
   boqQuantity: number | null;
+  boqItem?: string;
   remarks: string;
   isAnomaly: boolean;
   anomalyCategory: AnomalyCategory;

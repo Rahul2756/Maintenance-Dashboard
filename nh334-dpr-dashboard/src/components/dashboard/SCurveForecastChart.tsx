@@ -132,7 +132,7 @@ export const SCurveForecastChart: React.FC<SCurveForecastChartProps> = ({
     grid: {
       top: 36,
       right: 20,
-      bottom: 40,
+      bottom: 48,
       left: 45,
       containLabel: true
     },
@@ -206,8 +206,12 @@ export const SCurveForecastChart: React.FC<SCurveForecastChartProps> = ({
         color: '#94A3B8',
         fontSize: 10,
         fontFamily: 'monospace',
-        interval: 0,
-        rotate: 0
+        interval: 'auto',
+        hideOverlap: true,
+        rotate: categories.length > 12 ? 35 : 0,
+        showMinLabel: true,
+        showMaxLabel: true,
+        margin: 10
       }
     },
     yAxis: {

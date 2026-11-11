@@ -268,7 +268,7 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
     grid: {
       top: 36,
       right: 20,
-      bottom: 40,
+      bottom: 48,
       left: 45,
       containLabel: true
     },
@@ -369,8 +369,12 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
         color: '#94A3B8',
         fontSize: 10,
         fontFamily: 'monospace',
-        interval: 0,
-        rotate: 0
+        interval: 'auto',
+        hideOverlap: true,
+        rotate: chartData.categories.length > 12 ? 35 : 0,
+        showMinLabel: true,
+        showMaxLabel: true,
+        margin: 10
       }
     },
     yAxis: {

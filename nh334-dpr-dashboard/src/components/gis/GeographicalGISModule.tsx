@@ -34,7 +34,9 @@ import {
   SlidersHorizontal,
   ChevronDown,
   Navigation,
-  Calendar
+  Calendar,
+  ArrowLeft,
+  AlertTriangle
 } from 'lucide-react';
 
 interface GeographicalGISModuleProps {
@@ -48,6 +50,9 @@ interface GeographicalGISModuleProps {
   qcLogs?: QCTestLogItem[];
   selectedRow?: ActualDPRRow | null;
   onSelectRow?: (row: ActualDPRRow | null) => void;
+  selectedWorkRecord?: ActualDPRRow | null;
+  onClearSelectedWorkRecord?: () => void;
+  onBackToTimeline?: () => void;
 }
 
 export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
@@ -60,7 +65,10 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
   availableDates: externalDates = [],
   qcLogs = [],
   selectedRow = null,
-  onSelectRow
+  onSelectRow,
+  selectedWorkRecord = null,
+  onClearSelectedWorkRecord,
+  onBackToTimeline
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -96,6 +104,7 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
 
   // Inspection details
   const [inspectionDetails, setInspectionDetails] = useState<InspectionDetails | null>(null);
+  const [locationErrorMessage, setLocationErrorMessage] = useState<string | null>(null);
 
   // Street view modal state
   const [isStreetViewOpen, setIsStreetViewOpen] = useState<boolean>(false);
@@ -137,6 +146,57 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
       });
     }
   }, [externalSelectedChainage, geoSegments]);
+
+  // Synchronize and focus when navigating from Daily Quick Insight Timeline
+  useEffect(() => {
+    if (!selectedWorkRecord) return;
+
+    const fromM = selectedWorkRecord.rawFromChainage || Math.round((selectedWorkRecord.fromChainage || 0) * 1000);
+    const toM = selectedWorkRecord.rawToChainage || Math.round((selectedWorkRecord.toChainage || 0) * 1000);
+
+    // Validate chainage against road extent (Requirement 5)
+    const isFromValid = fromM >= CORRIDOR_EXTENT.projectStartM - 1000 && fromM <= CORRIDOR_EXTENT.projectEndM + 1000;
+    const isToValid = toM >= CORRIDOR_EXTENT.projectStartM - 1000 && toM <= CORRIDOR_EXTENT.projectEndM + 1000;
+
+    if (!isFromValid || !isToValid) {
+      setLocationErrorMessage('GPS location unavailable for this chainage.');
+      return;
+    }
+
+    setLocationErrorMessage(null);
+    const midM = Math.round((fromM + toM) / 2);
+    setSelectedChainage(midM);
+
+    const [lat, lon] = getCoordinatesAtChainage(midM);
+    const fromChFmt = formatChainageM(fromM);
+    const toChFmt = formatChainageM(toM);
+    const res = getChainageAtCoordinates(lat, lon);
+
+    // Find any intersecting classification segment for rich provenance
+    const matchingSeg = geoSegments.find(
+      s => (fromM >= s.fromChainageM && fromM <= s.toChainageM) || (toM >= s.fromChainageM && toM <= s.toChainageM)
+    );
+
+    setInspectionDetails({
+      chainageM: midM,
+      chainageFmt: `${fromChFmt} → ${toChFmt}`,
+      lat,
+      lon,
+      nearestLandmark: res.nearestLandmark,
+      segment: matchingSeg,
+      actualRow: selectedWorkRecord,
+      selectedSection: {
+        fromM,
+        toM,
+        fromChainageFmt: fromChFmt,
+        toChainageFmt: toChFmt,
+        side: selectedWorkRecord.side,
+        lane: selectedWorkRecord.lane,
+        activity: selectedWorkRecord.activity,
+        lengthM: selectedWorkRecord.lengthM || Math.abs(toM - fromM)
+      }
+    });
+  }, [selectedWorkRecord, geoSegments]);
 
   // Segment selection handler
   const handleSelectSegment = (segment: RoadSegmentGeo) => {
@@ -511,6 +571,49 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
 
       {/* 4. Main Viewport: 2D GIS Engine (Satellite / Hybrid / Road Map) OR 3D Digital Twin */}
       <div className="relative">
+        {/* Unmapped Chainage Warning Overlay (Requirement 5) */}
+        {locationErrorMessage && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 px-4 py-2.5 rounded-xl bg-amber-950/95 border border-amber-500/50 text-amber-200 font-mono text-xs shadow-2xl flex items-center gap-2.5 animate-bounce">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>{locationErrorMessage}</span>
+            <button
+              onClick={() => setLocationErrorMessage(null)}
+              className="ml-2 text-slate-400 hover:text-white cursor-pointer"
+              title="Dismiss warning"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Floating Focus Badge Overlay when Navigated from Daily Timeline */}
+        {selectedWorkRecord && (
+          <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-[#12161D]/95 backdrop-blur-md px-3.5 py-2 rounded-xl border border-cyan-500/40 font-mono text-xs text-white shadow-xl">
+            {onBackToTimeline && (
+              <button
+                onClick={onBackToTimeline}
+                className="flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-bold cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Timeline</span>
+              </button>
+            )}
+            <span className="text-slate-500">|</span>
+            <span className="text-slate-300">
+              Focusing: <span className="text-cyan-300 font-bold">{selectedWorkRecord.activity}</span> ({selectedWorkRecord.side} • {selectedWorkRecord.lane || 'MCW'})
+            </span>
+            {onClearSelectedWorkRecord && (
+              <button
+                onClick={onClearSelectedWorkRecord}
+                className="ml-1 text-slate-400 hover:text-white cursor-pointer"
+                title="Clear focus"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        )}
+
         {mapMode === '3d' ? (
           <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
             <Highway3DDigitalTwin
@@ -546,6 +649,7 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
             stateFilter={selectedState}
             pegmanActive={pegmanActive}
             onPegmanDrop={handlePegmanDrop}
+            selectedWorkRecord={selectedWorkRecord}
           />
         )}
 
@@ -558,6 +662,7 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
             onHighlightInStripChart={(m) => {
               if (onHighlightStripChart) onHighlightStripChart(m);
             }}
+            onBackToTimeline={onBackToTimeline}
           />
         )}
       </div>

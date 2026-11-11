@@ -1,22 +1,27 @@
-import React, { useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import {
   Clock,
   Play,
   Pause,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   AlertTriangle,
   CheckCircle2,
   Layers,
   Flame,
   Truck,
   RotateCcw,
-  Sparkles
+  Sparkles,
+  MapPin,
+  Navigation
 } from 'lucide-react';
 import { ActualDPRRow, ProjectBaseline, DashboardFilters } from '../../types/dpr';
 import { getPhasedTargetForDate, getPhasedMillingTargetForDate } from '../../utils/excelParser';
 import { DEFAULT_DAILY_PLANNED_TARGETS } from '../../utils/dailyPlannedTargetsData';
 import { useFilters } from '../../context/FilterContext';
+import { formatChainageM } from '../../utils/gisUtils';
 
 export interface DailyQuickInsightProps {
   actualRows: ActualDPRRow[];
@@ -25,6 +30,7 @@ export interface DailyQuickInsightProps {
   onFilterChange?: (newFilters: DashboardFilters) => void;
   availableDates: string[];
   onSelectRow?: (row: ActualDPRRow) => void;
+  onNavigateToLocation?: (row: ActualDPRRow) => void;
   className?: string;
 }
 
@@ -73,8 +79,11 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
   onFilterChange: propsOnFilterChange,
   availableDates,
   onSelectRow,
+  onNavigateToLocation,
   className = ''
 }) => {
+  const [isStretchesExpanded, setIsStretchesExpanded] = useState<boolean>(true);
+
   // Access global filter context if available
   let context: ReturnType<typeof useFilters> | null = null;
   try {
@@ -394,6 +403,7 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
 
   return (
     <div
+      id="daily-quick-insight"
       className={`bg-[#0E121E]/95 backdrop-blur-md border border-white/5 rounded-2xl p-5 shadow-2xl relative overflow-hidden transition-all duration-300 ${className}`}
       style={{
         boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5), inset 0 1px 0 0 rgba(255,255,255,0.05)'
@@ -861,6 +871,124 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Row 4: Daily Work Entries & Stretch Locations (Direct GIS Navigation) */}
+      <div className="mt-4 bg-black/35 border border-white/5 rounded-xl p-3.5 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <MapPin className="w-3.5 h-3.5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold tracking-wider text-slate-200 uppercase font-mono">
+                  Daily Work Entries & Stretch Locations
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 font-semibold">
+                  {dayRows.length} {dayRows.length === 1 ? 'Stretch' : 'Stretches'}
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-mono">
+                Click <span className="text-cyan-400 font-semibold">Locate</span> to zoom and highlight exact GPS road section on NH-334 GIS Map
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setIsStretchesExpanded(!isStretchesExpanded)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/5 text-[11px] font-mono transition-colors cursor-pointer"
+            title={isStretchesExpanded ? 'Collapse stretches list' : 'Expand stretches list'}
+          >
+            <span>{isStretchesExpanded ? 'Hide' : 'Show'}</span>
+            {isStretchesExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+
+        {isStretchesExpanded && (
+          dayRows.length === 0 ? (
+            <div className="p-3 text-center text-xs text-slate-500 font-mono bg-white/[0.01] rounded-lg border border-white/5">
+              No individual DPR work entries recorded for {isAllSelected ? 'the selected filters' : activeDate}.
+            </div>
+          ) : (
+            <div className="space-y-1.5 max-h-64 overflow-y-auto custom-scrollbar pr-1">
+              {dayRows.map((row, idx) => {
+                const fromM = row.rawFromChainage || Math.round((row.fromChainage || 0) * 1000);
+                const toM = row.rawToChainage || Math.round((row.toChainage || 0) * 1000);
+                const fromChFmt = formatChainageM(fromM);
+                const toChFmt = formatChainageM(toM);
+                const lenM = row.lengthM || Math.abs(toM - fromM);
+
+                return (
+                  <div
+                    key={row.id || `${row.date}-${row.activity}-${fromM}-${idx}`}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 hover:border-cyan-500/30 transition-all gap-2 text-xs font-mono"
+                  >
+                    {/* Left: Date, Activity, Side & Lane */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-slate-400 text-[11px] bg-white/5 px-1.5 py-0.5 rounded">
+                        {row.date}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                          row.activity === 'Milling'
+                            ? 'bg-cyan-950/70 text-cyan-300 border-cyan-500/40'
+                            : row.activity === 'Tackcoat'
+                            ? 'bg-amber-950/70 text-amber-300 border-amber-500/40'
+                            : 'bg-emerald-950/70 text-emerald-300 border-emerald-500/40'
+                        }`}
+                      >
+                        {row.activity}
+                      </span>
+                      <span className="text-slate-300 font-semibold bg-white/5 px-1.5 py-0.5 rounded text-[11px]">
+                        {row.side} • {row.lane || 'MCW'}
+                      </span>
+                      {row.isAnomaly && (
+                        <span className="text-[10px] text-rose-300 bg-rose-950/50 border border-rose-500/30 px-1.5 py-0.5 rounded flex items-center gap-1">
+                          <AlertTriangle className="w-2.5 h-2.5 text-rose-400" />
+                          <span>Anomaly</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Middle: Chainage span & Output */}
+                    <div className="flex items-center gap-3 text-slate-300">
+                      <span className="text-white font-bold">
+                        {fromChFmt} <span className="text-slate-500 font-normal">→</span> {toChFmt}
+                      </span>
+                      <span className="text-slate-400 text-[11px]">
+                        ({lenM.toLocaleString()} m)
+                      </span>
+                      {row.achievedToday > 0 && (
+                        <span className="text-emerald-400 font-semibold text-[11px] hidden md:inline">
+                          {formatFmt(row.achievedToday, 1)} {row.unit || 'sqm'}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Right: Map Pin Action Button */}
+                    <div className="flex items-center gap-2 justify-end">
+                      <button
+                        onClick={() => {
+                          if (onNavigateToLocation) {
+                            onNavigateToLocation(row);
+                          } else if (onSelectRow) {
+                            onSelectRow(row);
+                          }
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/30 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 hover:text-white font-mono text-xs font-semibold transition-all shadow-sm shadow-cyan-500/10 cursor-pointer group shrink-0"
+                        title={`Locate ${row.activity} stretch (${fromChFmt} → ${toChFmt}) on NH-334 GIS Map`}
+                      >
+                        <MapPin className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+                        <span>Locate</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )
+        )}
       </div>
     </div>
   );

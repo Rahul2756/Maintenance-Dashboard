@@ -1,11 +1,13 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { MapMode, RoadSegmentGeo } from '../../types/gis';
+import { ActualDPRRow, HighwaySide } from '../../types/dpr';
 import { 
   GPS_POINTS, 
   CORRIDOR_EXTENT, 
   NH334_LANDMARKS, 
   getMilestoneMarkers, 
   getCoordinatesAtChainage,
+  getCoordinatesSlice,
   getChainageAtCoordinates,
   formatChainageM
 } from '../../utils/gisUtils';
@@ -31,6 +33,7 @@ interface GISMapCanvasProps {
   onPegmanDrop?: (lat: number, lon: number, chainageFmt: string) => void;
   colorMode?: 'status' | 'activity';
   stateFilter?: StateFilter;
+  selectedWorkRecord?: ActualDPRRow | null;
 }
 
 // Tile URL generators
@@ -77,7 +80,8 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
   pegmanActive,
   onPegmanDrop,
   colorMode = 'status',
-  stateFilter = 'All'
+  stateFilter = 'All',
+  selectedWorkRecord = null
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -167,6 +171,32 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
       if (zoom < 13) setZoom(13.8);
     }
   }, [selectedChainageM]);
+
+  // Focus and zoom camera to selected daily work stretch
+  useEffect(() => {
+    if (!selectedWorkRecord) return;
+    const fromM = selectedWorkRecord.rawFromChainage || Math.round((selectedWorkRecord.fromChainage || 0) * 1000);
+    const toM = selectedWorkRecord.rawToChainage || Math.round((selectedWorkRecord.toChainage || 0) * 1000);
+
+    if (fromM < CORRIDOR_EXTENT.projectStartM - 1000 || toM > CORRIDOR_EXTENT.projectEndM + 1000) {
+      return;
+    }
+
+    const midM = Math.round((fromM + toM) / 2);
+    const coords = getCoordinatesAtChainage(midM);
+    setCenter(coords);
+
+    const spanM = Math.abs(toM - fromM);
+    if (spanM <= 1000) {
+      setZoom(15.2);
+    } else if (spanM <= 2500) {
+      setZoom(14.2);
+    } else if (spanM <= 5000) {
+      setZoom(13.2);
+    } else {
+      setZoom(12.2);
+    }
+  }, [selectedWorkRecord]);
 
   // Main canvas render loop
   useEffect(() => {
@@ -486,7 +516,95 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
       ctx.fillText(label, sx, sy - 18);
       ctx.shadowBlur = 0;
     }
-  }, [center, zoom, mode, segments, selectedChainageM, milestones]);
+
+    // 8. Render Selected Daily Work Interval Highlight Overlay
+    if (selectedWorkRecord) {
+      const fromM = selectedWorkRecord.rawFromChainage || Math.round((selectedWorkRecord.fromChainage || 0) * 1000);
+      const toM = selectedWorkRecord.rawToChainage || Math.round((selectedWorkRecord.toChainage || 0) * 1000);
+
+      if (fromM >= CORRIDOR_EXTENT.projectStartM - 1000 && toM <= CORRIDOR_EXTENT.projectEndM + 1000) {
+        const minM = Math.min(fromM, toM);
+        const maxM = Math.max(fromM, toM);
+        const intervalCoords = getCoordinatesSlice(minM, maxM, (selectedWorkRecord.side as HighwaySide) || 'Both');
+
+        if (intervalCoords.length >= 2) {
+          // A. Glowing outer casing
+          ctx.beginPath();
+          const [startPx, startPy] = toScreen(intervalCoords[0][0], intervalCoords[0][1]);
+          ctx.moveTo(startPx, startPy);
+          for (let i = 1; i < intervalCoords.length; i++) {
+            const [px, py] = toScreen(intervalCoords[i][0], intervalCoords[i][1]);
+            ctx.lineTo(px, py);
+          }
+          ctx.strokeStyle = 'rgba(6, 182, 212, 0.45)';
+          ctx.lineWidth = 14;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.stroke();
+
+          // B. Inner solid core stroke
+          ctx.strokeStyle = '#22D3EE';
+          ctx.lineWidth = 5;
+          ctx.stroke();
+
+          // C. Start pin at minM
+          const [sLat, sLon] = getCoordinatesAtChainage(minM);
+          const [sx, sy] = toScreen(sLat, sLon);
+          ctx.beginPath();
+          ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+          ctx.fillStyle = '#06B6D4';
+          ctx.fill();
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.font = 'bold 10px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#06B6D4';
+          ctx.shadowColor = 'rgba(0,0,0,0.9)';
+          ctx.shadowBlur = 4;
+          ctx.fillText(`From: ${formatChainageM(minM)}`, sx, sy - 14);
+          ctx.shadowBlur = 0;
+
+          // D. End pin at maxM
+          const [eLat, eLon] = getCoordinatesAtChainage(maxM);
+          const [ex, ey] = toScreen(eLat, eLon);
+          ctx.beginPath();
+          ctx.arc(ex, ey, 6, 0, Math.PI * 2);
+          ctx.fillStyle = '#10B981';
+          ctx.fill();
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.fillStyle = '#10B981';
+          ctx.shadowColor = 'rgba(0,0,0,0.9)';
+          ctx.shadowBlur = 4;
+          ctx.fillText(`To: ${formatChainageM(maxM)}`, ex, ey - 14);
+          ctx.shadowBlur = 0;
+
+          // E. Floating stretch badge at mid-point
+          const midM = Math.round((minM + maxM) / 2);
+          const [mLat, mLon] = getCoordinatesAtChainage(midM);
+          const [mx, my] = toScreen(mLat, mLon);
+          const badgeLabel = `${selectedWorkRecord.activity} (${selectedWorkRecord.side} • ${selectedWorkRecord.lane || 'MCW'}) • ${(selectedWorkRecord.lengthM || (maxM - minM)).toLocaleString()}m`;
+          ctx.font = 'bold 11px monospace';
+          const badgeW = ctx.measureText(badgeLabel).width;
+
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+          ctx.beginPath();
+          ctx.roundRect(mx - badgeW / 2 - 8, my - 36, badgeW + 16, 22, 6);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(6, 182, 212, 0.7)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillText(badgeLabel, mx, my - 21);
+        }
+      }
+    }
+  }, [center, zoom, mode, segments, selectedChainageM, milestones, selectedWorkRecord]);
 
   // Mouse pan handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {

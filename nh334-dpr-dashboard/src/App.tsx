@@ -78,6 +78,7 @@ function DashboardContent() {
     filters,
     setDateRange,
     activeModule,
+    setActiveModule,
     setSelectedSingleDate,
     setSelectedActivities,
     selectAllActivities,
@@ -124,6 +125,42 @@ function DashboardContent() {
 
   // Selected row for cross-component highlighting
   const [selectedRow, setSelectedRow] = useState<ActualDPRRow | null>(null);
+  const [selectedDailyWorkRecord, setSelectedDailyWorkRecord] = useState<ActualDPRRow | null>(null);
+
+  // Direct GIS Navigation from Daily Quick Insight Timeline
+  const handleNavigateFromTimelineToGIS = (row: ActualDPRRow) => {
+    setSelectedDailyWorkRecord(row);
+    setSelectedRow(row);
+    const m = row.rawFromChainage || Math.round((row.fromChainage || 0) * 1000);
+    setMapSelectedChainage(m);
+
+    // Switch to Spatial module if not currently visible
+    if (activeModule !== 'spatial' && activeModule !== 'all') {
+      setActiveModule('spatial');
+    }
+
+    // Smooth scroll to GIS Map
+    setTimeout(() => {
+      const el = document.getElementById('module-spatial');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
+  const handleBackToTimeline = () => {
+    if (activeModule !== 'overview' && activeModule !== 'all') {
+      setActiveModule('overview');
+    }
+
+    // Smooth scroll back to Daily Quick Insight Timeline
+    setTimeout(() => {
+      const el = document.getElementById('daily-quick-insight') || document.getElementById('module-overview');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
 
   // Two-way synchronization state between Strip Chart and GIS Map
   const [mapSelectedChainage, setMapSelectedChainage] = useState<number | null>(null);
@@ -647,6 +684,7 @@ function DashboardContent() {
               baseline={stateFilteredBaseline}
               availableDates={availableDates}
               onSelectRow={row => setSelectedRow(row)}
+              onNavigateToLocation={handleNavigateFromTimelineToGIS}
             />
           </section>
         )}
@@ -778,6 +816,9 @@ function DashboardContent() {
               qcLogs={qcLogs}
               selectedRow={selectedRow}
               onSelectRow={row => setSelectedRow(row)}
+              selectedWorkRecord={selectedDailyWorkRecord}
+              onClearSelectedWorkRecord={() => setSelectedDailyWorkRecord(null)}
+              onBackToTimeline={handleBackToTimeline}
             />
           </section>
         )}
