@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useFilterContext, ModuleTab } from '../../context/FilterContext';
 import { DPRMetadata } from '../../types/dpr';
 import { isoToDisplayDate, serialToIsoDate } from '../../utils/excelParser';
-import { ExcelUploadModule } from '../dashboard/ExcelUploadModule';
 
 export interface TopHeaderProps {
   metadata?: DPRMetadata;
@@ -229,11 +228,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             </div>
           </div>
 
-        </div>
-
-        {/* TIER 1.5: DATA SOURCE & EXCEL UPLOAD BAR */}
-        <div className="w-full px-6 lg:px-8 py-2 border-b border-white/10 bg-[#060D17]/80 backdrop-blur-md relative z-20">
-          <ExcelUploadModule onReload={onReload} isLoading={isLoading} />
         </div>
 
         {/* TIER 2: NAVIGATION TABS */}
