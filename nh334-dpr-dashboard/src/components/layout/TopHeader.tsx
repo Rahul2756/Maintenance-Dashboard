@@ -31,7 +31,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
     side, setSide,
     state, setState,
     selectedActivities, setSelectedActivities,
-    scope, setScope,
     dateRange, setDateRange,
     activeTab, setActiveTab,
     applyFilters, resetFilters,
@@ -44,10 +43,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   const [activityMode, setActivityMode] = useState<'single' | 'multi'>('multi');
   const activityDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Scope dropdown state
-  const [isScopeOpen, setIsScopeOpen] = useState(false);
-  const scopeDropdownRef = useRef<HTMLDivElement>(null);
-
   // Filter feedback flash state
   const [filterApplied, setFilterApplied] = useState(false);
 
@@ -57,9 +52,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
       const target = e.target as Node;
       if (activityDropdownRef.current && !activityDropdownRef.current.contains(target)) {
         setIsActivityOpen(false);
-      }
-      if (scopeDropdownRef.current && !scopeDropdownRef.current.contains(target)) {
-        setIsScopeOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -588,53 +580,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               )}
             </div>
 
-            {/* 3. SCOPE FILTER */}
-            <div className={`flex flex-col gap-1 relative ${isScopeOpen ? 'z-50' : 'z-20'}`} ref={scopeDropdownRef}>
-              <div className="flex items-center gap-1.5 text-gray-300 text-[11px] font-medium">
-                <svg className="w-3.5 h-3.5 text-[#00E599]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <span>Scope</span>
-              </div>
-              <button
-                onClick={() => setIsScopeOpen(!isScopeOpen)}
-                className={`bg-[#0B121E] border ${isScopeOpen ? 'border-[#00E599]' : 'border-white/10 hover:border-white/20'
-                  } rounded-xl px-3 py-2 flex items-center justify-between gap-3 text-xs text-white min-w-[130px] cursor-pointer transition-all`}
-              >
-                <span>
-                  {scope === 'All' ? 'All Scopes' : scope === 'DPR' ? 'Active DPR Package' : scope === 'Sec1' ? 'Section 1' : 'Section 2'}
-                </span>
-                <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${isScopeOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {/* Scope Dropdown Options */}
-              {isScopeOpen && (
-                <div className="absolute top-[calc(100%+6px)] left-0 w-64 bg-[#09121D] border border-white/15 rounded-xl shadow-2xl p-2 z-50 flex flex-col gap-1 backdrop-blur-md">
-                  {[
-                    { key: 'All', label: 'All Scopes (Ch. 130+560 – 206+220)' },
-                    { key: 'DPR', label: 'Active DPR Package (Roorkee – Haridwar)' },
-                    { key: 'Sec1', label: 'Section 1 (Muzaffarnagar – Roorkee)' },
-                    { key: 'Sec2', label: 'Section 2 (Roorkee – Haridwar)' }
-                  ].map((item) => (
-                    <button
-                      key={item.key}
-                      onClick={() => {
-                        setScope(item.key as any);
-                        setIsScopeOpen(false);
-                      }}
-                      className={`text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${scope === item.key ? 'bg-[#003B2C] text-[#00E599]' : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                        }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 4. FROM DATE -> TO DATE RANGE SELECTOR */}
+            {/* 3. FROM DATE -> TO DATE RANGE SELECTOR */}
             <div className="flex flex-col gap-1">
               <div className="flex flex-wrap items-center gap-1.5 text-gray-300 text-[11px] font-medium">
                 <svg className="w-3.5 h-3.5 text-[#00E599]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -764,7 +710,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               </div>
             </div>
 
-            {/* 5. STATE FILTER */}
+            {/* 4. STATE FILTER */}
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-gray-300 text-[11px] font-medium">
                 <svg className="w-3.5 h-3.5 text-[#00E599]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

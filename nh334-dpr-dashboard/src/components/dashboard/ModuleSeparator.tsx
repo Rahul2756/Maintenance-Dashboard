@@ -225,7 +225,7 @@ export const ModuleSeparator: React.FC<ModuleSeparatorProps> = ({
                 Bound: {formatChainagePlus(filters.chainageBounds.from)} to {formatChainagePlus(filters.chainageBounds.to)}
               </span>
               <span className="px-2.5 py-1 rounded-xl bg-white/5 border border-white/10 text-slate-300">
-                Preset: {filters.chainageScope}
+                Corridor: Full Stretch
               </span>
             </>
           )}
@@ -240,7 +240,7 @@ export const ModuleSeparator: React.FC<ModuleSeparatorProps> = ({
           {activeModule !== 'overview' && activeModule !== 'spatial' && (
             <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/[0.04] border border-white/10 text-slate-300">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Scope:</span>
+              <span>Corridor:</span>
               <span className="text-cyan-300 font-bold">
                 {formatChainagePlus(filters.chainageBounds.from)} – {formatChainagePlus(filters.chainageBounds.to)}
               </span>

@@ -169,7 +169,7 @@ export const DailyQuickInsight: React.FC<DailyQuickInsightProps> = ({
   // Derive active filter values with context priority
   const activeSide = context ? (context.filters.side === 'Both' ? 'ALL' : context.filters.side) : (propsFilters?.side || 'ALL');
   const activeActivities = context ? context.filters.selectedActivities : (propsFilters?.activities || ['Milling', 'Tackcoat', 'DBM', 'BC']);
-  const activeMinCh = context ? context.filters.chainageBounds.from : (propsFilters?.minChainage ?? 169.000);
+  const activeMinCh = context ? context.filters.chainageBounds.from : (propsFilters?.minChainage ?? 130.560);
   const activeMaxCh = context ? context.filters.chainageBounds.to : (propsFilters?.maxChainage ?? 206.220);
   const activeAnomaliesOnly = context ? context.filters.anomaliesOnly : (propsFilters?.anomaliesOnly ?? false);
   const activeStartDate = context ? context.filters.dateRange.start : (propsFilters?.startDate || dates[0] || '14.10.2026');

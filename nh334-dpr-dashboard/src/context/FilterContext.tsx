@@ -93,8 +93,8 @@ export const DEFAULT_FILTER_STATE: GlobalFilterState = {
   selectedActivities: ['Milling', 'Tackcoat', 'DBM', 'BC'],
   dateRange: { start: '14.10.2026', end: '01.11.2026' },
   selectedSingleDate: null,
-  chainageScope: 'DPR',
-  chainageBounds: { from: 169.000, to: 206.220 },
+  chainageScope: 'All',
+  chainageBounds: { from: 130.560, to: 206.220 },
   anomaliesOnly: false,
   searchQuery: ''
 };
@@ -309,8 +309,8 @@ export const FilterProvider: React.FC<{
         end: latest
       },
       selectedSingleDate: null,
-      chainageScope: 'DPR',
-      chainageBounds: { from: 169.000, to: 206.220 },
+      chainageScope: 'All',
+      chainageBounds: { from: 130.560, to: 206.220 },
       anomaliesOnly: false,
       searchQuery: ''
     });
@@ -321,7 +321,7 @@ export const FilterProvider: React.FC<{
     const hasSideFilter = filters.side !== 'Both';
     const hasStateFilter = Boolean(filters.state && filters.state !== 'All');
     const hasActivityFilter = filters.selectedActivities.length !== 4;
-    const hasChainageFilter = filters.chainageScope !== 'DPR';
+    const hasChainageFilter = filters.chainageScope !== 'All';
     const hasAnomalyFilter = filters.anomaliesOnly;
     const hasSearchFilter = filters.searchQuery.trim().length > 0;
 
@@ -442,6 +442,9 @@ export const FilterProvider: React.FC<{
       resetFilters,
       isFiltered,
       filterStats,
+      fullDateBounds,
+      setFullDateBounds,
+      isFullDateRange,
       applyFilters
     ]
   );
