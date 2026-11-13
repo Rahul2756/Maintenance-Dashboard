@@ -16,19 +16,126 @@ import {
   Maximize2,
   BarChart3
 } from 'lucide-react';
-import { ActualDPRRow, ProjectBaseline, ActivityType, BOQCardMetric, HighwaySide, LinearLaneFilter, LinearStretchFilter } from '../../types/dpr';
+import ReactECharts from 'echarts-for-react';
+import {
+  ActualDPRRow,
+  ProjectBaseline,
+  ActivityType,
+  BOQCardMetric,
+  HighwaySide,
+  LinearLaneFilter,
+  LinearStretchFilter,
+  ScheduleMilestones
+} from '../../types/dpr';
 import { Badge } from '../ui/Badge';
 import { MiniTripleBarChart } from '../ui/MiniTripleBarChart';
 import { serialToIsoDate, isoToDisplayDate, getLinearTargetM } from '../../utils/excelParser';
 import { useFilters } from '../../context/FilterContext';
+import { useTheme } from '../../context/ThemeContext';
 import { STATE_BOUNDARIES } from '../../utils/stateFilterUtils';
+import { type DailyPlannedTargetsByActivity } from '../../utils/dailyPlannedTargetsData';
+import {
+  computeActivityPaceAndForecast,
+  buildForecastChartOption,
+  type ActivityForecastResult,
+  type ForecastActivityKey
+} from '../../utils/paceForecastUtils';
+
+const matchesLaneFilter = (rowLane: string, filter: LinearLaneFilter): boolean => {
+  if (filter === 'All') return true;
+  const norm = (rowLane || '').toUpperCase().trim();
+  if (filter === 'Fast Lane') {
+    return norm === 'F/L' || norm === 'FL' || norm.startsWith('F/L') || norm.includes('FAST');
+  }
+  if (filter === 'Slow Lane') {
+    return norm === 'S/L' || norm === 'SL' || norm.startsWith('S/L') || norm.includes('SLOW');
+  }
+  return true;
+};
+
+const CardPaceStrip: React.FC<{ model: ActivityForecastResult; variant?: 'card' | 'modal' }> = ({
+  model,
+  variant = 'card'
+}) => {
+  const lagAbs = Math.abs(model.lagPct);
+  const lagPrefix = model.lagPct > 0.05 ? '+' : '';
+  const lagLabel =
+    model.lagPct > 0.05
+      ? 'Behind schedule'
+      : model.lagPct < -0.05
+      ? 'Ahead of schedule'
+      : 'On track';
+  const lagColorClass =
+    model.lagPct > 0.05
+      ? 'text-rose-400'
+      : model.lagPct < -0.05
+      ? 'text-emerald-400'
+      : 'text-slate-300';
+
+  const isModal = variant === 'modal';
+  const wrapperClass = isModal
+    ? 'mt-2.5 pt-2.5 border-t border-slate-800/80 grid grid-cols-3 gap-2'
+    : 'mt-2.5 pt-2 border-t border-cyan-500/15 grid grid-cols-3 gap-1.5';
+  const boxClass = isModal
+    ? 'bg-[#0B1221] border border-slate-800/80 rounded-lg px-2.5 py-1.5 min-w-0'
+    : 'bg-[#0B1221] border border-slate-800/80 rounded-lg px-2 py-1.5 min-w-0';
+  const labelClass = isModal
+    ? 'text-[9.5px] font-bold uppercase tracking-wider text-slate-400 truncate'
+    : 'text-[8.5px] font-bold uppercase tracking-wider text-slate-400 truncate';
+  const valueClass = isModal
+    ? 'text-xs font-mono font-bold mt-0.5 truncate'
+    : 'text-[11px] font-mono font-bold leading-tight mt-0.5 truncate';
+  const subClass = isModal
+    ? 'text-[9.5px] text-slate-400 font-mono truncate'
+    : 'text-[9px] text-slate-400 font-mono mt-0.5 truncate';
+
+  return (
+    <div
+      className={wrapperClass}
+      title={`Current Pace: ${model.currentPaceDaily.toFixed(2)}%/day (${model.currentActualPct.toFixed(1)}% / ${model.daysElapsed}d) | Planned Pace: ${model.plannedPaceDaily.toFixed(2)}%/day (${model.currentPlannedPct.toFixed(1)}% / ${model.daysElapsed}d) | Schedule Lag: ${lagAbs < 0.05 ? '0.0' : `${lagPrefix}${model.lagPct.toFixed(1)}`}% (${lagLabel})`}
+    >
+      <div className={boxClass}>
+        <div className={labelClass}>Current Pace</div>
+        <div className={`${valueClass} text-cyan-300`}>
+          {model.currentPaceDaily.toFixed(2)}%/day
+        </div>
+        <div className={subClass}>
+          {model.currentActualPct.toFixed(1)}% / {model.daysElapsed}d
+        </div>
+      </div>
+
+      <div className={boxClass}>
+        <div className={labelClass}>Planned Pace</div>
+        <div className={`${valueClass} text-blue-300`}>
+          {model.plannedPaceDaily.toFixed(2)}%/day
+        </div>
+        <div className={subClass}>
+          {model.currentPlannedPct.toFixed(1)}% / {model.daysElapsed}d
+        </div>
+      </div>
+
+      <div className={boxClass}>
+        <div className={labelClass}>Schedule Lag</div>
+        <div className={`${valueClass} ${lagColorClass}`}>
+          {lagAbs < 0.05 ? '0.0%' : `${lagPrefix}${model.lagPct.toFixed(1)}%`}
+        </div>
+        <div className={isModal ? 'text-[9.5px] text-slate-400 truncate' : 'text-[9px] text-slate-400 mt-0.5 truncate'}>
+          {lagLabel}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface LinearKPICardsProps {
   actualRows: ActualDPRRow[];
   baseline: ProjectBaseline;
+  dailyPlannedTargets?: Record<string, DailyPlannedTargetsByActivity>;
+  milestones?: ScheduleMilestones;
   selectedActivities?: ActivityType[];
   side?: HighwaySide;
   selectedDate?: string;
+  dateRange?: { start: string; end: string };
   availableDates?: string[];
   boqMetrics?: {
     milling: BOQCardMetric;
@@ -104,9 +211,12 @@ const getRowLengthInStretchM = (r: ActualDPRRow, stretch: LinearStretchFilter): 
 export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
   actualRows,
   baseline,
+  dailyPlannedTargets,
+  milestones,
   selectedActivities,
   side = 'Both',
   selectedDate,
+  dateRange,
   availableDates,
   boqMetrics,
   onDateChange,
@@ -137,11 +247,19 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
 
   // Fallback date is latest available in dataset
   const latestDate = allDates[allDates.length - 1] || '01.11.2026';
-  const effectiveDate = selectedDate || latestDate;
+  const effectiveDate = dateRange?.end || selectedDate || latestDate;
+  const effectiveFromDate = dateRange?.start || effectiveDate;
 
-  // Selected date ISO and human-readable format (e.g. 14-Oct-2026)
+  // Selected date / period ISO bounds (both endpoints inclusive) and display label
   const selectedIso = serialToIsoDate(effectiveDate);
+  const rawFromIso = serialToIsoDate(effectiveFromDate);
+  const fromIso = rawFromIso && selectedIso && rawFromIso <= selectedIso ? rawFromIso : selectedIso;
   const selectedDisplayDate = isoToDisplayDate(selectedIso);
+  const fromDisplayDate = isoToDisplayDate(fromIso);
+  const isSingleDayPeriod = fromIso === selectedIso;
+  const periodDisplayLabel = isSingleDayPeriod
+    ? selectedDisplayDate
+    : `${fromDisplayDate} → ${selectedDisplayDate}`;
 
   // Determine active highlights based on global filter
   const isAllActivities = !selectedActivities || selectedActivities.length >= 4 || selectedActivities.length === 0;
@@ -153,6 +271,7 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
 
   // Global lane, stretch, and state selection from context
   const { linearLane = 'All', linearStretch = 'All', state: selectedState = 'All' } = useFilters();
+  const { theme } = useTheme();
   const stateBoundary = STATE_BOUNDARIES[selectedState];
 
   const displayCorridorText = useMemo(() => {
@@ -236,7 +355,10 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
           getRowLengthInStretchM(r, linearStretch) > 0
       );
 
-      const dailyRows = actRows.filter((r) => serialToIsoDate(r.date) === selectedIso);
+      const dailyRows = actRows.filter((r) => {
+        const rIso = serialToIsoDate(r.date);
+        return rIso >= fromIso && rIso <= selectedIso;
+      });
       const cumRows = actRows.filter((r) => serialToIsoDate(r.date) <= selectedIso);
 
       const dailyM = dailyRows.reduce((sum, r) => sum + getRowLengthInStretchM(r, linearStretch), 0);
@@ -288,7 +410,10 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
         !isBcSlowLane(r.lane) &&
         getRowLengthInStretchM(r, linearStretch) > 0
     );
-    const bcDailyRows = bcActRows.filter((r) => serialToIsoDate(r.date) === selectedIso);
+    const bcDailyRows = bcActRows.filter((r) => {
+      const rIso = serialToIsoDate(r.date);
+      return rIso >= fromIso && rIso <= selectedIso;
+    });
     const bcCumRows = bcActRows.filter((r) => serialToIsoDate(r.date) <= selectedIso);
 
     const bcDailyM = bcDailyRows.reduce((sum, r) => sum + getRowLengthInStretchM(r, linearStretch), 0);
@@ -342,7 +467,75 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
       linearLane,
       linearStretch
     };
-  }, [actualRows, selectedIso, side, millingTargetM, tackTargetM, dbmTargetM, bcTargetM, linearLane, linearStretch]);
+  }, [actualRows, fromIso, selectedIso, side, millingTargetM, tackTargetM, dbmTargetM, bcTargetM, linearLane, linearStretch]);
+
+  // Activity-wise Current Pace, Planned Pace, Lag & Completion Forecast (Column O Achieved Today vs Work Program)
+  const paceForecasts = useMemo(() => {
+    const buildQtyExtractor = (act: ActivityType) => (row: ActualDPRRow): number => {
+      if (!(side === 'Both' || side === 'ALL' || side === 'BHS' || row.side === side)) {
+        return 0;
+      }
+      const effectiveLane = act === 'BC' ? 'All' : linearLane;
+      if (!matchesLaneFilter(row.lane, effectiveLane)) {
+        return 0;
+      }
+      const qty = row.achievedToday || 0;
+      if (qty <= 0) return 0;
+      if (linearStretch === 'All') return qty;
+      const inStretchM = getRowLengthInStretchM(row, linearStretch);
+      if (inStretchM <= 0) return 0;
+      const totalLenM = getRowLengthM(row);
+      return totalLenM > 0 ? qty * (inStretchM / totalLenM) : qty;
+    };
+
+    const specs: ReadonlyArray<{
+      cardKey: 'milling' | 'tack' | 'dbm' | 'bc';
+      forecastKey: ForecastActivityKey;
+      activity: ActivityType;
+      filteredTargetM: number;
+    }> = [
+      { cardKey: 'milling', forecastKey: 'Milling', activity: 'Milling', filteredTargetM: millingTargetM },
+      { cardKey: 'tack', forecastKey: 'Tackcoat', activity: 'Tackcoat', filteredTargetM: tackTargetM },
+      { cardKey: 'dbm', forecastKey: 'DBM', activity: 'DBM', filteredTargetM: dbmTargetM },
+      { cardKey: 'bc', forecastKey: 'BC', activity: 'BC', filteredTargetM: bcTargetM }
+    ];
+
+    const results = {} as Record<'milling' | 'tack' | 'dbm' | 'bc', ActivityForecastResult>;
+    for (const spec of specs) {
+      const stateTotalTargetM = getLinearTargetM(template, spec.activity, 'Both', 'All', 'All');
+      const targetScaleRatio = stateTotalTargetM > 0 ? spec.filteredTargetM / stateTotalTargetM : 0;
+
+      results[spec.cardKey] = computeActivityPaceAndForecast({
+        activity: spec.forecastKey,
+        actualRows,
+        dailyPlannedTargets,
+        baseline,
+        reportDate: effectiveDate,
+        startDate: milestones?.startDate || '13.10.2026',
+        contractCompletionDate: milestones?.completionDate || '31.12.2026',
+        side,
+        targetScaleRatio,
+        getRowAchievedQty: buildQtyExtractor(spec.activity)
+      });
+    }
+
+    return results;
+  }, [
+    actualRows,
+    dailyPlannedTargets,
+    baseline,
+    template,
+    effectiveDate,
+    milestones?.startDate,
+    milestones?.completionDate,
+    side,
+    linearLane,
+    linearStretch,
+    millingTargetM,
+    tackTargetM,
+    dbmTargetM,
+    bcTargetM
+  ]);
 
   // Selected card for detailed pop-up modal
   type LinearCardType = 'milling' | 'tack' | 'dbm' | 'bc' | 'gap';
@@ -568,7 +761,7 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0D1524] border border-cyan-500/30 shadow-sm font-medium text-cyan-300">
             <Calendar className="w-3 h-3 text-cyan-400" />
-            As-of Date: {selectedDisplayDate}
+            {isSingleDayPeriod ? `As-of Date: ${selectedDisplayDate}` : `Range: ${periodDisplayLabel}`}
           </span>
         </div>
       </div>
@@ -721,6 +914,8 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                 )}
               </div>
             </div>
+
+            <CardPaceStrip model={paceForecasts.milling} />
 
             {/* Click hint footer */}
             <div className="mt-2.5 pt-2 border-t border-cyan-500/10 flex items-center justify-between text-[10px] text-slate-400">
@@ -877,6 +1072,8 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
               </div>
             </div>
 
+            <CardPaceStrip model={paceForecasts.tack} />
+
             {/* Click hint footer */}
             <div className="mt-2.5 pt-2 border-t border-cyan-500/10 flex items-center justify-between text-[10px] text-slate-400">
               <span className="flex items-center gap-1 group-hover:text-cyan-300 transition-colors">
@@ -1032,6 +1229,8 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
               </div>
             </div>
 
+            <CardPaceStrip model={paceForecasts.dbm} />
+
             {/* Click hint footer */}
             <div className="mt-2.5 pt-2 border-t border-cyan-500/10 flex items-center justify-between text-[10px] text-slate-400">
               <span className="flex items-center gap-1 group-hover:text-emerald-300 transition-colors">
@@ -1178,6 +1377,8 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                 )}
               </div>
             </div>
+
+            <CardPaceStrip model={paceForecasts.bc} />
 
             {/* Click hint footer */}
             <div className="mt-2.5 pt-2 border-t border-cyan-500/10 flex items-center justify-between text-[10px] text-slate-400">
@@ -1356,7 +1557,7 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
           aria-modal="true"
         >
           <div
-            className="relative w-full max-w-xl max-h-[92vh] overflow-y-auto bg-gradient-to-b from-[#0F172A] via-[#0B101D] to-[#070B14] border border-cyan-500/40 rounded-2xl shadow-2xl shadow-cyan-950/60 text-white"
+            className="relative w-full max-w-xl sm:max-w-2xl max-h-[92vh] overflow-y-auto bg-gradient-to-b from-[#0F172A] via-[#0B101D] to-[#070B14] border border-cyan-500/40 rounded-2xl shadow-2xl shadow-cyan-950/60 text-white"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Highway Centerline Ribbon */}
@@ -1424,7 +1625,7 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
               </div>
               <div className="flex items-center gap-1.5 font-mono text-slate-400 text-[11px]">
                 <Calendar className="w-3.5 h-3.5 text-cyan-400" />
-                <span>As-of: <strong className="text-cyan-300">{selectedDisplayDate}</strong></span>
+                <span>{isSingleDayPeriod ? 'As-of:' : 'Period:'} <strong className="text-cyan-300">{periodDisplayLabel}</strong></span>
               </div>
             </div>
 
@@ -1515,6 +1716,72 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                 </div>
               </div>
 
+              {/* Execution Forecast & Pace Chart (Activity-Specific) */}
+              {selectedCard && selectedCard !== 'gap' && (() => {
+                const popupForecast = paceForecasts[selectedCard];
+
+                return (
+                  <div className="bg-[#070B14] border border-cyan-500/25 rounded-xl p-4 shadow-inner">
+                    <div className="flex items-start sm:items-center justify-between gap-2 mb-2.5 flex-wrap">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-cyan-400 shrink-0" />
+                          <span className="text-xs font-bold uppercase tracking-wider text-cyan-300">
+                            Execution Pace & Completion Forecast
+                          </span>
+                        </div>
+                        <p className="text-[10.5px] text-slate-400 mt-0.5">
+                          Activity-wise cumulative % vs Work Program (Planned, Actual & Dotted Pace Forecast)
+                        </p>
+                      </div>
+
+                      {popupForecast.hasSufficientData ? (
+                        <div
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono font-semibold whitespace-nowrap ${
+                            popupForecast.isDelayed
+                              ? 'text-amber-300 bg-amber-500/10 border-amber-500/35'
+                              : 'text-emerald-300 bg-emerald-500/10 border-emerald-500/35'
+                          }`}
+                        >
+                          {popupForecast.isDelayed ? (
+                            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                          ) : (
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                          )}
+                          <span>
+                            {popupForecast.isCompleted
+                              ? `Completed: ${popupForecast.projectedDateStr}`
+                              : `Forecast Finish: ${popupForecast.projectedDateStr}`}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono font-semibold text-amber-300 bg-amber-500/10 border-amber-500/35 whitespace-nowrap">
+                          <Clock className="w-3.5 h-3.5 shrink-0" />
+                          <span>Insufficient data for forecast</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {!popupForecast.hasSufficientData && (
+                      <div className="mb-2 px-3 py-1.5 rounded-lg bg-amber-950/30 border border-amber-500/25 text-[11px] text-amber-200/90">
+                        Insufficient data for forecast — no cumulative actual execution recorded for the active filter selection as of {selectedDisplayDate}.
+                      </div>
+                    )}
+
+                    <div className="w-full">
+                      <ReactECharts
+                        option={buildForecastChartOption(popupForecast, modalData.title, true, theme)}
+                        style={{ height: '230px', width: '100%' }}
+                        notMerge={true}
+                        opts={{ renderer: 'svg' }}
+                      />
+                    </div>
+
+                    <CardPaceStrip model={popupForecast} variant="modal" />
+                  </div>
+                );
+              })()}
+
               {/* Detailed Metrics Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* 1. Planned Target Scope */}
@@ -1539,9 +1806,11 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                   <p className="text-[11px] text-slate-500 mt-1">{modalData.progressPercent.toFixed(1)}% of target finished</p>
                 </div>
 
-                {/* 3. Selected Day Progress */}
+                {/* 3. Selected Day / Period Progress */}
                 <div className="p-3.5 rounded-xl bg-[#090E1A] border border-slate-800 hover:border-cyan-500/30 transition-colors">
-                  <div className="text-xs text-slate-400 font-medium">Daily Output ({selectedDisplayDate})</div>
+                  <div className="text-xs text-slate-400 font-medium">
+                    {isSingleDayPeriod ? `Daily Output (${selectedDisplayDate})` : `Period Output (${periodDisplayLabel})`}
+                  </div>
                   <div className="mt-1 flex items-baseline gap-1.5 flex-wrap">
                     {modalData.dailyM !== 0 ? (
                       <>
@@ -1555,7 +1824,9 @@ export const LinearKPICards: React.FC<LinearKPICardsProps> = ({
                       <span className="text-base font-bold font-mono text-slate-500">0 {modalData.unit} (No work logged)</span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-1">Output recorded on selected report date</p>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    {isSingleDayPeriod ? 'Output recorded on selected report date' : 'Output recorded across selected date range'}
+                  </p>
                 </div>
 
                 {/* 4. Remaining Balance */}

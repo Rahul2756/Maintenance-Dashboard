@@ -3,6 +3,8 @@ import ReactECharts from 'echarts-for-react';
 import { DailyProgressComparison, ActivityType } from '../../types/dpr';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { BarChart3 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
+import { getChartThemeTokens } from '../../utils/chartTheme';
 
 interface PlannedVsActualChartProps {
   data: DailyProgressComparison[];
@@ -13,6 +15,8 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
   data,
   selectedActivities
 }) => {
+  const { theme, isLight } = useTheme();
+  const tk = getChartThemeTokens(theme);
   const [metricView, setMetricView] = useState<ActivityType>('Milling');
   const [frozenIndex, setFrozenIndex] = useState<number | null>(null);
   const [frozenPos, setFrozenPos] = useState<{ x: number; y: number } | null>(null);
@@ -110,11 +114,11 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
       axisPointer: {
         type: 'shadow'
       },
-      backgroundColor: 'rgba(18, 20, 26, 0.95)',
-      borderColor: 'rgba(255, 255, 255, 0.12)',
+      backgroundColor: isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(18, 20, 26, 0.95)',
+      borderColor: isLight ? '#E2E8F0' : 'rgba(255, 255, 255, 0.12)',
       borderWidth: 1,
       textStyle: {
-        color: '#F3F4F6',
+        color: isLight ? '#17212B' : '#F3F4F6',
         fontSize: 12,
         fontFamily: 'Inter, sans-serif'
       },
@@ -123,14 +127,19 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
         if (!params || params.length === 0) return '';
         lastHoveredIndexRef.current = params[0].dataIndex;
         const dateStr = params[0].name;
-        let html = `<div style="font-weight: 700; margin-bottom: 4px; color: #E2E8F0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;">📅 Date: ${dateStr}</div>`;
-        html += `<div style="font-size: 11px; margin-bottom: 6px; color: #00e5ff; font-weight: 600;">Activity: ${metricView}</div>`;
+        const tHdr = isLight ? '#17212B' : '#E2E8F0';
+        const tDiv = isLight ? '#E5E7EB' : 'rgba(255,255,255,0.1)';
+        const tAct = isLight ? '#07966D' : '#00e5ff';
+        const tLbl = isLight ? '#64748B' : '#94A3B8';
+        const tVal = isLight ? '#17212B' : '#FFFFFF';
+        let html = `<div style="font-weight: 700; margin-bottom: 4px; color: ${tHdr}; border-bottom: 1px solid ${tDiv}; padding-bottom: 4px;">📅 Date: ${dateStr}</div>`;
+        html += `<div style="font-size: 11px; margin-bottom: 6px; color: ${tAct}; font-weight: 600;">Activity: ${metricView}</div>`;
         params.forEach(p => {
           const val = typeof p.value === 'number' ? p.value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : p.value;
           const marker = `<span style="display:inline-block;margin-right:6px;border-radius:3px;width:10px;height:10px;background-color:${p.color.colorStops ? p.color.colorStops[0].color : p.color};"></span>`;
           html += `<div style="display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; font-family: monospace;">
-            <span style="color: #94A3B8;">${marker} ${p.seriesName}</span>
-            <span style="font-weight: 600; color: #FFFFFF;">${val} ${p.seriesType === 'line' ? '%' : unit}</span>
+            <span style="color: ${tLbl};">${marker} ${p.seriesName}</span>
+            <span style="font-weight: 600; color: ${tVal};">${val} ${p.seriesType === 'line' ? '%' : unit}</span>
           </div>`;
         });
         return html;
@@ -141,7 +150,7 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
       top: 0,
       right: 10,
       textStyle: {
-        color: '#94A3B8',
+        color: tk.legendText,
         fontSize: 11,
         fontFamily: 'Inter, sans-serif'
       },
@@ -163,10 +172,10 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
           type: 'shadow'
         },
         axisLine: {
-          lineStyle: { color: 'rgba(255, 255, 255, 0.1)' }
+          lineStyle: { color: tk.axisLine }
         },
         axisLabel: {
-          color: '#94A3B8',
+          color: tk.axisLabel,
           fontSize: 10,
           fontFamily: 'JetBrains Mono, monospace',
           interval: 'auto',
@@ -183,18 +192,18 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
         type: 'value',
         name: unit,
         nameTextStyle: {
-          color: '#64748B',
+          color: tk.axisTitle,
           fontSize: 10,
           fontFamily: 'JetBrains Mono, monospace'
         },
         splitLine: {
           lineStyle: {
-            color: 'rgba(255, 255, 255, 0.05)',
+            color: isLight ? '#EDF1F5' : 'rgba(255, 255, 255, 0.05)',
             type: 'dashed'
           }
         },
         axisLabel: {
-          color: '#64748B',
+          color: tk.axisTitle,
           fontSize: 10,
           fontFamily: 'JetBrains Mono, monospace'
         }
@@ -212,10 +221,15 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
             y: 0,
             x2: 0,
             y2: 1,
-            colorStops: [
-              { offset: 0, color: 'rgba(99, 102, 241, 0.8)' },
-              { offset: 1, color: 'rgba(79, 70, 229, 0.2)' }
-            ]
+            colorStops: isLight
+              ? [
+                  { offset: 0, color: '#93C5FD' },
+                  { offset: 1, color: '#3B82F6' }
+                ]
+              : [
+                  { offset: 0, color: 'rgba(99, 102, 241, 0.8)' },
+                  { offset: 1, color: 'rgba(79, 70, 229, 0.2)' }
+                ]
           },
           borderRadius: [4, 4, 0, 0]
         },
@@ -232,10 +246,15 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
             y: 0,
             x2: 0,
             y2: 1,
-            colorStops: [
-              { offset: 0, color: 'rgba(6, 182, 212, 0.95)' },
-              { offset: 1, color: 'rgba(6, 182, 212, 0.25)' }
-            ]
+            colorStops: isLight
+              ? [
+                  { offset: 0, color: '#00C98B' },
+                  { offset: 1, color: '#07966D' }
+                ]
+              : [
+                  { offset: 0, color: 'rgba(6, 182, 212, 0.95)' },
+                  { offset: 1, color: 'rgba(6, 182, 212, 0.25)' }
+                ]
           },
           borderRadius: [4, 4, 0, 0]
         },
@@ -253,8 +272,11 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
               <button
                 key={tab}
                 onClick={() => setMetricView(tab)}
+                data-on-accent={isLight && metricView === tab ? 'true' : undefined}
                 className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${metricView === tab
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                    ? isLight
+                      ? 'bg-[#07966D] text-white font-semibold shadow-sm'
+                      : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
                     : 'text-slate-400 hover:text-slate-200'
                   }`}
               >
@@ -290,7 +312,11 @@ export const PlannedVsActualChart: React.FC<PlannedVsActualChartProps> = ({
               zIndex: 40
             }}
             onClick={(e) => e.stopPropagation()}
-            className="p-3.5 rounded-xl bg-[#0F1318]/95 border-2 border-cyan-400 shadow-2xl backdrop-blur-md text-xs font-mono text-slate-200 min-w-[250px] shadow-cyan-500/30 ring-2 ring-cyan-500/20 pointer-events-auto"
+            className={`p-3.5 rounded-xl border-2 backdrop-blur-md text-xs font-mono min-w-[250px] pointer-events-auto ${
+              isLight
+                ? 'bg-white/98 border-[#07966D] text-[#17212B] shadow-xl'
+                : 'bg-[#0F1318]/95 border-cyan-400 shadow-2xl text-slate-200 shadow-cyan-500/30 ring-2 ring-cyan-500/20'
+            }`}
           >
             <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-white/10 font-bold">
               <div className="flex items-center gap-1.5">

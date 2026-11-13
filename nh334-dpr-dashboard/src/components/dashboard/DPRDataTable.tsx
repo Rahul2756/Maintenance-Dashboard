@@ -17,9 +17,11 @@ import {
   Filter
 } from 'lucide-react';
 import { formatChainageKm, formatChainagePlus } from '../../utils/excelParser';
+import { useTheme } from '../../context/ThemeContext';
 
 interface DPRDataTableProps {
   rows: ActualDPRRow[];
+  dateRange?: { start: string; end: string };
   selectedRowId?: string | null;
   onSelectRow?: (row: ActualDPRRow) => void;
 }
@@ -39,9 +41,11 @@ type SortField =
 
 export const DPRDataTable: React.FC<DPRDataTableProps> = ({
   rows,
+  dateRange,
   selectedRowId,
   onSelectRow
 }) => {
+  const { isLight } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortAsc, setSortAsc] = useState<boolean>(true);
@@ -203,13 +207,18 @@ export const DPRDataTable: React.FC<DPRDataTableProps> = ({
           </div>
         }
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <CardTitle icon={<Table className="w-4 h-4 text-cyan-400" />}>
             Detailed DPR Chainage Logs & Anomaly Data Grid
           </CardTitle>
           <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-white/10">
             {sortedRows.length} entries
           </span>
+          {dateRange?.start && dateRange?.end && (
+            <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">
+              {dateRange.start === dateRange.end ? `Date: ${dateRange.start}` : `Range: ${dateRange.start} → ${dateRange.end}`}
+            </span>
+          )}
         </div>
         <p className="text-xs text-slate-400">
           Normalized 3-decimal chainages (189.xxx km), executed dimensions, and quality remarks
@@ -322,19 +331,27 @@ export const DPRDataTable: React.FC<DPRDataTableProps> = ({
             {paginatedRows.length === 0 ? (
               <tr>
                 <td colSpan={12} className="py-12 text-center text-slate-500 font-mono">
-                  No execution records found matching your filter criteria.
+                  {dateRange?.start && dateRange?.end
+                    ? `No execution records available for the selected date range (${dateRange.start} → ${dateRange.end}) and active filters.`
+                    : 'No execution records found matching your filter criteria.'}
                 </td>
               </tr>
             ) : (
               paginatedRows.map((r, idx) => {
                 const isSelected = selectedRowId === r.id;
 
-                let rowBg = 'hover:bg-white/[0.03]';
+                let rowBg = isLight
+                  ? 'odd:bg-white even:bg-[#F9FBFC] hover:bg-[#F0F7F3]'
+                  : 'hover:bg-white/[0.03]';
                 if (r.isAnomaly) {
-                  rowBg = 'bg-rose-950/20 hover:bg-rose-950/30';
+                  rowBg = isLight
+                    ? 'bg-rose-50/70 hover:bg-rose-50'
+                    : 'bg-rose-950/20 hover:bg-rose-950/30';
                 }
                 if (isSelected) {
-                  rowBg = 'bg-cyan-950/40 ring-1 ring-cyan-500/40';
+                  rowBg = isLight
+                    ? 'bg-[#DDF5EA] ring-1 ring-[#07966D]/40'
+                    : 'bg-cyan-950/40 ring-1 ring-cyan-500/40';
                 }
 
                 return (

@@ -71,12 +71,13 @@ import { Loader2, CheckCircle2, Layers, BarChart3, Compass, FileSpreadsheet, Cal
 import { ModuleSeparator } from './components/dashboard/ModuleSeparator';
 
 // Control visibility of the S-Curve completion forecast visual (Set to true to show again)
-const SHOW_FORECAST_VISUAL = false;
+const SHOW_FORECAST_VISUAL = true;
 
 function DashboardContent() {
   const {
     filters,
     setDateRange,
+    setFullDateBounds,
     activeModule,
     setActiveModule,
     setSelectedSingleDate,
@@ -89,7 +90,7 @@ function DashboardContent() {
   const [plannedRecords, setPlannedRecords] = useState<PlannedRecord[]>([]);
   const [baseline, setBaseline] = useState<ProjectBaseline>(DEFAULT_PROJECT_BASELINE);
   const [metadata, setMetadata] = useState<DPRMetadata>({
-    projectName: 'Muzaffarnagar - Haridwar Section, NH-334 (KM130+560 TO KM 206+220)',
+    projectName: 'Muzaffarnagar - Haridwar Section, NH-334 (KM 130+560 TO KM 206+220)',
     contractor: 'M/s Atcons India Limited',
     concessionaire: 'NHIT Southern Projects private limited',
     pm: 'National Highways InvIT Project Managers Pvt. Ltd.',
@@ -115,7 +116,7 @@ function DashboardContent() {
 
   // Set official page title
   useEffect(() => {
-    document.title = 'Muzaffarnagar - Haridwar Section, NH-334 (KM130+560 TO KM 206+220)';
+    document.title = 'Muzaffarnagar - Haridwar Section, NH-334 (KM 130+560 TO KM 206+220)';
   }, []);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -304,24 +305,38 @@ function DashboardContent() {
     });
   }, [actualRows]);
 
-  // Update filter start/end if dates loaded (default to latest date)
+  // Initialize From Date -> To Date range cleanly to earliest..latest from Excel DPR data,
+  // and revalidate/clamp if availableDates changes after an Excel upload.
   const hasInitializedDateRef = useRef(false);
   useEffect(() => {
-    if (availableDates.length > 0) {
-      const latest = availableDates[availableDates.length - 1];
-      const earliest = availableDates[0];
-      if (!hasInitializedDateRef.current) {
-        hasInitializedDateRef.current = true;
-        setSelectedSingleDate(latest);
-        setDateRange({
-          start: earliest,
-          end: latest
-        });
-      } else if (filters.selectedSingleDate && !availableDates.includes(filters.selectedSingleDate)) {
-        setSelectedSingleDate(latest);
-      }
+    if (availableDates.length === 0) return;
+    const earliest = availableDates[0];
+    const latest = availableDates[availableDates.length - 1];
+    setFullDateBounds({ start: earliest, end: latest });
+    const earliestIso = dmyToIso(earliest);
+    const latestIso = dmyToIso(latest);
+
+    if (!hasInitializedDateRef.current) {
+      hasInitializedDateRef.current = true;
+      setDateRange({ start: earliest, end: latest });
+      return;
     }
-  }, [availableDates, filters.selectedSingleDate, setDateRange, setSelectedSingleDate]);
+
+    const curStartIso = dmyToIso(filters.dateRange.start);
+    const curEndIso = dmyToIso(filters.dateRange.end);
+    const startInvalid = !curStartIso || curStartIso < earliestIso || curStartIso > latestIso;
+    const endInvalid = !curEndIso || curEndIso < earliestIso || curEndIso > latestIso;
+
+    if (filters.selectedSingleDate && !availableDates.includes(filters.selectedSingleDate)) {
+      setSelectedSingleDate(null);
+      setDateRange({ start: earliest, end: latest });
+    } else if (startInvalid || endInvalid || curEndIso < curStartIso) {
+      const clampedStart = startInvalid ? earliest : filters.dateRange.start;
+      const clampedEnd = endInvalid ? latest : filters.dateRange.end;
+      const finalEnd = dmyToIso(clampedEnd) < dmyToIso(clampedStart) ? clampedStart : clampedEnd;
+      setDateRange({ start: clampedStart, end: finalEnd });
+    }
+  }, [availableDates, filters.dateRange.end, filters.dateRange.start, filters.selectedSingleDate, setDateRange, setFullDateBounds, setSelectedSingleDate]);
 
   // Active State selection
   const selectedState: StateFilter = filters.state || 'All';
@@ -352,9 +367,18 @@ function DashboardContent() {
     return stateFilteredActualRows.filter(r => rowMatchesGlobalFilter(r, filters));
   }, [stateFilteredActualRows, filters]);
 
-  // Selected date (As of date) for DPR and cumulative calculations
-  const selectedDate = filters.selectedSingleDate || filters.dateRange.end || (availableDates[availableDates.length - 1] || '01.11.2026');
+  // Authoritative active From -> To Date range & To-Date (As-of) endpoint
+  const earliestAvailable = availableDates[0] || '14.10.2026';
+  const latestAvailable = availableDates[availableDates.length - 1] || '01.11.2026';
+  const fromDate = filters.selectedSingleDate || filters.dateRange.start || earliestAvailable;
+  const toDate = filters.selectedSingleDate || filters.dateRange.end || latestAvailable;
+  const selectedDate = toDate;
+  const fromIso = dmyToIso(fromDate);
   const selectedIso = dmyToIso(selectedDate);
+  const activeDateRange = useMemo(
+    () => ({ start: fromDate, end: toDate }),
+    [fromDate, toDate]
+  );
 
   // Dynamic cumulative achieved quantities computed as of selectedDate
   const dynamicCumulativeAchieved: CumulativeAchievedQuantities = useMemo(() => {
@@ -387,9 +411,10 @@ function DashboardContent() {
   }, [stateFilteredActualRows, selectedDate, cumulativeAchieved, selectedState]);
 
   // Authoritative BOQ and Linear progress metrics computed dynamically from final_sheet.xlsx
+  // Cumulative reflects up to To Date; Daily/Period output reflects [From Date .. To Date] inclusive.
   const boqMetrics = useMemo(() => {
-    return computeBOQProgressMetrics(stateFilteredActualRows, stateFilteredBaseline, selectedDate, filters.side);
-  }, [stateFilteredActualRows, stateFilteredBaseline, selectedDate, filters.side]);
+    return computeBOQProgressMetrics(stateFilteredActualRows, stateFilteredBaseline, selectedDate, filters.side, 'All', fromDate);
+  }, [stateFilteredActualRows, stateFilteredBaseline, selectedDate, filters.side, fromDate]);
 
   // Cumulative rows up to and including selectedDate (matching side filter)
   const cumulativeRows = useMemo(() => {
@@ -530,9 +555,16 @@ function DashboardContent() {
     };
   }, [boqMetrics, stateFilteredActualRows, availableDates, filters.selectedActivities, filters.side, filteredRows]);
 
-  // Grouped daily progress comparisons for Bar/Line visual
+  // Grouped daily progress comparisons for Bar/Line visual (strictly within selected From..To range)
   const dailyComparisons: DailyProgressComparison[] = useMemo(() => {
-    return availableDates.map(date => {
+    const rangedDates = availableDates.filter(date => {
+      const iso = dmyToIso(date);
+      if (!fromIso || !selectedIso) return true;
+      const minIso = fromIso <= selectedIso ? fromIso : selectedIso;
+      const maxIso = fromIso <= selectedIso ? selectedIso : fromIso;
+      return iso >= minIso && iso <= maxIso;
+    });
+    return rangedDates.map(date => {
       const dayRows = stateFilteredActualRows.filter(r => r.date === date);
       let millingAchieved = 0;
       let tackcoatAchieved = 0;
@@ -582,7 +614,7 @@ function DashboardContent() {
         adherenceRate: rate
       };
     });
-  }, [availableDates, stateFilteredActualRows, stateFilteredDailyPlannedTargets]);
+  }, [availableDates, fromIso, selectedIso, stateFilteredActualRows, stateFilteredDailyPlannedTargets]);
 
   // Export full report action
   const handleExportFullReport = () => {
@@ -702,9 +734,12 @@ function DashboardContent() {
             <LinearKPICards
               actualRows={stateFilteredActualRows}
               baseline={stateFilteredBaseline}
+              dailyPlannedTargets={stateFilteredDailyPlannedTargets}
+              milestones={milestones}
               selectedActivities={filters.selectedActivities}
               side={filters.side}
               selectedDate={selectedDate}
+              dateRange={activeDateRange}
               availableDates={availableDates}
               boqMetrics={boqMetrics}
               onDateChange={(d) => setSelectedSingleDate(d)}
@@ -737,6 +772,7 @@ function DashboardContent() {
                   cumulativeAchieved={dynamicCumulativeAchieved}
                   dailyComparisons={dailyComparisons}
                   availableDates={availableDates}
+                  dateRange={activeDateRange}
                 />
               </div>
             </div>
@@ -761,14 +797,18 @@ function DashboardContent() {
               </div>
             </div>
 
-            {/* Row 5: Long-Term Contractual Baseline S-Curve & Trendline Pace Forecast (Temporarily hidden; toggle SHOW_FORECAST_VISUAL to restore) */}
+            {/* Row 5: Long-Term Contractual Baseline S-Curve & Trendline Pace Forecast */}
             {SHOW_FORECAST_VISUAL && (
-              <div className="w-full min-h-[380px]">
+              <div className="w-full min-h-[420px]">
                 <SCurveForecastChart
-                  actualRows={filteredRows}
-                  milestones={milestones}
+                  actualRows={cumulativeRows}
+                  dailyPlannedTargets={stateFilteredDailyPlannedTargets}
+                  milestones={milestones ? { ...milestones, reportDate: selectedDate || milestones.reportDate } : undefined}
                   baseline={stateFilteredBaseline}
                   cumulativeAchieved={dynamicCumulativeAchieved}
+                  availableDates={availableDates}
+                  selectedDate={selectedDate}
+                  side={filters.side}
                 />
               </div>
             )}
@@ -835,6 +875,7 @@ function DashboardContent() {
             {/* Searchable DPR Chainage Data Grid with Anomaly Alerts & CSV Export */}
             <DPRDataTable
               rows={filteredRows}
+              dateRange={activeDateRange}
               selectedRowId={selectedRow?.id}
               onSelectRow={row => setSelectedRow(row)}
             />
@@ -845,7 +886,7 @@ function DashboardContent() {
       {/* Executive Footer */}
       <footer className="px-6 py-4 border-t border-white/[0.06] bg-[#0B0C0E] text-xs text-slate-500 flex flex-wrap items-center justify-between gap-3 mt-8">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-slate-400">Muzaffarnagar - Haridwar Section, NH-334 (KM130+560 TO KM 206+220)</span>
+          <span className="font-semibold text-slate-400">Muzaffarnagar - Haridwar Section, NH-334 (KM 130+560 TO KM 206+220)</span>
           <span>•</span>
           <span>Chainage Ch. 130+560 to Km 206+220 BHS</span>
           <span>•</span>

@@ -1,0 +1,941 @@
+[
+  {
+    "activity": "Milling",
+    "rawActivity": "Milling",
+    "side": "LHS",
+    "chainageFrom": 188.9,
+    "chainageTo": 206.22,
+    "totalQty": 25547,
+    "startIso": "2026-10-12",
+    "finishIso": "2026-10-17",
+    "windows": [
+      {
+        "startIso": "2026-10-12",
+        "endIso": "2026-10-17",
+        "qty": 25547
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (DBM)",
+    "rawActivity": "Tack Coat for DBM",
+    "side": "LHS",
+    "chainageFrom": 188.9,
+    "chainageTo": 206.22,
+    "totalQty": 25547,
+    "startIso": "2026-10-12",
+    "finishIso": "2026-10-17",
+    "windows": [
+      {
+        "startIso": "2026-10-12",
+        "endIso": "2026-10-17",
+        "qty": 25547
+      }
+    ]
+  },
+  {
+    "activity": "DBM",
+    "rawActivity": "DBM",
+    "side": "LHS",
+    "chainageFrom": 188.9,
+    "chainageTo": 206.22,
+    "totalQty": 1269,
+    "startIso": "2026-10-12",
+    "finishIso": "2026-10-17",
+    "windows": [
+      {
+        "startIso": "2026-10-12",
+        "endIso": "2026-10-17",
+        "qty": 1269
+      }
+    ]
+  },
+  {
+    "activity": "Milling",
+    "rawActivity": "Milling",
+    "side": "RHS",
+    "chainageFrom": 206.22,
+    "chainageTo": 188.9,
+    "totalQty": 39070,
+    "startIso": "2026-10-18",
+    "finishIso": "2026-10-23",
+    "windows": [
+      {
+        "startIso": "2026-10-18",
+        "endIso": "2026-10-23",
+        "qty": 39070
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (DBM)",
+    "rawActivity": "Tack Coat for DBM",
+    "side": "RHS",
+    "chainageFrom": 206.22,
+    "chainageTo": 188.9,
+    "totalQty": 39070,
+    "startIso": "2026-10-18",
+    "finishIso": "2026-10-23",
+    "windows": [
+      {
+        "startIso": "2026-10-18",
+        "endIso": "2026-10-23",
+        "qty": 39070
+      }
+    ]
+  },
+  {
+    "activity": "DBM",
+    "rawActivity": "DBM",
+    "side": "RHS",
+    "chainageFrom": 206.22,
+    "chainageTo": 188.9,
+    "totalQty": 1954,
+    "startIso": "2026-10-18",
+    "finishIso": "2026-10-23",
+    "windows": [
+      {
+        "startIso": "2026-10-18",
+        "endIso": "2026-10-23",
+        "qty": 1954
+      }
+    ]
+  },
+  {
+    "activity": "Milling",
+    "rawActivity": "Milling",
+    "side": "RHS",
+    "chainageFrom": 188.9,
+    "chainageTo": 167.25,
+    "totalQty": 100513,
+    "startIso": "2026-10-15",
+    "finishIso": "2026-11-22",
+    "windows": [
+      {
+        "startIso": "2026-10-15",
+        "endIso": "2026-10-28",
+        "qty": 22799
+      },
+      {
+        "startIso": "2026-11-02",
+        "endIso": "2026-11-07",
+        "qty": 24497.9447
+      },
+      {
+        "startIso": "2026-11-10",
+        "endIso": "2026-11-15",
+        "qty": 46366.5642
+      },
+      {
+        "startIso": "2026-11-16",
+        "endIso": "2026-11-22",
+        "qty": 6849.4911
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (DBM)",
+    "rawActivity": "Tack Coat for DBM",
+    "side": "RHS",
+    "chainageFrom": 188.9,
+    "chainageTo": 167.25,
+    "totalQty": 100513,
+    "startIso": "2026-10-15",
+    "finishIso": "2026-11-22",
+    "windows": [
+      {
+        "startIso": "2026-10-15",
+        "endIso": "2026-10-28",
+        "qty": 12620
+      },
+      {
+        "startIso": "2026-11-02",
+        "endIso": "2026-11-07",
+        "qty": 24497.9447
+      },
+      {
+        "startIso": "2026-11-10",
+        "endIso": "2026-11-15",
+        "qty": 45366.5642
+      },
+      {
+        "startIso": "2026-11-16",
+        "endIso": "2026-11-22",
+        "qty": 18028.4911
+      }
+    ]
+  },
+  {
+    "activity": "DBM",
+    "rawActivity": "DBM",
+    "side": "RHS",
+    "chainageFrom": 188.9,
+    "chainageTo": 167.25,
+    "totalQty": 5474.49,
+    "startIso": "2026-10-15",
+    "finishIso": "2026-11-22",
+    "windows": [
+      {
+        "startIso": "2026-10-15",
+        "endIso": "2026-10-28",
+        "qty": 631
+      },
+      {
+        "startIso": "2026-11-02",
+        "endIso": "2026-11-07",
+        "qty": 1350
+      },
+      {
+        "startIso": "2026-11-10",
+        "endIso": "2026-11-15",
+        "qty": 2500
+      },
+      {
+        "startIso": "2026-11-16",
+        "endIso": "2026-11-22",
+        "qty": 993.49
+      }
+    ]
+  },
+  {
+    "activity": "Milling",
+    "rawActivity": "Milling",
+    "side": "LHS",
+    "chainageFrom": 188.9,
+    "chainageTo": 206.22,
+    "totalQty": 10328,
+    "startIso": "2026-11-02",
+    "finishIso": "2026-11-07",
+    "windows": [
+      {
+        "startIso": "2026-11-02",
+        "endIso": "2026-11-07",
+        "qty": 10328
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (BC)",
+    "rawActivity": "Tack Coat for BC",
+    "side": "LHS",
+    "chainageFrom": 188.9,
+    "chainageTo": 206.22,
+    "totalQty": 105252.5,
+    "startIso": "2026-10-24",
+    "finishIso": "2026-11-07",
+    "windows": [
+      {
+        "startIso": "2026-10-24",
+        "endIso": "2026-11-01",
+        "qty": 15775
+      },
+      {
+        "startIso": "2026-11-02",
+        "endIso": "2026-11-07",
+        "qty": 89477.5
+      }
+    ]
+  },
+  {
+    "activity": "BC",
+    "rawActivity": "BC",
+    "side": "LHS",
+    "chainageFrom": 188.9,
+    "chainageTo": 206.22,
+    "totalQty": 4210.1,
+    "startIso": "2026-10-24",
+    "finishIso": "2026-11-07",
+    "windows": [
+      {
+        "startIso": "2026-10-24",
+        "endIso": "2026-11-01",
+        "qty": 631
+      },
+      {
+        "startIso": "2026-11-02",
+        "endIso": "2026-11-07",
+        "qty": 3579.1
+      }
+    ]
+  },
+  {
+    "activity": "Milling",
+    "rawActivity": "Milling",
+    "side": "LHS",
+    "chainageFrom": 206.22,
+    "chainageTo": 188.9,
+    "totalQty": 5800,
+    "startIso": "2026-11-02",
+    "finishIso": "2026-11-07",
+    "windows": [
+      {
+        "startIso": "2026-11-02",
+        "endIso": "2026-11-07",
+        "qty": 5800
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (BC)",
+    "rawActivity": "Tack Coat for BC",
+    "side": "RHS",
+    "chainageFrom": 206.22,
+    "chainageTo": 188.9,
+    "totalQty": 151067.5,
+    "startIso": "2026-11-02",
+    "finishIso": "2026-11-15",
+    "windows": [
+      {
+        "startIso": "2026-11-02",
+        "endIso": "2026-11-07",
+        "qty": 21500
+      },
+      {
+        "startIso": "2026-11-10",
+        "endIso": "2026-11-15",
+        "qty": 129567.5
+      }
+    ]
+  },
+  {
+    "activity": "BC",
+    "rawActivity": "BC",
+    "side": "RHS",
+    "chainageFrom": 206.22,
+    "chainageTo": 188.9,
+    "totalQty": 6042.7,
+    "startIso": "2026-11-02",
+    "finishIso": "2026-11-15",
+    "windows": [
+      {
+        "startIso": "2026-11-02",
+        "endIso": "2026-11-07",
+        "qty": 860
+      },
+      {
+        "startIso": "2026-11-10",
+        "endIso": "2026-11-15",
+        "qty": 5182.7
+      }
+    ]
+  },
+  {
+    "activity": "Milling",
+    "rawActivity": "Milling",
+    "side": "LHS",
+    "chainageFrom": 167.25,
+    "chainageTo": 188.9,
+    "totalQty": 86023,
+    "startIso": "2026-11-10",
+    "finishIso": "2026-11-29",
+    "windows": [
+      {
+        "startIso": "2026-11-10",
+        "endIso": "2026-11-15",
+        "qty": 31048.0113
+      },
+      {
+        "startIso": "2026-11-16",
+        "endIso": "2026-11-22",
+        "qty": 32555
+      },
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 22419.9887
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (DBM)",
+    "rawActivity": "Tack Coat for DBM",
+    "side": "LHS",
+    "chainageFrom": 167.25,
+    "chainageTo": 188.9,
+    "totalQty": 96351,
+    "startIso": "2026-11-10",
+    "finishIso": "2026-11-29",
+    "windows": [
+      {
+        "startIso": "2026-11-10",
+        "endIso": "2026-11-15",
+        "qty": 31048.0113
+      },
+      {
+        "startIso": "2026-11-16",
+        "endIso": "2026-11-22",
+        "qty": 30555.1857
+      },
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 34747.803
+      }
+    ]
+  },
+  {
+    "activity": "DBM",
+    "rawActivity": "DBM",
+    "side": "LHS",
+    "chainageFrom": 167.25,
+    "chainageTo": 188.9,
+    "totalQty": 4906.015,
+    "startIso": "2026-11-10",
+    "finishIso": "2026-11-29",
+    "windows": [
+      {
+        "startIso": "2026-11-10",
+        "endIso": "2026-11-15",
+        "qty": 1575
+      },
+      {
+        "startIso": "2026-11-16",
+        "endIso": "2026-11-22",
+        "qty": 1550
+      },
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 1781.015
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (BC)",
+    "rawActivity": "Tack Coat for BC",
+    "side": "LHS",
+    "chainageFrom": 167.25,
+    "chainageTo": 188.9,
+    "totalQty": 138820.5,
+    "startIso": "2026-11-16",
+    "finishIso": "2026-11-29",
+    "windows": [
+      {
+        "startIso": "2026-11-16",
+        "endIso": "2026-11-22",
+        "qty": 127825
+      },
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 10995.5
+      }
+    ]
+  },
+  {
+    "activity": "BC",
+    "rawActivity": "BC",
+    "side": "LHS",
+    "chainageFrom": 167.25,
+    "chainageTo": 188.9,
+    "totalQty": 5552.82,
+    "startIso": "2026-11-16",
+    "finishIso": "2026-11-29",
+    "windows": [
+      {
+        "startIso": "2026-11-16",
+        "endIso": "2026-11-22",
+        "qty": 5113
+      },
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 439.82
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (BC)",
+    "rawActivity": "Tack Coat for BC",
+    "side": "RHS",
+    "chainageFrom": 188.9,
+    "chainageTo": 167.25,
+    "totalQty": 138820.5,
+    "startIso": "2026-11-23",
+    "finishIso": "2026-12-06",
+    "windows": [
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 113750
+      },
+      {
+        "startIso": "2026-11-30",
+        "endIso": "2026-12-06",
+        "qty": 25070.5
+      }
+    ]
+  },
+  {
+    "activity": "BC",
+    "rawActivity": "BC",
+    "side": "RHS",
+    "chainageFrom": 188.9,
+    "chainageTo": 167.25,
+    "totalQty": 5552.82,
+    "startIso": "2026-11-23",
+    "finishIso": "2026-12-06",
+    "windows": [
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 3950
+      },
+      {
+        "startIso": "2026-11-30",
+        "endIso": "2026-12-06",
+        "qty": 1602.82
+      }
+    ]
+  },
+  {
+    "activity": "Milling",
+    "rawActivity": "Milling",
+    "side": "RHS",
+    "chainageFrom": 167.25,
+    "chainageTo": 130.56,
+    "totalQty": 116665.5,
+    "startIso": "2026-11-16",
+    "finishIso": "2026-12-06",
+    "windows": [
+      {
+        "startIso": "2026-11-16",
+        "endIso": "2026-11-22",
+        "qty": 25710.5335
+      },
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 45450
+      },
+      {
+        "startIso": "2026-11-30",
+        "endIso": "2026-12-06",
+        "qty": 45504.9665
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (DBM)",
+    "rawActivity": "Tack Coat",
+    "side": "RHS",
+    "chainageFrom": 167.25,
+    "chainageTo": 130.56,
+    "totalQty": 122465.5,
+    "startIso": "2026-11-16",
+    "finishIso": "2026-12-06",
+    "windows": [
+      {
+        "startIso": "2026-11-16",
+        "endIso": "2026-11-22",
+        "qty": 25710.5335
+      },
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 43441.936
+      },
+      {
+        "startIso": "2026-11-30",
+        "endIso": "2026-12-06",
+        "qty": 53313.0305
+      }
+    ]
+  },
+  {
+    "activity": "DBM",
+    "rawActivity": "DBM",
+    "side": "RHS",
+    "chainageFrom": 167.25,
+    "chainageTo": 130.56,
+    "totalQty": 6869.098,
+    "startIso": "2026-11-16",
+    "finishIso": "2026-12-06",
+    "windows": [
+      {
+        "startIso": "2026-11-16",
+        "endIso": "2026-11-22",
+        "qty": 1450
+      },
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 2450
+      },
+      {
+        "startIso": "2026-11-30",
+        "endIso": "2026-12-06",
+        "qty": 2969.098
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (BC)",
+    "rawActivity": "Tack Coat for BC",
+    "side": "RHS",
+    "chainageFrom": 167.25,
+    "chainageTo": 130.56,
+    "totalQty": 227466.75,
+    "startIso": "2026-11-30",
+    "finishIso": "2026-12-20",
+    "windows": [
+      {
+        "startIso": "2026-11-30",
+        "endIso": "2026-12-06",
+        "qty": 81750
+      },
+      {
+        "startIso": "2026-12-07",
+        "endIso": "2026-12-13",
+        "qty": 106250
+      },
+      {
+        "startIso": "2026-12-14",
+        "endIso": "2026-12-20",
+        "qty": 39466.75
+      }
+    ]
+  },
+  {
+    "activity": "BC",
+    "rawActivity": "BC",
+    "side": "RHS",
+    "chainageFrom": 167.25,
+    "chainageTo": 130.56,
+    "totalQty": 9098.67,
+    "startIso": "2026-11-30",
+    "finishIso": "2026-12-20",
+    "windows": [
+      {
+        "startIso": "2026-11-30",
+        "endIso": "2026-12-06",
+        "qty": 3270
+      },
+      {
+        "startIso": "2026-12-07",
+        "endIso": "2026-12-13",
+        "qty": 4250
+      },
+      {
+        "startIso": "2026-12-14",
+        "endIso": "2026-12-20",
+        "qty": 1578.67
+      }
+    ]
+  },
+  {
+    "activity": "Milling",
+    "rawActivity": "Milling",
+    "side": "LHS",
+    "chainageFrom": 130.56,
+    "chainageTo": 167.25,
+    "totalQty": 131351.5,
+    "startIso": "2026-11-23",
+    "finishIso": "2026-12-27",
+    "windows": [
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 11589.3859
+      },
+      {
+        "startIso": "2026-11-30",
+        "endIso": "2026-12-06",
+        "qty": 32284.7178
+      },
+      {
+        "startIso": "2026-12-07",
+        "endIso": "2026-12-13",
+        "qty": 30215.1846
+      },
+      {
+        "startIso": "2026-12-14",
+        "endIso": "2026-12-20",
+        "qty": 32284.7178
+      },
+      {
+        "startIso": "2026-12-21",
+        "endIso": "2026-12-27",
+        "qty": 24977.4941
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (DBM)",
+    "rawActivity": "Tack Coat",
+    "side": "LHS",
+    "chainageFrom": 130.56,
+    "chainageTo": 167.25,
+    "totalQty": 131351.5,
+    "startIso": "2026-11-23",
+    "finishIso": "2026-12-27",
+    "windows": [
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 11589.3859
+      },
+      {
+        "startIso": "2026-11-30",
+        "endIso": "2026-12-06",
+        "qty": 32284.7178
+      },
+      {
+        "startIso": "2026-12-07",
+        "endIso": "2026-12-13",
+        "qty": 30215.1846
+      },
+      {
+        "startIso": "2026-12-14",
+        "endIso": "2026-12-20",
+        "qty": 32284.7178
+      },
+      {
+        "startIso": "2026-12-21",
+        "endIso": "2026-12-27",
+        "qty": 24977.4941
+      }
+    ]
+  },
+  {
+    "activity": "DBM",
+    "rawActivity": "DBM",
+    "side": "LHS",
+    "chainageFrom": 130.56,
+    "chainageTo": 167.25,
+    "totalQty": 7933.643,
+    "startIso": "2026-11-23",
+    "finishIso": "2026-12-27",
+    "windows": [
+      {
+        "startIso": "2026-11-23",
+        "endIso": "2026-11-29",
+        "qty": 700
+      },
+      {
+        "startIso": "2026-11-30",
+        "endIso": "2026-12-06",
+        "qty": 1950
+      },
+      {
+        "startIso": "2026-12-07",
+        "endIso": "2026-12-13",
+        "qty": 1825
+      },
+      {
+        "startIso": "2026-12-14",
+        "endIso": "2026-12-20",
+        "qty": 1950
+      },
+      {
+        "startIso": "2026-12-21",
+        "endIso": "2026-12-27",
+        "qty": 1508.643
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (BC)",
+    "rawActivity": "Tack Coat for BC",
+    "side": "LHS",
+    "chainageFrom": 130.56,
+    "chainageTo": 167.25,
+    "totalQty": 217859.25,
+    "startIso": "2026-12-07",
+    "finishIso": "2026-12-27",
+    "windows": [
+      {
+        "startIso": "2026-12-07",
+        "endIso": "2026-12-13",
+        "qty": 11250
+      },
+      {
+        "startIso": "2026-12-14",
+        "endIso": "2026-12-20",
+        "qty": 78125
+      },
+      {
+        "startIso": "2026-12-21",
+        "endIso": "2026-12-27",
+        "qty": 128484.25
+      }
+    ]
+  },
+  {
+    "activity": "BC",
+    "rawActivity": "BC",
+    "side": "LHS",
+    "chainageFrom": 130.56,
+    "chainageTo": 167.25,
+    "totalQty": 8714.37,
+    "startIso": "2026-12-07",
+    "finishIso": "2026-12-27",
+    "windows": [
+      {
+        "startIso": "2026-12-07",
+        "endIso": "2026-12-13",
+        "qty": 450
+      },
+      {
+        "startIso": "2026-12-14",
+        "endIso": "2026-12-20",
+        "qty": 3125
+      },
+      {
+        "startIso": "2026-12-21",
+        "endIso": "2026-12-27",
+        "qty": 5139.37
+      }
+    ]
+  },
+  {
+    "activity": "Milling",
+    "rawActivity": "Milling",
+    "side": "BHS",
+    "chainageFrom": null,
+    "chainageTo": null,
+    "totalQty": 165986,
+    "startIso": "2026-12-07",
+    "finishIso": "2027-01-03",
+    "windows": [
+      {
+        "startIso": "2026-12-07",
+        "endIso": "2026-12-13",
+        "qty": 40437.3637
+      },
+      {
+        "startIso": "2026-12-14",
+        "endIso": "2026-12-20",
+        "qty": 40453.5451
+      },
+      {
+        "startIso": "2026-12-21",
+        "endIso": "2026-12-27",
+        "qty": 40437.3637
+      },
+      {
+        "startIso": "2026-12-28",
+        "endIso": "2027-01-03",
+        "qty": 44657.7275
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (DBM)",
+    "rawActivity": "Tack Coat for DBM",
+    "side": "BHS",
+    "chainageFrom": null,
+    "chainageTo": null,
+    "totalQty": 165985.75,
+    "startIso": "2026-12-07",
+    "finishIso": "2027-01-03",
+    "windows": [
+      {
+        "startIso": "2026-12-07",
+        "endIso": "2026-12-13",
+        "qty": 40437.3637
+      },
+      {
+        "startIso": "2026-12-14",
+        "endIso": "2026-12-20",
+        "qty": 40453.5451
+      },
+      {
+        "startIso": "2026-12-21",
+        "endIso": "2026-12-27",
+        "qty": 40437.3637
+      },
+      {
+        "startIso": "2026-12-28",
+        "endIso": "2027-01-03",
+        "qty": 44657.4775
+      }
+    ]
+  },
+  {
+    "activity": "DBM",
+    "rawActivity": "DBM",
+    "side": "BHS",
+    "chainageFrom": null,
+    "chainageTo": null,
+    "totalQty": 8620,
+    "startIso": "2026-12-07",
+    "finishIso": "2027-01-03",
+    "windows": [
+      {
+        "startIso": "2026-12-07",
+        "endIso": "2026-12-13",
+        "qty": 2100
+      },
+      {
+        "startIso": "2026-12-14",
+        "endIso": "2026-12-20",
+        "qty": 2100.8403
+      },
+      {
+        "startIso": "2026-12-21",
+        "endIso": "2026-12-27",
+        "qty": 2100
+      },
+      {
+        "startIso": "2026-12-28",
+        "endIso": "2027-01-03",
+        "qty": 2319.1597
+      }
+    ]
+  },
+  {
+    "activity": "Tackcoat (BC)",
+    "rawActivity": "Tack Coat for BC",
+    "side": "BHS",
+    "chainageFrom": null,
+    "chainageTo": null,
+    "totalQty": 187699.75,
+    "startIso": "2026-12-21",
+    "finishIso": "2027-01-10",
+    "windows": [
+      {
+        "startIso": "2026-12-21",
+        "endIso": "2026-12-27",
+        "qty": 5749.9923
+      },
+      {
+        "startIso": "2026-12-28",
+        "endIso": "2027-01-03",
+        "qty": 86249.8851
+      },
+      {
+        "startIso": "2027-01-04",
+        "endIso": "2027-01-10",
+        "qty": 95699.8725
+      }
+    ]
+  },
+  {
+    "activity": "BC",
+    "rawActivity": "BC",
+    "side": "BHS",
+    "chainageFrom": null,
+    "chainageTo": null,
+    "totalQty": 7508,
+    "startIso": "2026-12-21",
+    "finishIso": "2027-01-10",
+    "windows": [
+      {
+        "startIso": "2026-12-21",
+        "endIso": "2026-12-27",
+        "qty": 230
+      },
+      {
+        "startIso": "2026-12-28",
+        "endIso": "2027-01-03",
+        "qty": 3450
+      },
+      {
+        "startIso": "2027-01-04",
+        "endIso": "2027-01-10",
+        "qty": 3828
+      }
+    ]
+  }
+]

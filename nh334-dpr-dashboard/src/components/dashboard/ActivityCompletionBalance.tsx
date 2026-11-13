@@ -121,6 +121,7 @@ export const ActivityCompletionBalance: React.FC<ActivityCompletionBalanceProps>
             <button
               type="button"
               onClick={() => setMetricMode('quantity')}
+              data-on-accent={metricMode === 'quantity' ? 'true' : undefined}
               className={`px-4 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                 metricMode === 'quantity'
                   ? 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-emerald-950/50'
@@ -132,6 +133,7 @@ export const ActivityCompletionBalance: React.FC<ActivityCompletionBalanceProps>
             <button
               type="button"
               onClick={() => setMetricMode('linear')}
+              data-on-accent={metricMode === 'linear' ? 'true' : undefined}
               className={`px-4 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                 metricMode === 'linear'
                   ? 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-emerald-950/50'
@@ -146,7 +148,7 @@ export const ActivityCompletionBalance: React.FC<ActivityCompletionBalanceProps>
         {/* ============================================================== */}
         {/* 2. Legend (Below Header, Aligned to Right)                     */}
         {/* ============================================================== */}
-        <div className="flex items-center justify-end gap-5 mt-2.5 mb-5 text-xs font-medium text-slate-300">
+        <div className="flex items-center justify-end gap-5 mt-2.5 mb-2.5 text-xs font-medium text-slate-300">
           <div className="flex items-center gap-2">
             <span className="w-3.5 h-3.5 rounded-sm bg-[#10B981] shadow-sm shadow-emerald-500/40" />
             <span>Completed</span>
@@ -161,7 +163,7 @@ export const ActivityCompletionBalance: React.FC<ActivityCompletionBalanceProps>
       {/* ============================================================== */}
       {/* 3. Main Horizontal Stacked Bar Chart Area                      */}
       {/* ============================================================== */}
-      <div className="my-auto space-y-4">
+      <div className="flex-1 flex flex-col justify-evenly gap-3 py-1">
         {displayedMetrics.length === 0 ? (
           <div className="py-12 text-center text-slate-500 font-mono text-xs">
             No matching activity data available for the active filters.
@@ -238,6 +240,7 @@ export const ActivityCompletionBalance: React.FC<ActivityCompletionBalanceProps>
                       {visualCompleted > 0 && (
                         <div
                           style={{ width: `${visualCompleted}%` }}
+                          data-on-accent="true"
                           className="h-full bg-[#10B981] flex items-center justify-center transition-all duration-500 relative border-r border-[#0B1319]/30"
                         >
                           <span className="text-xs font-bold font-mono text-white drop-shadow-sm px-1.5 whitespace-nowrap">
@@ -250,6 +253,7 @@ export const ActivityCompletionBalance: React.FC<ActivityCompletionBalanceProps>
                       {visualRemaining > 0 && (
                         <div
                           style={{ width: `${visualRemaining}%` }}
+                          data-on-accent="true"
                           className="h-full bg-[#F59E0B] flex items-center justify-center transition-all duration-500 relative"
                         >
                           <span className="text-xs font-bold font-mono text-white drop-shadow-sm px-1.5 whitespace-nowrap">

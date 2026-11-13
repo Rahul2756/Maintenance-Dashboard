@@ -4,6 +4,8 @@ import { ActualDPRRow } from '../../types/dpr';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { AlertCircle, Sliders } from 'lucide-react';
 import { formatChainagePlus } from '../../utils/excelParser';
+import { useTheme } from '../../context/ThemeContext';
+import { getChartThemeTokens } from '../../utils/chartTheme';
 
 interface AnomalyScatterPlotProps {
   rows: ActualDPRRow[];
@@ -14,6 +16,8 @@ export const AnomalyScatterPlot: React.FC<AnomalyScatterPlotProps> = ({
   rows,
   onSelectRow
 }) => {
+  const { theme, isLight } = useTheme();
+  const tk = getChartThemeTokens(theme);
   const [axisMode, setAxisMode] = useState<'depth' | 'width'>('depth');
 
   // Prepare scatter points: [ChainageMid, YVal, Size, RowObject]
@@ -65,12 +69,12 @@ export const AnomalyScatterPlot: React.FC<AnomalyScatterPlotProps> = ({
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
-      backgroundColor: 'rgba(18, 20, 26, 0.95)',
-      borderColor: 'rgba(255, 255, 255, 0.15)',
+      backgroundColor: isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(18, 20, 26, 0.95)',
+      borderColor: isLight ? '#E2E8F0' : 'rgba(255, 255, 255, 0.15)',
       borderWidth: 1,
       padding: [10, 14],
       textStyle: {
-        color: '#F3F4F6',
+        color: isLight ? '#17212B' : '#F3F4F6',
         fontSize: 12,
         fontFamily: 'Inter, sans-serif'
       },
@@ -78,25 +82,35 @@ export const AnomalyScatterPlot: React.FC<AnomalyScatterPlotProps> = ({
         const item = params.data;
         const r: ActualDPRRow = item.rawRow;
         const statusBadge = r.isAnomaly
-          ? `<span style="background: rgba(239,68,68,0.25); color: #FCA5A5; border: 1px solid rgba(239,68,68,0.4); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">⚠ ANOMALY: ${r.anomalyCategory.toUpperCase()}</span>`
-          : `<span style="background: rgba(16,185,129,0.2); color: #6EE7B7; border: 1px solid rgba(16,185,129,0.4); padding: 2px 6px; border-radius: 4px; font-size: 11px;">✓ Standard Spec</span>`;
+          ? isLight
+            ? `<span style="background:#FEE2E2; color:#DC4C4C; border:1px solid rgba(220,76,76,0.35); padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600;">⚠ ANOMALY: ${r.anomalyCategory.toUpperCase()}</span>`
+            : `<span style="background: rgba(239,68,68,0.25); color: #FCA5A5; border: 1px solid rgba(239,68,68,0.4); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">⚠ ANOMALY: ${r.anomalyCategory.toUpperCase()}</span>`
+          : isLight
+            ? `<span style="background:#DDF5EA; color:#159B63; border:1px solid rgba(21,155,99,0.35); padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600;">✓ Standard Spec</span>`
+            : `<span style="background: rgba(16,185,129,0.2); color: #6EE7B7; border: 1px solid rgba(16,185,129,0.4); padding: 2px 6px; border-radius: 4px; font-size: 11px;">✓ Standard Spec</span>`;
+
+        const tCh = isLight ? '#07966D' : '#38BDF8';
+        const tMuted = isLight ? '#64748B' : '#94A3B8';
+        const tVal = isLight ? '#17212B' : '#FFF';
+        const tBox = isLight ? '#F8FAFC' : 'rgba(0,0,0,0.3)';
+        const tRem = isLight ? '#B45309' : '#FCD34D';
 
         return `
           <div style="min-width: 210px; font-family: Inter, sans-serif;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-              <span style="font-weight:700; color:#38BDF8; font-family:monospace;">${item.name}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px; gap:8px;">
+              <span style="font-weight:700; color:${tCh}; font-family:monospace;">${item.name}</span>
               ${statusBadge}
             </div>
-            <div style="font-size: 11px; color:#94A3B8; margin-bottom: 6px;">
-              Date: <span style="color:#FFF; font-family:monospace;">${r.date}</span> | Act: <span style="color:#FFF;">${r.activity}</span> (${r.lane})
+            <div style="font-size: 11px; color:${tMuted}; margin-bottom: 6px;">
+              Date: <span style="color:${tVal}; font-family:monospace;">${r.date}</span> | Act: <span style="color:${tVal};">${r.activity}</span> (${r.lane})
             </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 11px; font-family:monospace; background:rgba(0,0,0,0.3); padding:6px; border-radius:6px; margin-bottom:6px;">
-              <div>Length: <span style="color:#FFF;">${r.lengthM}m</span></div>
-              <div>Width: <span style="color:#FFF;">${r.widthM}m</span></div>
-              <div>Depth: <span style="color:${r.depthMm && r.depthMm > 55 ? '#EF4444' : '#FFF'}; font-weight:bold;">${r.depthMm || 50}mm</span></div>
-              <div>Achieved: <span style="color:#38BDF8;">${r.achievedToday} ${r.unit}</span></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 11px; font-family:monospace; background:${tBox}; padding:6px; border-radius:6px; margin-bottom:6px;">
+              <div>Length: <span style="color:${tVal};">${r.lengthM}m</span></div>
+              <div>Width: <span style="color:${tVal};">${r.widthM}m</span></div>
+              <div>Depth: <span style="color:${r.depthMm && r.depthMm > 55 ? '#DC4C4C' : tVal}; font-weight:bold;">${r.depthMm || 50}mm</span></div>
+              <div>Achieved: <span style="color:${tCh};">${r.achievedToday} ${r.unit}</span></div>
             </div>
-            ${r.remarks ? `<div style="font-size:11px; color:#FCD34D; font-style:italic; border-top:1px dashed rgba(255,255,255,0.1); padding-top:4px;">💬 ${r.remarks}</div>` : ''}
+            ${r.remarks ? `<div style="font-size:11px; color:${tRem}; font-style:italic; border-top:1px dashed ${isLight ? '#E2E8F0' : 'rgba(255,255,255,0.1)'}; padding-top:4px;">💬 ${r.remarks}</div>` : ''}
           </div>
         `;
       }
@@ -114,7 +128,7 @@ export const AnomalyScatterPlot: React.FC<AnomalyScatterPlotProps> = ({
       nameLocation: 'middle',
       nameGap: 24,
       nameTextStyle: {
-        color: '#64748B',
+        color: tk.axisTitle,
         fontSize: 10,
         fontFamily: 'Inter, sans-serif'
       },
@@ -123,16 +137,16 @@ export const AnomalyScatterPlot: React.FC<AnomalyScatterPlotProps> = ({
       interval: 2.0,
       splitLine: {
         lineStyle: {
-          color: 'rgba(255, 255, 255, 0.05)',
+          color: isLight ? '#EDF1F5' : 'rgba(255, 255, 255, 0.05)',
           type: 'dashed'
         }
       },
       axisLine: {
-        lineStyle: { color: 'rgba(255, 255, 255, 0.1)' }
+        lineStyle: { color: tk.axisLine }
       },
       axisLabel: {
         formatter: (val: number) => `Ch.${val.toFixed(0)}`,
-        color: '#94A3B8',
+        color: tk.axisLabel,
         fontSize: 10,
         fontFamily: 'JetBrains Mono, monospace'
       }
@@ -141,7 +155,7 @@ export const AnomalyScatterPlot: React.FC<AnomalyScatterPlotProps> = ({
       type: 'value',
       name: axisMode === 'depth' ? 'Depth (mm)' : 'Width (m)',
       nameTextStyle: {
-        color: '#64748B',
+        color: tk.axisTitle,
         fontSize: 10,
         fontFamily: 'Inter, sans-serif'
       },
@@ -149,12 +163,12 @@ export const AnomalyScatterPlot: React.FC<AnomalyScatterPlotProps> = ({
       max: axisMode === 'depth' ? 100 : 8.0,
       splitLine: {
         lineStyle: {
-          color: 'rgba(255, 255, 255, 0.05)',
+          color: isLight ? '#EDF1F5' : 'rgba(255, 255, 255, 0.05)',
           type: 'dashed'
         }
       },
       axisLabel: {
-        color: '#94A3B8',
+        color: tk.axisLabel,
         fontSize: 10,
         fontFamily: 'JetBrains Mono, monospace'
       }
@@ -168,14 +182,14 @@ export const AnomalyScatterPlot: React.FC<AnomalyScatterPlotProps> = ({
         markLine: {
           silent: true,
           lineStyle: {
-            color: '#10B981',
+            color: tk.contractFinish,
             type: 'dashed',
             width: 1.5
           },
           label: {
             formatter: axisMode === 'depth' ? 'Design Depth: 50mm' : 'Std Lane: 3.5m',
             position: 'end',
-            color: '#10B981',
+            color: tk.contractFinish,
             fontSize: 10,
             fontFamily: 'JetBrains Mono, monospace'
           },

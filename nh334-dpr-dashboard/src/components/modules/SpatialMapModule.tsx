@@ -21,13 +21,24 @@ export const SpatialMapModule: React.FC<SpatialMapModuleProps> = ({
   targetChainageM,
   onDatasetLoaded,
 }) => {
-  const { filters } = useFilters();
+  const { filters, isFullDateRange } = useFilters();
   const selectedState = filters.state || 'All';
 
   const [rawDataset, setRawDataset] = useState<StripChartDataset | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedActivityId, setSelectedActivityId] = useState<string>('all');
   const [selectedDate, setSelectedDate] = useState<string | null>('all');
+
+  // Keep Master Strip Chart date selection synchronized with global From -> To Date filter
+  useEffect(() => {
+    if (filters.selectedSingleDate) {
+      setSelectedDate(`range:${filters.selectedSingleDate}|${filters.selectedSingleDate}`);
+    } else if (isFullDateRange) {
+      setSelectedDate('all');
+    } else if (filters.dateRange?.start && filters.dateRange?.end) {
+      setSelectedDate(`range:${filters.dateRange.start}|${filters.dateRange.end}`);
+    }
+  }, [filters.selectedSingleDate, filters.dateRange?.start, filters.dateRange?.end, isFullDateRange]);
   const [scrollRatio, setScrollRatio] = useState<number>(0);
   const [currentStartCh, setCurrentStartCh] = useState<string>('130+560');
   const [currentEndCh, setCurrentEndCh] = useState<string>('140+000');

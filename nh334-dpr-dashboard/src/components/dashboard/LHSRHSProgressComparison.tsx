@@ -163,7 +163,7 @@ export const LHSRHSProgressComparison: React.FC<LHSRHSProgressComparisonProps> =
                       {Math.abs(diffPP) < 0.05 ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 border border-white/10 text-slate-300">
                           <Equal className="w-3 h-3 text-slate-400" />
-                          <span>Parity (0.0 pp)</span>
+                          <span>Parity (0.0%)</span>
                         </span>
                       ) : diffPP > 0 ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">

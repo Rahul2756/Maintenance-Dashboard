@@ -82,7 +82,7 @@ export const HeaderFilterBar: React.FC<HeaderFilterBarProps> = ({
   };
 
   const moduleTabs: { id: ModuleTab; label: string; icon: React.ReactNode; number: string }[] = [
-    { id: 'overview', label: 'Project Overview', icon: <Calendar className="w-3.5 h-3.5" />, number: '01' },
+    { id: 'overview', label: 'Executive Summary', icon: <Calendar className="w-3.5 h-3.5" />, number: '01' },
     { id: 'analytics', label: 'Daily Analytics', icon: <BarChart3 className="w-3.5 h-3.5" />, number: '02' },
     { id: 'spatial', label: 'Spatial & Strip Map', icon: <Compass className="w-3.5 h-3.5" />, number: '03' },
     { id: 'logs', label: 'Chainage Logs & DPR', icon: <FileSpreadsheet className="w-3.5 h-3.5" />, number: '04' }
@@ -106,7 +106,7 @@ export const HeaderFilterBar: React.FC<HeaderFilterBarProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-sm lg:text-base font-extrabold text-white tracking-tight drop-shadow-sm flex items-center gap-2">
-                  <span>Muzaffarnagar - Haridwar Section, NH-334 (KM130+560 TO KM 206+220)</span>
+                  <span>Muzaffarnagar - Haridwar Section, NH-334 (KM 130+560 TO KM 206+220)</span>
                 </h1>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-mono font-bold shrink-0">
                   BHS Both Sides

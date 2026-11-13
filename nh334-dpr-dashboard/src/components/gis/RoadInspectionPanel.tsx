@@ -1,6 +1,7 @@
 import React from 'react';
 import { InspectionDetails } from '../../types/gis';
 import { formatChainageM } from '../../utils/gisUtils';
+import { useTheme } from '../../context/ThemeContext';
 import { 
   X, 
   MapPin, 
@@ -34,6 +35,7 @@ export const RoadInspectionPanel: React.FC<RoadInspectionPanelProps> = ({
   onHighlightInStripChart,
   onBackToTimeline
 }) => {
+  const { isLight } = useTheme();
   const [copied, setCopied] = React.useState(false);
 
   if (!details) return null;
@@ -65,9 +67,21 @@ export const RoadInspectionPanel: React.FC<RoadInspectionPanelProps> = ({
   };
 
   return (
-    <div className="absolute bottom-4 left-4 z-30 w-96 max-w-[calc(100vw-2rem)] bg-[#12161D]/95 backdrop-blur-md border border-cyan-500/30 rounded-2xl shadow-2xl shadow-black/80 text-slate-100 overflow-hidden font-sans animate-fade-in">
+    <div
+      className={`absolute bottom-4 left-4 z-30 w-96 max-w-[calc(100vw-2rem)] backdrop-blur-md rounded-2xl overflow-hidden font-sans animate-fade-in ${
+        isLight
+          ? 'bg-white/98 border border-slate-300 shadow-xl text-[#17212B]'
+          : 'bg-[#12161D]/95 border border-cyan-500/30 shadow-2xl shadow-black/80 text-slate-100'
+      }`}
+    >
       {/* Panel Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-cyan-950/60 to-slate-900/60 border-b border-white/10">
+      <div
+        className={`flex items-center justify-between px-4 py-3 border-b ${
+          isLight
+            ? 'bg-[#F8FAFC] border-slate-200'
+            : 'bg-gradient-to-r from-cyan-950/60 to-slate-900/60 border-white/10'
+        }`}
+      >
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
             <MapPin className="w-4 h-4" />

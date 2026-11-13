@@ -65,7 +65,8 @@ export const WorkZoneAnnotation: React.FC<WorkZoneAnnotationProps> = ({
       }}
       onMouseEnter={(e) => onHoverZone(zone, e)}
       onMouseLeave={() => onHoverZone(null)}
-      className={`absolute inset-y-0.5 rounded-lg border-2 ${styleConfig.border} ${styleConfig.bg} ${styleConfig.glow} z-20 flex items-center justify-center p-1 overflow-hidden transition-all cursor-pointer pointer-events-auto hover:brightness-110 hover:z-30`}
+      className={`preserve-dark absolute inset-y-0.5 rounded-lg border-2 ${styleConfig.border} ${styleConfig.bg} ${styleConfig.glow} z-20 flex items-center justify-center p-1 overflow-hidden transition-all cursor-pointer pointer-events-auto hover:brightness-110 hover:z-30`}
+      data-on-accent="true"
       title={`${zone.label} (${zone.fromChainage} to ${zone.toChainage}, ${(zone.totalLengthM / 1000).toFixed(2)} km)`}
     >
       {/* Dynamic Badge strictly bounded within widthPx without horizontal overflow */}

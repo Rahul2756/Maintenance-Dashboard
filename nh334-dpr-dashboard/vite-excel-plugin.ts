@@ -198,6 +198,13 @@ function setupExcelMiddleware(middlewares: any) {
             // Save metadata to public/data/upload_metadata.json
             fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2), 'utf-8');
 
+            // Keep dist/data synchronized if build directory exists
+            const distDataDir = path.resolve(publicDataDir, '../../dist/data');
+            if (fs.existsSync(distDataDir)) {
+              fs.writeFileSync(path.join(distDataDir, 'final_sheet.xlsx'), buffer);
+              fs.writeFileSync(path.join(distDataDir, 'upload_metadata.json'), JSON.stringify(metadata, null, 2), 'utf-8');
+            }
+
             console.log(`[Excel Upload] Successfully updated ${targetExcelPath} (${buffer.length} bytes)`);
 
             res.setHeader('Content-Type', 'application/json');

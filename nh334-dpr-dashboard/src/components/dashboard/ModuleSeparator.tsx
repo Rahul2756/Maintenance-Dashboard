@@ -1,5 +1,6 @@
 import React from 'react';
 import { useFilters } from '../../context/FilterContext';
+import { useTheme } from '../../context/ThemeContext';
 import { ShieldAlert } from 'lucide-react';
 import { formatChainagePlus } from '../../utils/excelParser';
 
@@ -13,13 +14,14 @@ export const ModuleSeparator: React.FC<ModuleSeparatorProps> = ({
   overallAdherence
 }) => {
   const { filters, activeModule, selectedDate, linearLane, setLinearLane, linearStretch, setLinearStretch } = useFilters();
+  const { isLight } = useTheme();
 
   const moduleMetaMap = {
     overview: {
       number: '01',
       total: '04',
       badge: 'MODULE 01',
-      title: 'Project Overview & Baseline Milestone Control',
+      title: 'Executive Summary & Baseline Milestone Control',
       desc: 'Milestone Timeline (13 Oct – 20 Nov 2026), Contract BOQ Baseline, and Daily Timeline Scrubber',
       color: 'from-cyan-500/50 via-blue-500/20 to-transparent',
       textColor: 'text-cyan-300',
@@ -142,9 +144,12 @@ export const ModuleSeparator: React.FC<ModuleSeparatorProps> = ({
                       type="button"
                       onClick={() => setLinearStretch(s.id)}
                       title={s.title}
+                      data-on-accent={isLight && isSelected ? 'true' : undefined}
                       className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                         isSelected
-                          ? 'bg-cyan-400 text-black font-extrabold shadow-[0_0_12px_rgba(6,182,212,0.6)]'
+                          ? isLight
+                            ? 'bg-[#07966D] text-white font-bold shadow-sm'
+                            : 'bg-cyan-400 text-black font-extrabold shadow-[0_0_12px_rgba(6,182,212,0.6)]'
                           : 'text-slate-400 hover:text-white hover:bg-white/5'
                       }`}
                     >
@@ -166,9 +171,12 @@ export const ModuleSeparator: React.FC<ModuleSeparatorProps> = ({
                       key={l}
                       type="button"
                       onClick={() => setLinearLane(l)}
+                      data-on-accent={isLight && isSelected ? 'true' : undefined}
                       className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                         isSelected
-                          ? 'bg-cyan-400 text-black font-extrabold shadow-[0_0_12px_rgba(6,182,212,0.6)]'
+                          ? isLight
+                            ? 'bg-[#07966D] text-white font-bold shadow-sm'
+                            : 'bg-cyan-400 text-black font-extrabold shadow-[0_0_12px_rgba(6,182,212,0.6)]'
                           : 'text-slate-400 hover:text-white hover:bg-white/5'
                       }`}
                     >
@@ -239,9 +247,17 @@ export const ModuleSeparator: React.FC<ModuleSeparatorProps> = ({
             </div>
           )}
 
-          {(filters.selectedSingleDate || selectedDate) ? (
+          {filters.selectedSingleDate ? (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold">
-              <span>Day: {filters.selectedSingleDate || selectedDate}</span>
+              <span>Day: {filters.selectedSingleDate}</span>
+            </div>
+          ) : filters.dateRange?.start && filters.dateRange?.end ? (
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold">
+              <span>Range: {filters.dateRange.start} → {filters.dateRange.end}</span>
+            </div>
+          ) : selectedDate ? (
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold">
+              <span>Day: {selectedDate}</span>
             </div>
           ) : null}
 

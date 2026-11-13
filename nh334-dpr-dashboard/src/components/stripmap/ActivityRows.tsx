@@ -119,6 +119,7 @@ export const ActivityRows: React.FC<ActivityRowsProps> = ({
                     return (
                       <div
                         key={`fill-${inter.index}-${fIdx}`}
+                        data-on-accent={!fill.isExclusion && fill.isCompleted ? 'true' : undefined}
                         style={{
                           left: `${fill.startPct}%`,
                           width: `${fill.widthPct}%`,

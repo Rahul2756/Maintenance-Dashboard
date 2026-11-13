@@ -13,7 +13,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { StripChartDataset, DataConflictRecord } from '../../types/stripChart';
-import { unionIntervals, formatChainage } from '../../utils/stripChartExcelParser';
+import { unionIntervals, formatChainage, stripDateMatchesSelection } from '../../utils/stripChartExcelParser';
 
 interface StripMapMetricsBarProps {
   dataset: StripChartDataset;
@@ -99,7 +99,7 @@ export const StripMapMetricsBar: React.FC<StripMapMetricsBarProps> = ({
     const filteredLogs = (completedLogs || []).filter(l => {
       if (!l || !isFinite(l.fromM) || !isFinite(l.toM) || l.toM <= l.fromM) return false;
       if (selectedActivityId !== 'all' && l.mappedActivityId !== selectedActivityId) return false;
-      if (selectedDate && selectedDate !== 'all' && l.date !== selectedDate) return false;
+      if (!stripDateMatchesSelection(l.date, selectedDate)) return false;
       return true;
     });
 
@@ -309,7 +309,9 @@ export const StripMapMetricsBar: React.FC<StripMapMetricsBarProps> = ({
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] text-emerald-300 uppercase tracking-wider font-bold">4. Completed Scope</span>
               {selectedDate && selectedDate !== 'all' ? (
-                <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-[9px] text-emerald-300 font-bold">Daily</span>
+                <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-[9px] text-emerald-300 font-bold">
+                  {selectedDate.startsWith('range:') ? 'Range' : 'Daily'}
+                </span>
               ) : (
                 <span className="px-1.5 py-0.2 rounded bg-cyan-500/20 text-[9px] text-cyan-300 font-bold">Overall</span>
               )}

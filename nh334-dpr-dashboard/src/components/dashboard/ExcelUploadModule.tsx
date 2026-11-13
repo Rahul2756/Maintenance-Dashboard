@@ -28,18 +28,20 @@ export interface ExcelUploadMetadata {
 
 export interface ExcelUploadModuleProps {
   onReload?: () => Promise<void> | void;
+  onOpenUpload?: () => void;
   isLoading?: boolean;
 }
 
 export const ExcelUploadModule: React.FC<ExcelUploadModuleProps> = ({
   onReload,
+  onOpenUpload,
   isLoading = false
 }) => {
   const [metadata, setMetadata] = useState<ExcelUploadMetadata>({
-    originalName: 'final_sheet.xlsx',
+    originalName: 'Final_sheet_10-11-2026.xlsx',
     filename: 'final_sheet.xlsx',
-    uploadedAt: new Date().toISOString(),
-    formattedDate: '01-Nov-2026',
+    uploadedAt: '2026-11-10T12:26:00.000Z',
+    formattedDate: '10-Nov-2026 17:56',
     status: 'active'
   });
 
@@ -293,15 +295,21 @@ export const ExcelUploadModule: React.FC<ExcelUploadModuleProps> = ({
 
               <div className="space-y-2 text-xs">
                 <div className="flex items-start justify-between gap-2">
+                  <span className="text-slate-400">Active Workbook:</span>
+                  <span className="font-mono font-bold text-[#00E599] text-right truncate max-w-[175px]" title={metadata.originalName || metadata.filename}>
+                    {metadata.originalName || metadata.filename || 'final_sheet.xlsx'}
+                  </span>
+                </div>
+                <div className="flex items-start justify-between gap-2">
                   <span className="text-slate-400">Authoritative File:</span>
-                  <span className="font-mono font-bold text-[#00E599] text-right">
+                  <span className="font-mono text-slate-300 text-right">
                     public/data/final_sheet.xlsx
                   </span>
                 </div>
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-slate-400">Worksheets:</span>
                   <span className="font-mono text-slate-200 text-right">
-                    Work Program, Chainage Log(input)
+                    Work Program, Chainage Log
                   </span>
                 </div>
                 <div className="flex items-start justify-between gap-2">
@@ -313,7 +321,7 @@ export const ExcelUploadModule: React.FC<ExcelUploadModuleProps> = ({
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-slate-400">Last Synced:</span>
                   <span className="font-mono text-cyan-300 text-right">
-                    {metadata.formattedDate || '01-Nov-2026'}
+                    {metadata.formattedDate || '10-Nov-2026 17:56'}
                   </span>
                 </div>
               </div>
@@ -324,6 +332,19 @@ export const ExcelUploadModule: React.FC<ExcelUploadModuleProps> = ({
                   Uploading an Excel workbook validates required sheets and replaces <code className="text-emerald-400">final_sheet.xlsx</code> permanently on disk.
                 </span>
               </div>
+
+              {onOpenUpload && (
+                <button
+                  onClick={() => {
+                    setIsPopoverOpen(false);
+                    onOpenUpload();
+                  }}
+                  className="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-slate-200 hover:text-white flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Upload className="w-3.5 h-3.5 text-[#00E599]" />
+                  <span>Open Dual Workbook Upload Modal</span>
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -346,17 +367,20 @@ export const ExcelUploadModule: React.FC<ExcelUploadModuleProps> = ({
         </button>
 
         {/* 3. Active Filename Pill */}
-        <div className="bg-[#0B121E] border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-mono text-slate-200 flex items-center gap-2 shadow-inner">
+        <div
+          className="bg-[#0B121E] border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-mono text-slate-200 flex items-center gap-2 shadow-inner"
+          title={`Active source: ${metadata.originalName || metadata.filename || 'final_sheet.xlsx'}`}
+        >
           <FileSpreadsheet className="w-4 h-4 text-slate-300 shrink-0" />
-          <span className="truncate max-w-[180px] sm:max-w-[240px]">
-            {metadata.filename || 'final_sheet.xlsx'}
+          <span className="truncate max-w-[180px] sm:max-w-[260px]">
+            {metadata.originalName || metadata.filename || 'final_sheet.xlsx'}
           </span>
         </div>
 
         {/* 4. Uploaded Date/Time Pill */}
         <div className="bg-[#0B121E] border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-mono text-slate-200 flex items-center gap-2 shadow-inner">
           <Calendar className="w-4 h-4 text-slate-300 shrink-0" />
-          <span>Uploaded: {metadata.formattedDate || '01-Nov-2026'}</span>
+          <span>Uploaded: {metadata.formattedDate || '10-Nov-2026 17:56'}</span>
         </div>
 
         {/* 5. Status Badge */}

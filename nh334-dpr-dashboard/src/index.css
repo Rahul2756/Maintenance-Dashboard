@@ -78,3 +78,407 @@
 .animate-pulse-subtle {
   animation: pulseSubtle 2.5s infinite ease-in-out;
 }
+
+/* ============================================================================
+   LIGHT THEME DESIGN SYSTEM (Strictly scoped under html.light)
+   Preserves existing Dark Theme 100% untouched.
+   ============================================================================ */
+html.light {
+  color-scheme: light;
+  --lt-bg-main: #F7F9FC;
+  --lt-bg-secondary: #F1F5F9;
+  --lt-bg-card: #FFFFFF;
+  --lt-bg-card-secondary: #F9FBFC;
+  --lt-bg-input: #FFFFFF;
+  --lt-bg-hover: #F0F7F3;
+
+  --lt-green-primary: #07966D;
+  --lt-green-secondary: #0B8F68;
+  --lt-green-active: #00C98B;
+  --lt-green-light: #DDF5EA;
+  --lt-green-pale: #EAF8F0;
+
+  --lt-border-primary: #E2E8F0;
+  --lt-border-secondary: #EDF1F5;
+  --lt-divider: #E5E7EB;
+  --lt-card-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 4px 14px rgba(15, 23, 42, 0.04);
+
+  --lt-text-primary: #17212B;
+  --lt-text-secondary: #64748B;
+  --lt-text-muted: #94A3B8;
+
+  --lt-success: #159B63;
+  --lt-warning: #E9A23B;
+  --lt-danger: #DC4C4C;
+  --lt-info: #2684C7;
+}
+
+html.light body {
+  background-color: var(--lt-bg-main);
+  color: var(--lt-text-primary);
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: var(--lt-bg-secondary);
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+html.light .vaulto-card {
+  background: var(--lt-bg-card);
+  border: 1px solid var(--lt-border-primary);
+  box-shadow: var(--lt-card-shadow);
+}
+html.light .vaulto-card-hover:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.09);
+}
+
+/* Remove dark neon glows in Light mode */
+html.light .glow-emerald,
+html.light .glow-amber,
+html.light .glow-crimson,
+html.light .glow-cyan {
+  box-shadow: var(--lt-card-shadow);
+}
+
+/* Main page canvas surfaces */
+html.light :is(
+  [class*="bg-[#0B0C0E]"],
+  [class*="bg-[#03070E]"],
+  [class*="bg-[#08090C]"]
+) {
+  background-color: var(--lt-bg-main);
+}
+
+/* Primary white card / modal / drawer surfaces */
+html.light :is(
+  [class*="bg-[#13161D]"],
+  [class*="bg-[#16181D]"],
+  [class*="bg-[#101820]"],
+  [class*="bg-[#14171C]"],
+  [class*="bg-[#12161D]"],
+  [class*="bg-[#040911]"],
+  [class*="bg-[#0A0D12]"],
+  [class*="bg-[#0F172A]"],
+  [class*="bg-[#0F1218]"],
+  [class*="bg-[#0F1318]"],
+  [class*="bg-[#081017]"],
+  [class*="bg-[#0B101D]"],
+  [class*="bg-[#09121D]"],
+  [class*="bg-[#0E121E]"],
+  [class*="bg-[#0B1120]"],
+  [class*="bg-[#161922]"],
+  [class*="bg-[#16181F]"],
+  [class*="bg-[#161a24]"],
+  [class*="bg-[#161B26]"],
+  [class*="bg-[#141720]"],
+  [class*="bg-[#14171E]"],
+  [class*="bg-[#141822]"],
+  [class*="bg-[#0E1520]"],
+  [class*="bg-[#141A22]"],
+  [class*="bg-[#0F131D]"],
+  [class*="bg-[#0D1524]"],
+  [class*="bg-[#101217]"],
+  [class*="bg-[#10131A]"],
+  [class*="bg-[#101319]"],
+  [class*="bg-[#10141D]"],
+  [class*="bg-[#12151D]"],
+  [class*="bg-[#121620]"],
+  [class*="bg-[#121622]"],
+  [class*="bg-[#1d2230]"],
+  [class*="bg-[#111B2B]"],
+  [class*="bg-[#0B0D11]"],
+  [class*="bg-[#0B0E15]"],
+  [class*="bg-[#0E121B]"],
+  [class*="bg-[#0B1215]"]
+):not(.preserve-dark):not(.preserve-dark *) {
+  background-color: var(--lt-bg-card);
+}
+
+/* Secondary nested card / strip / input / toolbar surfaces */
+html.light :is(
+  [class*="bg-[#121316]"],
+  [class*="bg-[#12141A]"],
+  [class*="bg-[#121418]"],
+  [class*="bg-[#181B22]"],
+  [class*="bg-[#1A1D24]"],
+  [class*="bg-[#20242D]"],
+  [class*="bg-[#070B14]"],
+  [class*="bg-[#0B1221]"],
+  [class*="bg-[#0B121E]"],
+  [class*="bg-[#0A101D]"],
+  [class*="bg-[#0A1224]"],
+  [class*="bg-[#0A0F1D]"],
+  [class*="bg-[#090E1A]"],
+  [class*="bg-[#090D16]"],
+  [class*="bg-[#090C11]"],
+  [class*="bg-[#091017]"],
+  [class*="bg-[#09141D]"],
+  [class*="bg-[#0C1620]"],
+  [class*="bg-[#0A121A]"],
+  [class*="bg-[#0A0D14]"],
+  [class*="bg-[#0A0F16]"],
+  [class*="bg-[#080B0F]"],
+  [class*="bg-[#06090D]"],
+  [class*="bg-[#060D17]"],
+  [class*="bg-[#070D14]"],
+  [class*="bg-[#070D18]"],
+  [class*="bg-[#070A0F]"],
+  [class*="bg-[#070D12]"],
+  [class*="bg-[#10141C]"],
+  [class*="bg-[#111317]"],
+  [class*="bg-[#0A0E14]"],
+  [class*="bg-[#0E1015]"],
+  [class*="bg-[#0E1218]"],
+  [class*="bg-[#0E131A]"],
+  [class*="bg-[#0E2033]"],
+  [class*="bg-[#0D1017]"],
+  [class*="bg-[#1E232B]"],
+  [class*="bg-[#1E2532]"],
+  [class*="bg-[#1E293B]"],
+  [class*="bg-[#14120E]"],
+  [class*="bg-[#100E0B]"],
+  [class*="bg-[#181510]"],
+  [class*="bg-[#08121A]"],
+  [class*="bg-[#081519]"],
+  [class*="bg-[#091218]"],
+  [class*="bg-[#17202A]"],
+  [class*="bg-[#0F1D24]"],
+  [class*="bg-[#071922]"],
+  [class*="bg-[#0B2530]"],
+  [class*="bg-[#241432]"],
+  .bg-slate-900,
+  .bg-slate-950,
+  [class*="bg-slate-900/"],
+  [class*="bg-slate-950/"]
+):not(.preserve-dark):not(.preserve-dark *) {
+  background-color: var(--lt-bg-card-secondary);
+}
+
+/* Dark gradient card bodies -> crisp white-to-subtle gradient */
+html.light :is(
+  [class*="from-[#0F172A]"],
+  [class*="from-[#1C1813]"],
+  [class*="from-[#161B26]"],
+  [class*="from-[#091E24]"],
+  [class*="from-[#0B2530]"],
+  [class*="from-[#12151D]"],
+  [class*="from-[#090A0D]"],
+  [class*="from-[#0A0D12]"],
+  [class*="from-cyan-950/"],
+  [class*="from-slate-900/"]
+):not(.preserve-dark) {
+  background-image: linear-gradient(to bottom, #FFFFFF, #F8FAFC);
+  --tw-gradient-from: #FFFFFF;
+  --tw-gradient-via: #FFFFFF;
+  --tw-gradient-to: #F8FAFC;
+}
+
+/* Floating overlays over GIS / 3D Canvas must stay crisp & opaque in Light mode */
+html.light :is(
+  [class*="bg-[#12161D]/9"],
+  [class*="bg-[#12141A]/8"],
+  [class*="bg-[#12141A]/9"],
+  [class*="bg-[#10141C]/9"],
+  [class*="bg-[#0B1120]/9"]
+):not(.preserve-dark) {
+  background-color: rgba(255, 255, 255, 0.97);
+  border-color: #CBD5E1;
+}
+
+/* Subtle translucent overlays & modal backdrops */
+html.light :is(
+  .bg-white\/5,
+  .bg-white\/10,
+  [class*="bg-white/[0.0"],
+  .bg-black\/20,
+  .bg-black\/25,
+  .bg-black\/30,
+  .bg-black\/35,
+  .bg-black\/40,
+  .bg-black\/50,
+  .bg-black\/60
+):not(.preserve-dark):not(.preserve-dark *) {
+  background-color: var(--lt-bg-secondary);
+}
+html.light .bg-black\/80,
+html.light .bg-black\/75,
+html.light .bg-black\/70 {
+  background-color: rgba(15, 23, 42, 0.45);
+}
+
+/* Green-tinted dark pills & active containers -> Pale/Light green tokens */
+html.light :is(
+  [class*="bg-[#082820]"],
+  [class*="bg-[#08201A]"],
+  [class*="bg-[#112420]"],
+  [class*="bg-[#003B2C]"],
+  [class*="bg-[#003B2A]"],
+  [class*="bg-emerald-950"],
+  [class*="bg-teal-950"]
+):not([data-on-accent="true"]):not(.preserve-dark) {
+  background-color: var(--lt-green-pale);
+}
+
+html.light :is([class*="from-[#003B2A]"], [class*="to-[#002218]"]):not([data-on-accent="true"]):not(.preserve-dark) {
+  background-image: none;
+  background-color: var(--lt-green-primary);
+}
+
+/* Primary solid green accents mapped to Light brand green */
+html.light [class*="bg-[#008B6B]"]:not(.preserve-dark) {
+  background-color: var(--lt-green-primary);
+}
+html.light [class*="bg-[#008B6B]"]:hover:not(.preserve-dark) {
+  background-color: var(--lt-green-secondary);
+}
+
+/* Informational / Status tinted dark pills & strip chart fills -> Clean soft light pills */
+html.light :is([class*="bg-cyan-950"], [class*="bg-sky-950"], [class*="bg-sky-900"]):not([data-on-accent="true"]):not(.preserve-dark) {
+  background-color: #E0F2FE;
+}
+html.light :is([class*="bg-blue-950"], [class*="bg-indigo-950"]):not([data-on-accent="true"]):not(.preserve-dark) {
+  background-color: #DBEAFE;
+}
+html.light :is([class*="bg-amber-950"], [class*="bg-amber-900"]):not([data-on-accent="true"]):not(.preserve-dark) {
+  background-color: #FEF3C7;
+}
+html.light [class*="bg-rose-950"]:not([data-on-accent="true"]):not(.preserve-dark) {
+  background-color: #FEE2E2;
+}
+html.light :is([class*="bg-purple-950"], [class*="bg-purple-900"]):not([data-on-accent="true"]):not(.preserve-dark) {
+  background-color: #F3E8FF;
+}
+html.light [class*="bg-pink-900"]:not([data-on-accent="true"]):not(.preserve-dark) {
+  background-color: #FCE7F3;
+}
+html.light :is(.bg-slate-800, [class*="bg-slate-800/"]):not(.preserve-dark) {
+  background-color: var(--lt-bg-secondary);
+}
+
+/* Borders & Dividers */
+html.light :is(
+  .border-white\/5,
+  .border-white\/10,
+  .border-white\/15,
+  .border-white\/20,
+  [class*="border-white/"],
+  .border-black\/40,
+  .border-slate-700,
+  .border-slate-800,
+  [class*="border-slate-700/"],
+  [class*="border-slate-800/"]
+):not(.preserve-dark) {
+  border-color: var(--lt-border-primary);
+}
+
+html.light [class*="border-cyan-500/"]:not(.preserve-dark) {
+  border-color: #93C5FD;
+}
+html.light [class*="border-emerald-500/"]:not(.preserve-dark),
+html.light [class*="border-teal-500/"]:not(.preserve-dark),
+html.light [class*="border-[#00E599]"]:not(.preserve-dark),
+html.light [class*="border-[#0F5A46]"]:not(.preserve-dark) {
+  border-color: rgba(7, 150, 109, 0.30);
+}
+html.light :is([class*="border-[#14382F]"], [class*="border-[#143028]"]):not(.preserve-dark) {
+  border-color: var(--lt-border-primary);
+}
+html.light [class*="border-amber-500/"]:not(.preserve-dark) {
+  border-color: rgba(233, 162, 59, 0.5);
+}
+html.light [class*="border-rose-500/"]:not(.preserve-dark) {
+  border-color: rgba(220, 76, 76, 0.45);
+}
+
+html.light :is([class*="divide-white/"], .divide-slate-800, .divide-black\/40) > :not(:last-child) {
+  border-color: var(--lt-divider);
+}
+
+/* Card & panel shadow moderation */
+html.light :is(.shadow-xl, .shadow-2xl):not(.preserve-dark) {
+  --tw-shadow-color: rgba(15, 23, 42, 0.08);
+  box-shadow: var(--lt-card-shadow);
+}
+
+/* Typography Hierarchy (protecting solid accent controls & dark overlay banners) */
+html.light :is(
+  .text-white,
+  .text-slate-100,
+  .text-slate-200,
+  .text-gray-100,
+  .text-gray-200
+):not([data-on-accent="true"]):not([data-on-accent="true"] *):not(.preserve-dark):not(.preserve-dark *):not(
+  [class*="bg-[#008B6B]"]
+):not([class*="bg-[#008B6B]"] *):not([class*="bg-[#07966D]"]):not([class*="bg-[#07966D]"] *):not(
+  [class*="bg-[#159B63]"]
+):not([class*="bg-[#159B63]"] *):not(.bg-emerald-600):not(.bg-emerald-600 *):not(
+  .bg-emerald-500
+):not(.bg-emerald-500 *):not(.bg-rose-500):not(.bg-rose-600):not(.bg-blue-600):not(.bg-cyan-600) {
+  color: var(--lt-text-primary);
+}
+
+html.light :is(.text-slate-300, .text-gray-300):not([data-on-accent="true"]):not([data-on-accent="true"] *):not(.preserve-dark):not(.preserve-dark *) {
+  color: #334155;
+}
+
+html.light :is(.text-slate-400, .text-gray-400):not([data-on-accent="true"]):not(.preserve-dark):not(.preserve-dark *) {
+  color: #475569;
+}
+
+html.light :is(.text-slate-500, .text-gray-500, .text-slate-600, .text-gray-600):not([data-on-accent="true"]):not(.preserve-dark):not(.preserve-dark *) {
+  color: #64748B;
+}
+
+/* Accent & Status Text High-Contrast Mapping on Light Surfaces */
+html.light :is(.text-emerald-200, .text-emerald-300, .text-emerald-400, [class*="text-[#00E599]"]):not([data-on-accent="true"]):not(.preserve-dark) {
+  color: var(--lt-green-primary);
+}
+html.light :is(.text-teal-200, .text-teal-300, .text-teal-400):not([data-on-accent="true"]):not(.preserve-dark) {
+  color: var(--lt-green-secondary);
+}
+html.light :is(.text-cyan-200, .text-cyan-300, .text-cyan-400, .text-sky-200, .text-sky-300, .text-sky-400):not([data-on-accent="true"]):not(.preserve-dark) {
+  color: #0369A1;
+}
+html.light :is(.text-blue-200, .text-blue-300, .text-blue-400):not([data-on-accent="true"]):not(.preserve-dark) {
+  color: #1D4ED8;
+}
+html.light :is(.text-indigo-200, .text-indigo-300, .text-indigo-400):not([data-on-accent="true"]):not(.preserve-dark) {
+  color: #4338CA;
+}
+html.light :is(.text-amber-200, .text-amber-300, .text-amber-400, .text-orange-200, .text-orange-300, .text-orange-400, .text-yellow-300):not([data-on-accent="true"]):not(.preserve-dark) {
+  color: #B45309;
+}
+html.light :is(.text-rose-200, .text-rose-300, .text-rose-400):not([data-on-accent="true"]):not(.preserve-dark) {
+  color: var(--lt-danger);
+}
+html.light :is(.text-purple-200, .text-purple-300, .text-purple-400):not([data-on-accent="true"]):not(.preserve-dark) {
+  color: #6D28D9;
+}
+html.light :is(.text-pink-200, .text-pink-300, .text-pink-400):not([data-on-accent="true"]):not(.preserve-dark) {
+  color: #BE185D;
+}
+
+/* Hover text protection */
+html.light :is(.hover\:text-white, .hover\:text-slate-100, .hover\:text-slate-200):hover:not([data-on-accent="true"]):not(.preserve-dark) {
+  color: var(--lt-text-primary);
+}
+html.light :is(.hover\:bg-white\/5, .hover\:bg-white\/10, [class*="hover:bg-white/"]):hover:not(.preserve-dark) {
+  background-color: var(--lt-bg-hover);
+}
+
+/* Form inputs & native selects in Light mode */
+html.light input,
+html.light select,
+html.light textarea {
+  color: var(--lt-text-primary);
+}
+html.light select option {
+  background-color: #FFFFFF;
+  color: #17212B;
+}

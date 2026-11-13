@@ -1,10 +1,12 @@
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface StripMapLegendProps {
   className?: string;
 }
 
 export const StripMapLegend: React.FC<StripMapLegendProps> = ({ className = '' }) => {
+  const { isLight } = useTheme();
   return (
     <div className={`bg-[#14171C] border border-white/10 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono select-none ${className}`}>
       <div className="flex items-center gap-2 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
@@ -50,7 +52,11 @@ export const StripMapLegend: React.FC<StripMapLegendProps> = ({ className = '' }
 
         {/* Planned / Baseline */}
         <div className="flex items-center gap-2">
-          <span className="w-3.5 h-3.5 rounded bg-[#1E293B] border border-white/20 shadow-sm" />
+          <span
+            className={`w-3.5 h-3.5 rounded shadow-sm ${
+              isLight ? 'bg-[#E0F2FE] border border-[#38BDF8]' : 'bg-[#1E293B] border border-white/20'
+            }`}
+          />
           <span className="text-slate-400 font-medium">Planned / Scope</span>
         </div>
       </div>

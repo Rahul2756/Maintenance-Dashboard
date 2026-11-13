@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 import {
@@ -16,6 +16,9 @@ import {
 } from '../../utils/dailyPlannedTargetsData';
 import { Card, CardContent } from '../ui/Card';
 import { TrendingUp, AlertTriangle } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
+import { getChartThemeTokens } from '../../utils/chartTheme';
+import { dmyToIsoSafe } from '../../context/FilterContext';
 
 interface SCurveActualChartProps {
   actualRows: ActualDPRRow[];
@@ -25,17 +28,21 @@ interface SCurveActualChartProps {
   dailyComparisons?: DailyProgressComparison[];
   availableDates?: string[];
   dailyPlannedTargets?: Record<string, DailyPlannedTargetsByActivity>;
+  dateRange?: { start: string; end: string };
 }
 
 export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
   actualRows,
   availableDates = [],
   dailyPlannedTargets,
-  baseline
+  baseline,
+  dateRange
 }) => {
+  const { theme, isLight } = useTheme();
+  const tk = getChartThemeTokens(theme);
   // Activity selector with exactly FIVE independent options (default: Milling)
   const [selectedActivity, setSelectedActivity] = useState<SCurveActivity>('Milling');
-  const [frozenIndex, setFrozenIndex] = useState<number | null>(null);
+  const [frozenState, setFrozenState] = useState<{ index: number; rangeKey: string } | null>(null);
   const [frozenPos, setFrozenPos] = useState<{ x: number; y: number } | null>(null);
   const chartRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -105,7 +112,7 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
   }, [plannedMap, selectedActivity]);
 
   // Sorted list of unique DPR dates
-  const sortedDates = useMemo(() => {
+  const allSortedDates = useMemo(() => {
     const rawDates = availableDates.length > 0
       ? availableDates
       : Array.from(new Set(actualRows.map(r => r.date)));
@@ -117,6 +124,26 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
     });
   }, [availableDates, actualRows]);
 
+  const startIso = dateRange?.start ? dmyToIsoSafe(dateRange.start) : '';
+  const endIso = dateRange?.end ? dmyToIsoSafe(dateRange.end) : '';
+  const minIso = startIso && endIso ? (startIso <= endIso ? startIso : endIso) : '';
+  const maxIso = startIso && endIso ? (startIso <= endIso ? endIso : startIso) : '';
+  const currentRangeKey = `${minIso}|${maxIso}`;
+  const frozenIndex = frozenState && frozenState.rangeKey === currentRangeKey ? frozenState.index : null;
+  const setFrozenIndex = useCallback((updater: number | null | ((prev: number | null) => number | null)) => {
+    setFrozenState(prev => {
+      const prevIdx = prev && prev.rangeKey === currentRangeKey ? prev.index : null;
+      const nextIdx = typeof updater === 'function' ? updater(prevIdx) : updater;
+      return nextIdx === null ? null : { index: nextIdx, rangeKey: currentRangeKey };
+    });
+  }, [currentRangeKey]);
+
+  const sortedDates = useMemo(() => {
+    if (!maxIso) return allSortedDates;
+    // Accumulate up to To Date so cumulative progress remains accurate up to To Date
+    return allSortedDates.filter(d => dmyToIsoSafe(d) <= maxIso);
+  }, [allSortedDates, maxIso]);
+
   // Running cumulative calculations for the selected activity
   const chartData = useMemo(() => {
     const fullCats: string[] = [];
@@ -124,15 +151,21 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
     const fullActPct: number[] = [];
     const fullPlanQty: number[] = [];
     const fullActQty: number[] = [];
+    const inRangeIndices: number[] = [];
 
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     let runningActualQty = 0;
 
-    sortedDates.forEach(d => {
+    sortedDates.forEach((d, idx) => {
       const [dayNum, monthNum, yearNum] = d.split('.').map(Number);
       const monthLabel = months[monthNum - 1] || 'Oct';
       const cat = `${dayNum}-${monthLabel}`;
       fullCats.push(cat);
+
+      const dIso = dmyToIsoSafe(d);
+      if (!minIso || !maxIso || (dIso >= minIso && dIso <= maxIso)) {
+        inRangeIndices.push(idx);
+      }
 
       // 1. Cumulative Actual Quantity: sum of daily achieved in Column O up to date d
       const dayRows = actualRows.filter(r => r.date === d && matchesActivity(r, selectedActivity));
@@ -177,16 +210,18 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
       };
     }
 
+    const displayIndices = inRangeIndices.length > 0 ? inRangeIndices : fullCats.map((_, i) => i);
+
     return {
-      categories: fullCats,
-      plannedData: fullPlanPct,
-      actualData: fullActPct,
-      plannedQtys: fullPlanQty,
-      actualQtys: fullActQty,
+      categories: displayIndices.map(i => fullCats[i]),
+      plannedData: displayIndices.map(i => fullPlanPct[i]),
+      actualData: displayIndices.map(i => fullActPct[i]),
+      plannedQtys: displayIndices.map(i => fullPlanQty[i]),
+      actualQtys: displayIndices.map(i => fullActQty[i]),
       allActualPcts: fullActPct,
       allPlannedPcts: fullPlanPct
     };
-  }, [sortedDates, actualRows, selectedActivity, plannedEntries, totalActivityTarget, viewMode]);
+  }, [sortedDates, actualRows, selectedActivity, plannedEntries, totalActivityTarget, viewMode, minIso, maxIso]);
 
   // Latest progress metrics for footer cards & header badge
   const metrics = useMemo(() => {
@@ -260,7 +295,7 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
     return () => {
       zr.off('click', handleZrClick);
     };
-  }, [chartData]);
+  }, [chartData, setFrozenIndex]);
 
   // S-Curve ECharts configuration
   const option: echarts.EChartsOption = {
@@ -276,18 +311,18 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
       show: frozenIndex === null,
       trigger: 'axis',
       enterable: true,
-      backgroundColor: '#0F1218',
-      borderColor: 'rgba(255, 255, 255, 0.15)',
+      backgroundColor: isLight ? 'rgba(255, 255, 255, 0.98)' : '#0F1218',
+      borderColor: isLight ? '#E2E8F0' : 'rgba(255, 255, 255, 0.15)',
       borderWidth: 1,
       padding: [10, 14],
       textStyle: {
-        color: '#FFFFFF',
+        color: isLight ? '#17212B' : '#FFFFFF',
         fontSize: 11
       },
       axisPointer: {
         type: 'cross',
         lineStyle: {
-          color: 'rgba(255, 255, 255, 0.25)',
+          color: isLight ? 'rgba(100, 116, 139, 0.35)' : 'rgba(255, 255, 255, 0.25)',
           type: 'dashed'
         }
       },
@@ -303,35 +338,42 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
         const actQty = chartData.actualQtys[dataIdx] !== undefined ? chartData.actualQtys[dataIdx] : 0;
 
         const variance = actPct - planPct;
-        const varColor = variance >= 0 ? '#10B981' : '#F43F5E';
+        const varColor = variance >= 0 ? (isLight ? '#159B63' : '#10B981') : (isLight ? '#DC4C4C' : '#F43F5E');
         const varSign = variance >= 0 ? '+' : '';
+        const tText = isLight ? '#17212B' : '#FFFFFF';
+        const tMuted = isLight ? '#64748B' : '#94A3B8';
+        const tSub = isLight ? '#475569' : '#E2E8F0';
+        const tDiv = isLight ? '#E5E7EB' : 'rgba(255,255,255,0.12)';
+        const tPlan = isLight ? '#2563EB' : '#60A5FA';
+        const tAct = isLight ? '#DC4C4C' : '#EF4444';
+        const tHdrAct = isLight ? '#07966D' : '#93C5FD';
 
         return `
           <div style="font-family: Inter, sans-serif; font-size: 11px; min-width: 210px;">
-            <div style="font-weight: 700; color: #FFFFFF; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 4px; margin-bottom: 6px;">
+            <div style="font-weight: 700; color: ${tText}; border-bottom: 1px solid ${tDiv}; padding-bottom: 4px; margin-bottom: 6px;">
               📅 ${dateLabel} Cumulative Progress
             </div>
-            <div style="font-size: 11px; color: #60A5FA; font-weight: 600; margin-bottom: 6px;">
-              Activity: <span style="color: #93C5FD;">${selectedActivity}</span> (${unit})
+            <div style="font-size: 11px; color: ${isLight ? '#07966D' : '#60A5FA'}; font-weight: 600; margin-bottom: 6px;">
+              Activity: <span style="color: ${tHdrAct};">${selectedActivity}</span> (${unit})
             </div>
             <div style="display: flex; justify-content: space-between; gap: 12px; margin: 3px 0; font-family: monospace;">
-              <span style="color: #60A5FA;">● Planned Target (%):</span>
-              <span style="font-weight: 700; color: #FFFFFF;">${planPct.toFixed(2)}%</span>
+              <span style="color: ${tPlan};">● Planned Target (%):</span>
+              <span style="font-weight: 700; color: ${tText};">${planPct.toFixed(2)}%</span>
             </div>
-            <div style="display: flex; justify-content: space-between; gap: 12px; margin: 2px 0 5px 0; font-family: monospace; font-size: 10px; color: #94A3B8;">
+            <div style="display: flex; justify-content: space-between; gap: 12px; margin: 2px 0 5px 0; font-family: monospace; font-size: 10px; color: ${tMuted};">
               <span>  Cum. Planned Qty:</span>
-              <span style="color: #E2E8F0;">${planQty.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${unit}</span>
+              <span style="color: ${tSub};">${planQty.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${unit}</span>
             </div>
             <div style="display: flex; justify-content: space-between; gap: 12px; margin: 3px 0; font-family: monospace;">
-              <span style="color: #EF4444;">◆ Actual Achieved (%):</span>
-              <span style="font-weight: 700; color: #FFFFFF;">${actPct.toFixed(2)}%</span>
+              <span style="color: ${tAct};">◆ Actual Achieved (%):</span>
+              <span style="font-weight: 700; color: ${tText};">${actPct.toFixed(2)}%</span>
             </div>
-            <div style="display: flex; justify-content: space-between; gap: 12px; margin: 2px 0 5px 0; font-family: monospace; font-size: 10px; color: #94A3B8;">
+            <div style="display: flex; justify-content: space-between; gap: 12px; margin: 2px 0 5px 0; font-family: monospace; font-size: 10px; color: ${tMuted};">
               <span>  Cum. Actual Qty:</span>
-              <span style="color: #E2E8F0;">${actQty.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${unit}</span>
+              <span style="color: ${tSub};">${actQty.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${unit}</span>
             </div>
-            <div style="border-top: 1px solid rgba(255,255,255,0.12); padding-top: 4px; margin-top: 6px; display: flex; justify-content: space-between; gap: 12px; font-family: monospace; font-weight: 700;">
-              <span style="color: #94A3B8;">Variance:</span>
+            <div style="border-top: 1px solid ${tDiv}; padding-top: 4px; margin-top: 6px; display: flex; justify-content: space-between; gap: 12px; font-family: monospace; font-weight: 700;">
+              <span style="color: ${tMuted};">Variance:</span>
               <span style="color: ${varColor};">${varSign}${variance.toFixed(2)}%</span>
             </div>
           </div>
@@ -345,7 +387,7 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
       itemWidth: 8,
       itemHeight: 8,
       textStyle: {
-        color: '#94A3B8',
+        color: tk.legendText,
         fontSize: 11
       },
       data: ['Planned Target (%)', 'Actual Achieved (%)']
@@ -356,17 +398,17 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
       boundaryGap: false,
       axisLine: {
         lineStyle: {
-          color: 'rgba(255, 255, 255, 0.1)'
+          color: tk.axisLine
         }
       },
       axisTick: {
         alignWithLabel: true,
         lineStyle: {
-          color: 'rgba(255, 255, 255, 0.1)'
+          color: tk.axisLine
         }
       },
       axisLabel: {
-        color: '#94A3B8',
+        color: tk.axisLabel,
         fontSize: 10,
         fontFamily: 'monospace',
         interval: 'auto',
@@ -384,13 +426,13 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
       interval: yAxisMode === 'full' ? 20 : undefined,
       axisLabel: {
         formatter: '{value}%',
-        color: '#94A3B8',
+        color: tk.axisLabel,
         fontSize: 10,
         fontFamily: 'monospace'
       },
       splitLine: {
         lineStyle: {
-          color: 'rgba(255, 255, 255, 0.06)',
+          color: tk.splitLine,
           type: 'dashed'
         }
       }
@@ -487,9 +529,12 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
               <button
                 key={act}
                 onClick={() => setSelectedActivity(act)}
+                data-on-accent={isLight && selectedActivity === act ? 'true' : undefined}
                 className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                   selectedActivity === act
-                    ? 'bg-blue-500/25 text-blue-300 font-bold border border-blue-500/40 shadow-sm'
+                    ? isLight
+                      ? 'bg-[#07966D] text-white font-bold shadow-sm'
+                      : 'bg-blue-500/25 text-blue-300 font-bold border border-blue-500/40 shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -502,9 +547,12 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
           <div className="flex items-center bg-[#121316] p-0.5 rounded-lg border border-white/10 text-[11px] font-mono">
             <button
               onClick={() => setViewMode('daily')}
+              data-on-accent={isLight && viewMode === 'daily' ? 'true' : undefined}
               className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                 viewMode === 'daily'
-                  ? 'bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30'
+                  ? isLight
+                    ? 'bg-[#07966D] text-white font-bold shadow-xs'
+                    : 'bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30'
                   : 'text-slate-400 hover:text-white'
               }`}
               title={`Daily cumulative progression (${chartData.categories.length} Days)`}
@@ -513,9 +561,12 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
             </button>
             <button
               onClick={() => setViewMode('milestones')}
+              data-on-accent={isLight && viewMode === 'milestones' ? 'true' : undefined}
               className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                 viewMode === 'milestones'
-                  ? 'bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30'
+                  ? isLight
+                    ? 'bg-[#07966D] text-white font-bold shadow-xs'
+                    : 'bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30'
                   : 'text-slate-400 hover:text-white'
               }`}
               title="Contractual milestone points to date"
@@ -567,7 +618,11 @@ export const SCurveActualChart: React.FC<SCurveActualChartProps> = ({
               zIndex: 40
             }}
             onClick={(e) => e.stopPropagation()}
-            className="p-3.5 rounded-xl bg-[#0F1218]/95 border-2 border-blue-400 shadow-2xl backdrop-blur-md text-xs font-mono text-slate-200 min-w-[270px] shadow-blue-500/30 ring-2 ring-blue-500/20 pointer-events-auto"
+            className={`p-3.5 rounded-xl border-2 backdrop-blur-md text-xs font-mono min-w-[270px] pointer-events-auto ${
+              isLight
+                ? 'bg-white/98 border-[#07966D] text-[#17212B] shadow-xl'
+                : 'bg-[#0F1218]/95 border-blue-400 shadow-2xl text-slate-200 shadow-blue-500/30 ring-2 ring-blue-500/20'
+            }`}
           >
             {/* Header: Date + Frozen Pill + Close Button */}
             <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-white/10 font-bold">

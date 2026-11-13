@@ -425,14 +425,14 @@ export async function fetchOrLoadStripChartDataset(): Promise<StripChartDataset>
 
     // 2. Fetch Source B: final_sheet.xlsx
     const finalUrls = [
-      '/data/Final_sheet_10-11-2026.xlsx',
       '/data/final_sheet.xlsx',
       '/data/Final_sheet.xlsx',
+      '/data/Final_sheet_10-11-2026.xlsx',
     ];
 
     for (const url of finalUrls) {
       try {
-        const resp = await fetch(url);
+        const resp = await fetch(`${url}?t=${Date.now()}`);
         if (resp.ok) {
           const buffer = await resp.arrayBuffer();
           finalWb = XLSX.read(buffer, { cellStyles: true });
@@ -454,6 +454,53 @@ export async function fetchOrLoadStripChartDataset(): Promise<StripChartDataset>
   // Authoritative fallback generated directly from reference workbooks
   cachedDataset = defaultStripData as unknown as StripChartDataset;
   return cachedDataset;
+}
+
+const STRIP_MONTH_MAP: Record<string, string> = {
+  jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+  jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12'
+};
+
+/**
+ * Normalize 'DD-Mon-YYYY', 'DD.MM.YYYY', or 'YYYY-MM-DD' into 'YYYY-MM-DD'.
+ */
+export function parseStripDateToIso(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  const trimmed = dateStr.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  if (/^\d{2}\.\d{2}\.\d{4}$/.test(trimmed)) {
+    const [d, m, y] = trimmed.split('.');
+    return `${y}-${m}-${d}`;
+  }
+  const dashParts = trimmed.split('-');
+  if (dashParts.length === 3 && STRIP_MONTH_MAP[dashParts[1].toLowerCase()]) {
+    return `${dashParts[2]}-${STRIP_MONTH_MAP[dashParts[1].toLowerCase()]}-${dashParts[0].padStart(2, '0')}`;
+  }
+  return trimmed;
+}
+
+/**
+ * Matches a strip-chart log date against 'all', a single date, or encoded 'range:<start>|<end>'.
+ */
+export function stripDateMatchesSelection(
+  logDate: string | null | undefined,
+  selectedDate: string | null | undefined
+): boolean {
+  if (!selectedDate || selectedDate === 'all') return true;
+  if (selectedDate.startsWith('range:')) {
+    const [rawStart, rawEnd] = selectedDate.slice(6).split('|');
+    const logIso = parseStripDateToIso(logDate);
+    const sIso = parseStripDateToIso(rawStart);
+    const eIso = parseStripDateToIso(rawEnd);
+    if (!logIso || !sIso || !eIso) return true;
+    const minIso = sIso <= eIso ? sIso : eIso;
+    const maxIso = sIso <= eIso ? eIso : sIso;
+    return logIso >= minIso && logIso <= maxIso;
+  }
+  if (logDate === selectedDate) return true;
+  const logIso = parseStripDateToIso(logDate);
+  const selIso = parseStripDateToIso(selectedDate);
+  return Boolean(logIso && selIso && logIso === selIso);
 }
 
 export function computeSubFills(
@@ -488,7 +535,7 @@ export function computeSubFills(
   const activeLogs = logs.filter(l => {
     if (l.mappedActivityId !== activityId) return false;
     if (l.side !== 'BHS' && l.side !== side) return false;
-    if (selectedDate && selectedDate !== 'all' && l.date !== selectedDate) return false;
+    if (!stripDateMatchesSelection(l.date, selectedDate)) return false;
     return Math.max(l.fromM, interval.fromM) < Math.min(l.toM, interval.toM);
   });
 

@@ -16,6 +16,7 @@ import {
   STRIP_ACTIVITIES
 } from '../../utils/gisUtils';
 import { formatChainagePlus, formatChainageKm, normalizeChainage } from '../../utils/excelParser';
+import { useTheme } from '../../context/ThemeContext';
 import {
   Compass,
   Eye,
@@ -100,6 +101,8 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
   activeReportingDate
 }) => {
   // Container & Canvas references
+  const { isLight } = useTheme();
+  const isLightRef = useRef(isLight);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -117,6 +120,15 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
 
   // Coordinate scaling: 1 km = 100 Three.js units (1m = 0.1 units)
   const SCALE_PER_KM = 100;
+
+  // Dynamically update 3D scene sky/fog when Dark/Light theme changes without rebuilding WebGL
+  useEffect(() => {
+    isLightRef.current = isLight;
+    if (!sceneRef.current) return;
+    const bgHex = isLight ? 0xedf2f7 : 0x0b0c0e;
+    sceneRef.current.background = new THREE.Color(bgHex);
+    sceneRef.current.fog = new THREE.FogExp2(bgHex, 0.00015);
+  }, [isLight]);
   const corridorLengthKm = maxChainage - minChainage || 15;
   const corridorLengthWorld = corridorLengthKm * SCALE_PER_KM;
 
@@ -305,8 +317,9 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
 
     // SCENE
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b0c0e);
-    scene.fog = new THREE.FogExp2(0x0b0c0e, 0.00015);
+    const bgHex = isLightRef.current ? 0xedf2f7 : 0x0b0c0e;
+    scene.background = new THREE.Color(bgHex);
+    scene.fog = new THREE.FogExp2(bgHex, 0.00015);
     sceneRef.current = scene;
 
     // CAMERA
@@ -1090,9 +1103,12 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
+                  data-on-accent={isLight && isActive ? 'true' : undefined}
                   className={`px-3 py-1 rounded-lg font-medium transition-all duration-150 cursor-pointer ${
                     isActive
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/30'
+                      ? isLight
+                        ? 'bg-[#07966D] text-white font-bold shadow-sm'
+                        : 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/30'
                       : 'text-slate-300 hover:text-white hover:bg-white/[0.04]'
                   }`}
                 >
@@ -1557,9 +1573,12 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
                         <button
                           key={act.id}
                           onClick={() => handleActivityChange(act.id)}
+                          data-on-accent={isLight && isTabActive ? 'true' : undefined}
                           className={`px-2 py-1 text-[11px] font-medium rounded-lg transition-all cursor-pointer ${
                             isTabActive
-                              ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
+                              ? isLight
+                                ? 'bg-[#07966D] text-white font-bold shadow-sm'
+                                : 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
                               : 'text-slate-300 hover:text-white hover:bg-white/5'
                           }`}
                         >

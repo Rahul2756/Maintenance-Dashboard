@@ -2156,7 +2156,7 @@ export function parseFinalSheetBuffer(buffer: ArrayBuffer): {
   };
 
   const metadata: DPRMetadata = {
-    projectName: 'Muzaffarnagar - Haridwar Section, NH-334 (KM130+560 TO KM 206+220)',
+    projectName: 'Muzaffarnagar - Haridwar Section, NH-334 (KM 130+560 TO KM 206+220)',
     contractor: 'M/s Atcons India Limited',
     concessionaire: 'NHIT Southern Projects private limited',
     pm: 'National Highways InvIT Project Managers Pvt. Ltd.',
@@ -2257,7 +2257,8 @@ export function computeBOQProgressMetrics(
   baseline: ProjectBaseline,
   selectedDate: string,
   sideFilter: HighwaySide = 'Both',
-  laneFilter: string = 'All'
+  laneFilter: string = 'All',
+  fromDate?: string
 ): {
   milling: BOQCardMetric;
   tackcoat: BOQCardMetric;
@@ -2276,6 +2277,8 @@ export function computeBOQProgressMetrics(
   warnings: string[];
 } {
   const selectedIso = serialToIsoDate(selectedDate);
+  const fromIsoRaw = fromDate ? serialToIsoDate(fromDate) : selectedIso;
+  const fromIso = fromIsoRaw && selectedIso && fromIsoRaw <= selectedIso ? fromIsoRaw : selectedIso;
   const warnings: string[] = [];
 
   // Determine side targets
@@ -2304,9 +2307,12 @@ export function computeBOQProgressMetrics(
     const actRows = actualRows.filter(r => r.activity === act);
     const sideMatchingRows = actRows.filter(r => (sideFilter === 'Both' || sideFilter === 'ALL' || sideFilter === 'BHS') || r.side === sideFilter);
 
-    // Daily rows: exactly on selected date
-    const dailyRows = sideMatchingRows.filter(r => serialToIsoDate(r.date) === selectedIso);
-    // Cumulative rows: up to and including selected date
+    // Daily / Period rows: inclusively between From Date and To Date
+    const dailyRows = sideMatchingRows.filter(r => {
+      const rIso = serialToIsoDate(r.date);
+      return rIso >= fromIso && rIso <= selectedIso;
+    });
+    // Cumulative rows: up to and including To Date
     const cumRows = sideMatchingRows.filter(r => serialToIsoDate(r.date) <= selectedIso);
 
     const achievedToday = dailyRows.reduce((sum, r) => sum + r.achievedToday, 0);
@@ -2877,12 +2883,12 @@ export async function loadDashboardData(): Promise<{
   dataQualityWarnings: string[];
 }> {
   try {
-    let res = await fetch(`/data/Final_sheet_10-11-2026.xlsx?t=${Date.now()}`);
-    if (!res.ok) {
-      res = await fetch(`/data/final_sheet.xlsx?t=${Date.now()}`);
-    }
+    let res = await fetch(`/data/final_sheet.xlsx?t=${Date.now()}`);
     if (!res.ok) {
       res = await fetch(`/data/Final_sheet.xlsx?t=${Date.now()}`);
+    }
+    if (!res.ok) {
+      res = await fetch(`/data/Final_sheet_10-11-2026.xlsx?t=${Date.now()}`);
     }
     if (!res.ok) {
       throw new Error(`Critical Error: 'final_sheet.xlsx' could not be fetched (HTTP ${res.status}).`);

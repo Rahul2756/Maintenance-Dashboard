@@ -14,6 +14,7 @@ import {
   STRIP_ACTIVITIES
 } from '../../utils/gisUtils';
 import { useFilters } from '../../context/FilterContext';
+import { useTheme } from '../../context/ThemeContext';
 import { STATE_BOUNDARIES } from '../../utils/stateFilterUtils';
 import { GISMapCanvas } from './GISMapCanvas';
 import { RoadInspectionPanel } from './RoadInspectionPanel';
@@ -74,6 +75,7 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
 
   // Read Global State Filter
   const { filters } = useFilters();
+  const { isLight } = useTheme();
   const selectedState = filters.state || 'All';
   const stateBoundary = STATE_BOUNDARIES[selectedState];
 
@@ -374,9 +376,12 @@ export const GeographicalGISModule: React.FC<GeographicalGISModuleProps> = ({
 
           <button
             onClick={() => setMapMode('3d')}
+            data-on-accent={mapMode === '3d' ? 'true' : undefined}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer font-semibold ${
               mapMode === '3d'
-                ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
+                ? isLight
+                  ? 'bg-[#07966D] text-white font-bold shadow-sm'
+                  : 'bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
                 : 'text-slate-400 hover:text-white'
             }`}
           >

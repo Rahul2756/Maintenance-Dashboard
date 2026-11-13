@@ -295,7 +295,7 @@ export const StripMapGrid: React.FC<StripMapGridProps> = ({
       <div className="px-4 py-2.5 bg-[#0A0E14] border-b border-cyan-500/20 flex flex-wrap items-center justify-between gap-3">
         {/* Left: Date Selector (Overall vs Daily DPR View) */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Overall vs Daily View Mode Toggle */}
+          {/* Overall vs Daily / Range View Mode Toggle */}
           <div className="flex items-center bg-[#06090D] p-0.5 rounded-lg border border-white/10 text-xs">
             <button
               type="button"
@@ -310,11 +310,11 @@ export const StripMapGrid: React.FC<StripMapGridProps> = ({
             <button
               type="button"
               onClick={() => {
-                if (selectedDate === 'all' || !selectedDate) {
+                if (selectedDate === 'all' || !selectedDate || selectedDate.startsWith('range:')) {
                   onSelectDate(availableDates[availableDates.length - 1] || '01-Nov-2026');
                 }
               }}
-              className={`px-3 py-1 rounded-md transition-all cursor-pointer font-semibold ${selectedDate !== 'all' && selectedDate !== null
+              className={`px-3 py-1 rounded-md transition-all cursor-pointer font-semibold ${selectedDate !== 'all' && selectedDate !== null && !selectedDate.startsWith('range:')
                 ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 shadow-sm'
                 : 'text-slate-400 hover:text-white'
                 }`}
@@ -323,8 +323,15 @@ export const StripMapGrid: React.FC<StripMapGridProps> = ({
             </button>
           </div>
 
+          {selectedDate?.startsWith('range:') && (
+            <div className="flex items-center gap-2 bg-[#0E1520] border border-cyan-500/30 rounded-lg px-2.5 py-1 text-xs text-cyan-200 font-mono font-bold">
+              <Calendar className="w-3 h-3 text-cyan-400" />
+              <span>Range: {selectedDate.slice(6).replace('|', ' → ')}</span>
+            </div>
+          )}
+
           {/* Daily Date Stepper & Dropdown (When in Daily DPR View) */}
-          {selectedDate !== 'all' && selectedDate !== null && (
+          {selectedDate !== 'all' && selectedDate !== null && !selectedDate.startsWith('range:') && (
             <div className="flex items-center gap-1 bg-[#0E1520] border border-cyan-500/30 rounded-lg p-0.5">
               <button
                 type="button"

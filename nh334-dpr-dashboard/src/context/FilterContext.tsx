@@ -56,6 +56,34 @@ export const CHAINAGE_PRESETS: Record<'All' | 'DPR' | 'Sec1' | 'Sec2', ChainageP
   }
 };
 
+/**
+ * Convert DD.MM.YYYY (or YYYY-MM-DD) safely into lexicographically comparable YYYY-MM-DD.
+ */
+export function dmyToIsoSafe(dateStr: string): string {
+  if (!dateStr) return '';
+  const trimmed = dateStr.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  const parts = trimmed.split('.');
+  if (parts.length === 3) {
+    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+  }
+  return trimmed;
+}
+
+/**
+ * Inclusive check whether a DD.MM.YYYY date string falls within [range.start .. range.end].
+ */
+export function isDateInRange(dateStr: string, range?: { start: string; end: string } | null): boolean {
+  if (!range || !range.start || !range.end) return true;
+  const rIso = dmyToIsoSafe(dateStr);
+  const sIso = dmyToIsoSafe(range.start);
+  const eIso = dmyToIsoSafe(range.end);
+  if (!rIso || !sIso || !eIso) return true;
+  const minIso = sIso <= eIso ? sIso : eIso;
+  const maxIso = sIso <= eIso ? eIso : sIso;
+  return rIso >= minIso && rIso <= maxIso;
+}
+
 export const DEFAULT_FILTER_STATE: GlobalFilterState = {
   side: 'Both',
   state: 'All',
@@ -64,7 +92,7 @@ export const DEFAULT_FILTER_STATE: GlobalFilterState = {
   linearStretch: 'All',
   selectedActivities: ['Milling', 'Tackcoat', 'DBM', 'BC'],
   dateRange: { start: '14.10.2026', end: '01.11.2026' },
-  selectedSingleDate: '01.11.2026',
+  selectedSingleDate: null,
   chainageScope: 'DPR',
   chainageBounds: { from: 169.000, to: 206.220 },
   anomaliesOnly: false,
@@ -114,6 +142,9 @@ interface FilterContextType {
   scope: 'All' | 'DPR' | 'Sec1' | 'Sec2';
   setScope: (scope: 'All' | 'DPR' | 'Sec1' | 'Sec2') => void;
   dateRange: { start: string; end: string };
+  fullDateBounds: { start: string; end: string } | null;
+  setFullDateBounds: (bounds: { start: string; end: string }) => void;
+  isFullDateRange: boolean;
   anomalyFilter: string;
   setAnomalyFilter: (val: string | boolean) => void;
   activeTab: ModuleTab;
@@ -203,14 +234,20 @@ export const FilterProvider: React.FC<{
   }, []);
 
   const setDateRange = useCallback((range: { start: string; end: string }) => {
-    setFilters(prev => ({ ...prev, dateRange: range, selectedSingleDate: null }));
+    const startIso = dmyToIsoSafe(range.start);
+    const endIso = dmyToIsoSafe(range.end);
+    const normalized =
+      startIso && endIso && endIso < startIso
+        ? { start: range.start, end: range.start }
+        : range;
+    setFilters(prev => ({ ...prev, dateRange: normalized, selectedSingleDate: null }));
   }, []);
 
   const setSelectedSingleDate = useCallback((date: string | null) => {
     setFilters(prev => ({
       ...prev,
       selectedSingleDate: date,
-      dateRange: date ? { start: prev.dateRange.start, end: date } : prev.dateRange
+      dateRange: date ? { start: date, end: date } : prev.dateRange
     }));
   }, []);
 
@@ -271,7 +308,7 @@ export const FilterProvider: React.FC<{
         start: earliest,
         end: latest
       },
-      selectedSingleDate: latest,
+      selectedSingleDate: null,
       chainageScope: 'DPR',
       chainageBounds: { from: 169.000, to: 206.220 },
       anomaliesOnly: false,
@@ -316,7 +353,24 @@ export const FilterProvider: React.FC<{
     setFilters(prev => ({ ...prev }));
   }, []);
 
+  const [fullDateBounds, setFullDateBoundsState] = useState<{ start: string; end: string } | null>(null);
+
+  const setFullDateBounds = useCallback((bounds: { start: string; end: string }) => {
+    setFullDateBoundsState(prev =>
+      prev && prev.start === bounds.start && prev.end === bounds.end ? prev : bounds
+    );
+  }, []);
+
   const selectedDate = filters.selectedSingleDate || filters.dateRange.end || '01.11.2026';
+
+  const isFullDateRange = useMemo(() => {
+    if (filters.selectedSingleDate) return false;
+    if (!fullDateBounds) return true;
+    return (
+      dmyToIsoSafe(filters.dateRange.start) === dmyToIsoSafe(fullDateBounds.start) &&
+      dmyToIsoSafe(filters.dateRange.end) === dmyToIsoSafe(fullDateBounds.end)
+    );
+  }, [filters.selectedSingleDate, filters.dateRange.start, filters.dateRange.end, fullDateBounds]);
 
   const value = useMemo(
     () => ({
@@ -354,6 +408,9 @@ export const FilterProvider: React.FC<{
       scope: filters.chainageScope,
       setScope: setChainageScope,
       dateRange: filters.dateRange,
+      fullDateBounds,
+      setFullDateBounds,
+      isFullDateRange,
       anomalyFilter: filters.anomaliesOnly ? 'Anomalies' : 'All',
       setAnomalyFilter: (val: string | boolean) => {
         setAnomaliesOnly(typeof val === 'string' ? val === 'Anomalies' : Boolean(val));
@@ -406,23 +463,11 @@ export const useFilterContext = useFilters;
  * High-performance row matcher adhering to unified global filter state
  */
 export function rowMatchesGlobalFilter(row: ActualDPRRow, filters: GlobalFilterState): boolean {
-  // 1. Single Date filter
+  // 1. Single Date or Date Range filter (both endpoints inclusive)
   if (filters.selectedSingleDate) {
-    if (row.date !== filters.selectedSingleDate) return false;
+    if (dmyToIsoSafe(row.date) !== dmyToIsoSafe(filters.selectedSingleDate)) return false;
   } else {
-    // Date range filter
-    const parseDMY = (s: string) => {
-      const parts = s.split('.').map(Number);
-      return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
-    };
-    try {
-      const rTime = parseDMY(row.date);
-      const sTime = parseDMY(filters.dateRange.start);
-      const eTime = parseDMY(filters.dateRange.end);
-      if (rTime < sTime || rTime > eTime) return false;
-    } catch {
-      // fallback
-    }
+    if (!isDateInRange(row.date, filters.dateRange)) return false;
   }
 
   // 2. Side filter ('Both' accepts all, otherwise must match 'LHS' or 'RHS')

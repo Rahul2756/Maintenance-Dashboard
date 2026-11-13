@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route } from 'lucide-react';
 import { StripChartDataset } from '../../types/stripChart';
+import { useTheme } from '../../context/ThemeContext';
 
 interface StripMapHeaderProps {
   dataset: StripChartDataset;
@@ -8,16 +9,23 @@ interface StripMapHeaderProps {
 
 export const StripMapHeader: React.FC<StripMapHeaderProps> = ({ dataset }) => {
   const { metadata } = dataset;
+  const { isLight } = useTheme();
 
   return (
     <div className="w-full relative overflow-hidden bg-[#0A0D12] border border-cyan-500/20 rounded-2xl shadow-2xl select-none">
       {/* Right Highway Graphic with Gradient Dissolve Mask */}
       <div className="absolute right-0 top-0 bottom-0 w-[55%] pointer-events-none overflow-hidden z-0 hidden md:block">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0D12] via-[#0A0D12]/70 to-transparent z-10" />
+        <div
+          className={`absolute inset-0 z-10 ${
+            isLight
+              ? 'bg-gradient-to-r from-white via-white/85 to-white/20'
+              : 'bg-gradient-to-r from-[#0A0D12] via-[#0A0D12]/70 to-transparent'
+          }`}
+        />
         <img
           src="/images/highway-header-banner.jpg"
           alt="NH-334 Highway Corridor"
-          className="w-full h-full object-cover object-right opacity-45"
+          className={`w-full h-full object-cover object-right ${isLight ? 'opacity-70' : 'opacity-45'}`}
         />
       </div>
 
@@ -34,7 +42,7 @@ export const StripMapHeader: React.FC<StripMapHeaderProps> = ({ dataset }) => {
           {/* Project Title & Corridor Information */}
           <div className="space-y-0.5">
             <div className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-teal-400 font-bold uppercase flex items-center gap-2">
-              <span>PROJECT MONITORING DASHBOARD</span>
+              <span>MAJOR MAINTENANCE DASHBOARD</span>
             </div>
             <h1 className="text-lg sm:text-2xl font-black text-white tracking-tight">
               NH-334 Linear Highway Progression Grid
