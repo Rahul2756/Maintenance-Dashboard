@@ -55,6 +55,7 @@ import { LinearChainageStrip } from './components/dashboard/LinearChainageStrip'
 import { Highway3DDigitalTwin } from './components/dashboard/Highway3DDigitalTwin';
 import { GeographicalGISModule } from './components/gis/GeographicalGISModule';
 import { StripChartDataset } from './types/stripChart';
+import { fetchOrLoadStripChartDataset } from './utils/stripChartExcelParser';
 import { DPRDataTable } from './components/dashboard/DPRDataTable';
 import { DailyQuickInsight } from './components/dashboard/DailyQuickInsight';
 import { ProjectOverviewModule } from './components/dashboard/ProjectOverviewModule';
@@ -196,6 +197,15 @@ function DashboardContent() {
         }
       } catch (wpErr) {
         console.warn('Could not load dynamic work program planned targets:', wpErr);
+      }
+
+      try {
+        const stripData = await fetchOrLoadStripChartDataset();
+        if (stripData) {
+          setSharedStripDataset(stripData);
+        }
+      } catch (sErr) {
+        console.warn('Could not load strip chart dataset in App:', sErr);
       }
     } catch (e) {
       console.error('Failed to load final_sheet.xlsx, checking stored data:', e);

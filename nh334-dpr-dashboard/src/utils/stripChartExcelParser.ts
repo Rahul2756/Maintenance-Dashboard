@@ -276,6 +276,7 @@ export function parseStripChartWorkbook(wb: XLSX.WorkBook, finalWb?: XLSX.WorkBo
         const unitCell = wsLog[XLSX.utils.encode_cell({ r, c: 7 })];
         const lenCell = wsLog[XLSX.utils.encode_cell({ r, c: 11 })];
         const achCell = wsLog[XLSX.utils.encode_cell({ r, c: 14 })];
+        const cumCell = wsLog[XLSX.utils.encode_cell({ r, c: 15 })];
 
         if (!fromCell && !toCell && !actCell && !dateCell) continue;
         if (!fromCell && !toCell) continue;
@@ -344,6 +345,7 @@ export function parseStripChartWorkbook(wb: XLSX.WorkBook, finalWb?: XLSX.WorkBo
           side,
           lane,
           achievedQty: achCell ? Number(achCell.v) : 0,
+          cumulativeQty: cumCell && !isNaN(Number(cumCell.v)) ? Number(cumCell.v) : undefined,
           unit: unitCell ? String(unitCell.v).trim() : '',
           hasConflict,
           conflictType,

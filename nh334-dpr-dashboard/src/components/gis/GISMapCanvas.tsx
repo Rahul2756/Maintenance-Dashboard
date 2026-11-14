@@ -34,6 +34,8 @@ interface GISMapCanvasProps {
   colorMode?: 'status' | 'activity';
   stateFilter?: StateFilter;
   selectedWorkRecord?: ActualDPRRow | null;
+  isHighlightingDeviations?: boolean;
+  isLight?: boolean;
 }
 
 // Tile URL generators
@@ -81,7 +83,9 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
   onPegmanDrop,
   colorMode = 'status',
   stateFilter = 'All',
-  selectedWorkRecord = null
+  selectedWorkRecord = null,
+  isHighlightingDeviations = false,
+  isLight = false
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -356,40 +360,52 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
 
       const offsetDist = isDual ? (seg.side === 'LHS' ? -3.5 : seg.side === 'RHS' ? 3.5 : 0) : 0;
       const pts = computeOffsetPoints(seg.coordinates, offsetDist);
+      if (pts.length < 2) return;
 
+      // Dim non-deviations when user is filtering/highlighting deviations
+      if (isHighlightingDeviations && !seg.isDeviation) {
+        ctx.globalAlpha = 0.22;
+      } else {
+        ctx.globalAlpha = 1.0;
+      }
+
+      // 1. Single Primary Fill Stroke: latest successfully completed activity colour,
+      // Solid Red (#EF4444) if sequence deviation, or Silver Grey (#CBD5E1) if planned
       ctx.beginPath();
       pts.forEach((p, idx) => {
         if (idx === 0) ctx.moveTo(p[0], p[1]);
         else ctx.lineTo(p[0], p[1]);
       });
 
-      ctx.strokeStyle = seg.color || '#10B981';
+      ctx.strokeStyle = seg.color || '#CBD5E1';
       ctx.lineWidth = zoom > 12 ? (isDual ? 5 : 7) : (isDual ? 3.5 : 5);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.stroke();
 
+      ctx.globalAlpha = 1.0; // reset
+
       // Render status labels directly on road at suitable zoom levels
       if (zoom >= 12.2 && pts.length >= 2) {
-        // Calculate total screen length of this segment
         let totalLen = 0;
         for (let i = 1; i < pts.length; i++) {
           totalLen += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
         }
 
-        // Only draw if segment has enough visual length on screen
         if (totalLen >= 30) {
           const midIdx = Math.floor(pts.length / 2);
           const midPt = pts[midIdx];
 
-          // Check if midPt is inside visible canvas area
           if (midPt[0] >= -50 && midPt[0] <= width + 50 && midPt[1] >= -50 && midPt[1] <= height + 50) {
             let badgeText = '';
-            if (seg.statusCategory === 'completed') badgeText = 'COMPLETED';
-            else if (seg.statusCategory === 'dps') badgeText = 'DPS';
-            else if (seg.statusCategory === 'under_construction') badgeText = 'U/C';
-            else if (seg.statusCategory === 'himalayan') badgeText = 'HIMALAYAN';
-            else if (seg.statusCategory === 'eligible_scope') badgeText = 'REMAINING';
+            if (seg.isDeviation) badgeText = 'DEVIATION';
+            else if (seg.isInProgress && seg.inProgressStageName) badgeText = `${seg.inProgressStageName.toUpperCase()} (IN PROG)`;
+            else if (seg.latestStage === 5) badgeText = 'BC (STAGE 5)';
+            else if (seg.latestStage === 4) badgeText = 'TACK BC';
+            else if (seg.latestStage === 3) badgeText = 'DBM';
+            else if (seg.latestStage === 2) badgeText = 'TACK DBM';
+            else if (seg.latestStage === 1) badgeText = 'MILLING';
+            else badgeText = 'PLANNED';
 
             if (badgeText) {
               ctx.font = 'bold 9px monospace';
@@ -397,16 +413,17 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
               const pillW = textWidth + 8;
               const pillH = 14;
 
-              ctx.fillStyle = 'rgba(10, 14, 20, 0.90)';
+              ctx.fillStyle = isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(10, 14, 20, 0.90)';
               ctx.beginPath();
               ctx.roundRect(midPt[0] - pillW / 2, midPt[1] - pillH / 2, pillW, pillH, 3);
               ctx.fill();
 
-              ctx.strokeStyle = seg.color;
+              const badgeColor = seg.isDeviation ? '#EF4444' : (seg.isInProgress ? '#06B6D4' : (seg.color || '#64748B'));
+              ctx.strokeStyle = badgeColor;
               ctx.lineWidth = 1;
               ctx.stroke();
 
-              ctx.fillStyle = seg.color;
+              ctx.fillStyle = badgeColor;
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               ctx.fillText(badgeText, midPt[0], midPt[1]);
@@ -604,7 +621,7 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
         }
       }
     }
-  }, [center, zoom, mode, segments, selectedChainageM, milestones, selectedWorkRecord]);
+  }, [center, zoom, mode, segments, selectedChainageM, milestones, selectedWorkRecord, isHighlightingDeviations, isLight]);
 
   // Mouse pan handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -851,28 +868,39 @@ export const GISMapCanvas: React.FC<GISMapCanvasProps> = ({
         </button>
       </div>
 
-      {/* Floating Bottom Legend Overlay */}
-      <div className="absolute bottom-4 right-4 z-20 bg-[#12161D]/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 font-mono text-[11px] text-slate-300 shadow-xl flex items-center gap-3.5 flex-wrap">
-        <span className="text-slate-400 font-bold uppercase text-[10px]">Classification:</span>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
-          <span>Completed</span>
+      {/* Exclusive Construction Sequence Legend */}
+      <div className={`absolute bottom-4 right-4 z-20 backdrop-blur-md px-3.5 py-2.5 rounded-xl border font-mono text-[11px] shadow-xl flex items-center gap-3.5 flex-wrap max-w-[85vw] ${
+        isLight ? 'bg-white/95 border-slate-200 text-slate-800' : 'bg-[#12161D]/90 border-white/10 text-slate-300'
+      }`}>
+        <span className="text-slate-400 font-bold uppercase text-[10px]">Legend:</span>
+        <div className="flex items-center gap-1.5" title="Milling (#64748B)">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#64748B' }} />
+          <span>Milling</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6]" />
-          <span>DPS</span>
+        <div className="flex items-center gap-1.5" title="Tack Coat (DBM) (#F59E0B)">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#F59E0B' }} />
+          <span>Tack Coat (DBM)</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#D97706]" />
-          <span>Under Construction</span>
+        <div className="flex items-center gap-1.5" title="DBM (#2563EB)">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#2563EB' }} />
+          <span>DBM</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#EC4899]" />
-          <span>Himalayan</span>
+        <div className="flex items-center gap-1.5" title="Tack Coat (BC) (#8B5CF6)">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#8B5CF6' }} />
+          <span>Tack Coat (BC)</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#0284C7]" />
-          <span>Remaining Scope</span>
+        <div className="flex items-center gap-1.5" title="BC (#16A34A)">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#16A34A' }} />
+          <span>BC</span>
+        </div>
+        <span className="text-slate-500">|</span>
+        <div className="flex items-center gap-1.5" title="Sequence Deviation (#EF4444) - Solid Red">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#EF4444' }} />
+          <span className="text-rose-500 font-semibold">Sequence Deviation</span>
+        </div>
+        <div className="flex items-center gap-1.5" title="Planned (#CBD5E1) - Silver Grey">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#CBD5E1' }} />
+          <span>Planned</span>
         </div>
       </div>
 

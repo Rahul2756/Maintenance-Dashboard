@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, useImperativeHandle, forwardRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {
@@ -42,11 +42,27 @@ import {
   Gauge,
   Sliders,
   Sparkles,
-  Info
+  Info,
+  MousePointer,
+  Plus,
+  Minus
 } from 'lucide-react';
 
 export type ViewMode = 'Overall' | 'Activity' | 'Planned' | 'Actual' | 'Delayed' | 'Remaining';
 export type CameraMode = '3D' | 'Plan' | 'Driver';
+
+export interface Highway3DDigitalTwinHandle {
+  smoothFlyToChainage: (km: number) => void;
+  jumpCameraToChainage: (km: number) => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  resetCamera: () => void;
+  setCameraMode: (mode: CameraMode) => void;
+  toggleFlyover: () => void;
+  searchToChainage: (queryStr: string) => void;
+  togglePlayTour: () => void;
+  setTourSpeed: (speed: number) => void;
+}
 
 export interface Highway3DDigitalTwinProps {
   actualRows: ActualDPRRow[];
@@ -65,6 +81,22 @@ export interface Highway3DDigitalTwinProps {
   onActivityChange?: (activity: string) => void;
   onSideChange?: (side: HighwaySide) => void;
   activeReportingDate?: string;
+  // Enhanced props for Draft A unified GIS architecture:
+  cameraMode?: CameraMode;
+  onCameraModeChange?: (mode: CameraMode) => void;
+  isFlyoverActive?: boolean;
+  onToggleFlyover?: () => void;
+  currentTourChainage?: number;
+  onTourChainageChange?: (km: number) => void;
+  isPlayingTour?: boolean;
+  onTogglePlayTour?: () => void;
+  tourSpeed?: number;
+  selectedSegment?: RoadSegmentData | null;
+  onSelectSegment?: (seg: RoadSegmentData | null) => void;
+  targetChainage?: number | null;
+  activeTool?: 'select' | 'orbit';
+  onActiveToolChange?: (tool: 'select' | 'orbit') => void;
+  isHighlightingDeviations?: boolean;
 }
 
 // Normalized road segment type aliased to Highway3DProgressSegment
@@ -82,7 +114,7 @@ interface ProjectedMarker {
   visible: boolean;
 }
 
-export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
+export const Highway3DDigitalTwin = forwardRef<Highway3DDigitalTwinHandle, Highway3DDigitalTwinProps>(({
   actualRows,
   plannedRecords,
   selectedRow,
@@ -98,8 +130,23 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
   selectedActivityFilter: externalActivityFilter,
   onActivityChange,
   onSideChange,
-  activeReportingDate
-}) => {
+  activeReportingDate,
+  cameraMode: propCameraMode,
+  onCameraModeChange,
+  isFlyoverActive: propIsFlyoverActive,
+  onToggleFlyover,
+  currentTourChainage: propCurrentTourChainage,
+  onTourChainageChange,
+  isPlayingTour: propIsPlayingTour,
+  onTogglePlayTour,
+  tourSpeed: propTourSpeed,
+  selectedSegment: propSelectedSegment,
+  onSelectSegment,
+  targetChainage: propTargetChainage,
+  activeTool: propActiveTool = 'select',
+  onActiveToolChange,
+  isHighlightingDeviations = false
+}, ref) => {
   // Container & Canvas references
   const { isLight } = useTheme();
   const isLightRef = useRef(isLight);
@@ -157,9 +204,10 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
     if (onActivityChange) onActivityChange(actId);
   };
 
-  const [cameraMode, setCameraMode] = useState<CameraMode>('3D');
+  const [cameraMode, setCameraMode] = useState<CameraMode>(propCameraMode || '3D');
+  const [activeTool, setActiveTool] = useState<'select' | 'orbit'>(propActiveTool || 'select');
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isFlyoverActive, setIsFlyoverActive] = useState(false);
+  const [isFlyoverActive, setIsFlyoverActive] = useState(propIsFlyoverActive || false);
   const flyoverProgressRef = useRef(0);
   const flyoverSpeed = 1;
 
@@ -173,16 +221,75 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
 
   // Hover and selection state
   const [hoveredSegment, setHoveredSegment] = useState<RoadSegmentData | null>(null);
-  const [selectedSegment, setSelectedSegment] = useState<RoadSegmentData | null>(null);
+  const [selectedSegment, setSelectedSegment] = useState<RoadSegmentData | null>(propSelectedSegment || null);
   const [inspectorActiveActivity, setInspectorActiveActivity] = useState<string>('milling');
 
   // Chainage Tour Playback state (moves slowly from starting chainage to ending chainage)
-  const [currentTourChainage, setCurrentTourChainage] = useState<number>(minChainage);
-  const currentTourChainageRef = useRef<number>(minChainage);
-  const [isPlayingChainageTour, setIsPlayingChainageTour] = useState<boolean>(false);
-  const isPlayingChainageTourRef = useRef<boolean>(false);
-  const [chainageTourSpeed, setChainageTourSpeed] = useState<number>(1); // 1x, 1.5x, 2x, 2.5x, 3x
-  const chainageTourSpeedRef = useRef<number>(1);
+  const [currentTourChainage, setCurrentTourChainage] = useState<number>(propCurrentTourChainage || minChainage);
+  const currentTourChainageRef = useRef<number>(propCurrentTourChainage || minChainage);
+  const [isPlayingChainageTour, setIsPlayingChainageTour] = useState<boolean>(propIsPlayingTour || false);
+  const isPlayingChainageTourRef = useRef<boolean>(propIsPlayingTour || false);
+  const [chainageTourSpeed, setChainageTourSpeed] = useState<number>(propTourSpeed || 1); // 1x, 1.5x, 2x, 2.5x, 3x
+  const chainageTourSpeedRef = useRef<number>(propTourSpeed || 1);
+
+  // Synchronize incoming props
+  useEffect(() => {
+    if (propCameraMode && propCameraMode !== cameraMode) {
+      setCameraViewMode(propCameraMode);
+    }
+  }, [propCameraMode]);
+
+  useEffect(() => {
+    if (propActiveTool) {
+      setActiveTool(propActiveTool);
+    }
+  }, [propActiveTool]);
+
+  useEffect(() => {
+    if (propIsFlyoverActive !== undefined && propIsFlyoverActive !== isFlyoverActive) {
+      setIsFlyoverActive(propIsFlyoverActive);
+    }
+  }, [propIsFlyoverActive]);
+
+  useEffect(() => {
+    if (
+      propCurrentTourChainage !== undefined &&
+      Math.abs(propCurrentTourChainage - currentTourChainageRef.current) > 0.05
+    ) {
+      currentTourChainageRef.current = propCurrentTourChainage;
+      setCurrentTourChainage(propCurrentTourChainage);
+      jumpCameraToChainage(propCurrentTourChainage);
+    }
+  }, [propCurrentTourChainage]);
+
+  useEffect(() => {
+    if (propIsPlayingTour !== undefined && propIsPlayingTour !== isPlayingChainageTourRef.current) {
+      setIsPlayingChainageTour(propIsPlayingTour);
+      isPlayingChainageTourRef.current = propIsPlayingTour;
+    }
+  }, [propIsPlayingTour]);
+
+  useEffect(() => {
+    if (propTourSpeed !== undefined) {
+      setChainageTourSpeed(propTourSpeed);
+      chainageTourSpeedRef.current = propTourSpeed;
+    }
+  }, [propTourSpeed]);
+
+  useEffect(() => {
+    if (propSelectedSegment !== undefined) {
+      setSelectedSegment(propSelectedSegment);
+      if (propSelectedSegment) {
+        setInspectorActiveActivity(propSelectedSegment.activity);
+      }
+    }
+  }, [propSelectedSegment]);
+
+  useEffect(() => {
+    if (propTargetChainage !== undefined && propTargetChainage !== null) {
+      searchToChainage(formatChainagePlus(propTargetChainage));
+    }
+  }, [propTargetChainage]);
 
   // Sync refs when state changes
   useEffect(() => {
@@ -199,18 +306,19 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
   // Current active date (all DPR execution data up to latest reporting date)
   const activeTimelineDate = activeReportingDate || availableDates[availableDates.length - 1] || '05.11.2026';
 
-  // 1. Process 3D Segments using dynamic Strip Chart data logic & planned records
+  // 1. Process 3D Segments using dynamic unified Construction Execution Sequence logic
   const roadSegments: RoadSegmentData[] = useMemo(() => {
     return buildHighway3DProgressSegments(
       actualRows,
       plannedRecords,
       stripDataset ?? null,
-      internalActivity,
+      'milling',
       sideFilter,
       activeTimelineDate,
-      kmToWorldX
+      kmToWorldX,
+      isLight
     );
-  }, [actualRows, plannedRecords, stripDataset, internalActivity, sideFilter, activeTimelineDate, kmToWorldX]);
+  }, [actualRows, plannedRecords, stripDataset, sideFilter, activeTimelineDate, kmToWorldX, isLight]);
 
   // Sync selectedSegment when external selectedRow prop changes
   useEffect(() => {
@@ -235,40 +343,13 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
       return { color: 0x000000, emissive: 0x000000, opacity: 0 };
     }
 
-    if (viewMode === 'Overall' || viewMode === 'Activity') {
-      return { color: seg.color, emissive: seg.emissive, opacity: 0.95 };
+    let opacity = 0.95;
+    if (isHighlightingDeviations && !seg.isDeviation) {
+      opacity = 0.22;
     }
 
-    if (viewMode === 'Planned') {
-      if (seg.status === 'planned' || seg.status === 'delayed') {
-        return { color: 0x3b82f6, emissive: 0x1e40af, opacity: 0.95 };
-      }
-      return { color: 0x222630, emissive: 0x000000, opacity: 0.25 };
-    }
-
-    if (viewMode === 'Actual') {
-      if (seg.status === 'completed' || seg.status === 'in_progress') {
-        return { color: seg.color, emissive: seg.emissive, opacity: 0.95 };
-      }
-      return { color: 0x222630, emissive: 0x000000, opacity: 0.25 };
-    }
-
-    if (viewMode === 'Delayed') {
-      if (seg.status === 'delayed') {
-        return { color: 0xef4444, emissive: 0x991b1b, opacity: 0.95 };
-      }
-      return { color: 0x222630, emissive: 0x000000, opacity: 0.25 };
-    }
-
-    if (viewMode === 'Remaining') {
-      if (seg.status === 'planned' || seg.status === 'delayed' || seg.status === 'in_progress') {
-        return { color: 0x8b5cf6, emissive: 0x5b21b6, opacity: 0.95 };
-      }
-      return { color: 0x222630, emissive: 0x000000, opacity: 0.25 };
-    }
-
-    return { color: seg.color, emissive: seg.emissive, opacity: 0.95 };
-  }, [viewMode]);
+    return { color: seg.color, emissive: seg.emissive, opacity };
+  }, [isHighlightingDeviations]);
 
   // Smooth camera animation target helper
   const cameraTargetRef = useRef<{
@@ -594,19 +675,18 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
         return;
       }
 
-      // Realistic 3D lift: DBM is raised +0.07m above asphalt; Milling is grooved; Tackcoat is intermediate
+      // Realistic 3D lift:
       let layerHeight = 0.06;
       let posY = 0.04;
-      const actLower = (seg.activity || '').toLowerCase();
-      if (actLower.includes('dbm')) {
-        layerHeight = 0.07;
-        posY = 0.045;
-      } else if (actLower.includes('milling')) {
-        layerHeight = 0.04;
-        posY = 0.025;
-      } else if (actLower.includes('bc')) {
+      if (seg.latestStage === 5) {
         layerHeight = 0.08;
         posY = 0.05;
+      } else if (seg.latestStage === 3) {
+        layerHeight = 0.07;
+        posY = 0.045;
+      } else if (seg.latestStage === 1) {
+        layerHeight = 0.04;
+        posY = 0.025;
       }
 
       const geo = new THREE.BoxGeometry(length, layerHeight, seg.widthZ);
@@ -689,6 +769,7 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
         setSelectedSegment(seg);
         setInspectorActiveActivity(seg.activity);
         if (onSelectRow) onSelectRow(seg.primaryRow ?? null);
+        if (onSelectSegment) onSelectSegment(seg);
       }
     }
   };
@@ -769,10 +850,12 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
           nextKm = maxChainage;
           isPlayingChainageTourRef.current = false;
           setIsPlayingChainageTour(false);
+          if (onTogglePlayTour) onTogglePlayTour();
         }
 
         currentTourChainageRef.current = nextKm;
         setCurrentTourChainage(nextKm);
+        if (onTourChainageChange) onTourChainageChange(nextKm);
 
         // Move camera and target synchronously along the highway
         const targetWorldX = kmToWorldX(nextKm);
@@ -965,6 +1048,7 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
       setSelectedSegment(found);
       setInspectorActiveActivity(found.activity);
       if (onSelectRow) onSelectRow(found.primaryRow ?? null);
+      if (onSelectSegment) onSelectSegment(found);
       smoothFlyToChainage(targetKm);
     }
   };
@@ -1070,767 +1154,355 @@ export const Highway3DDigitalTwin: React.FC<Highway3DDigitalTwinProps> = ({
     jumpCameraToChainage(prevKm);
   };
 
-  const handleStepForwardChainage = () => {
-    const nextKm = Math.min(maxChainage, currentTourChainageRef.current + 0.5);
-    currentTourChainageRef.current = nextKm;
-    setCurrentTourChainage(nextKm);
-    jumpCameraToChainage(nextKm);
+  const handleZoomIn = () => {
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!camera || !controls) return;
+    camera.position.sub(controls.target).multiplyScalar(0.8).add(controls.target);
+    controls.update();
   };
+
+  const handleZoomOut = () => {
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!camera || !controls) return;
+    camera.position.sub(controls.target).multiplyScalar(1.25).add(controls.target);
+    controls.update();
+  };
+
+  useImperativeHandle(ref, () => ({
+    smoothFlyToChainage,
+    jumpCameraToChainage,
+    zoomIn: handleZoomIn,
+    zoomOut: handleZoomOut,
+    resetCamera: handleResetCamera,
+    setCameraMode: (mode: CameraMode) => setCameraViewMode(mode),
+    toggleFlyover: () => {
+      setIsFlyoverActive(prev => !prev);
+      if (!isFlyoverActive) setCameraMode('3D');
+    },
+    searchToChainage,
+    togglePlayTour: handleToggleChainagePlay,
+    setTourSpeed: (speed: number) => {
+      setChainageTourSpeed(speed);
+      chainageTourSpeedRef.current = speed;
+    }
+  }));
 
   return (
     <div
       ref={containerRef}
-      className={`relative w-full rounded-2xl bg-[#0B0C0E] border border-white/[0.08] shadow-2xl overflow-hidden transition-all duration-300 flex flex-col ${
-        isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'min-h-[640px] h-[720px]'
+      className={`relative w-full h-full min-h-[580px] bg-gradient-to-b ${
+        isLight ? 'from-[#F7F9FC] to-[#EDF2F7]' : 'from-[#090A0D] to-[#0F1116]'
+      } overflow-hidden rounded-2xl border ${
+        isLight ? 'border-slate-200' : 'border-white/10'
       }`}
     >
-      {/* =========================================================================
-          TOP TOOLBAR: VIEW PILLS, ACTIVITIES, SEARCH & CAMERA MODES
-          (Matching the user's design reference exactly)
-      ========================================================================= */}
-      <div className="z-20 bg-[#121418]/95 backdrop-blur-md border-b border-white/[0.08] p-3 px-4 flex flex-wrap items-center justify-between gap-3">
-        {/* Row 1: VIEW Modes & Filter controls */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
-          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">
-            VIEW
-          </span>
+      <canvas
+        ref={canvasRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        className="w-full h-full block focus:outline-none cursor-grab active:cursor-grabbing"
+      />
 
-          {/* VIEW Mode Pills */}
-          <div className="flex items-center bg-[#181B22] p-1 rounded-xl border border-white/[0.06]">
-            {(['Overall', 'Activity', 'Planned', 'Actual', 'Delayed', 'Remaining'] as ViewMode[]).map(mode => {
-              const isActive = viewMode === mode;
-              return (
-                <button
-                  key={mode}
-                  onClick={() => setViewMode(mode)}
-                  data-on-accent={isLight && isActive ? 'true' : undefined}
-                  className={`px-3 py-1 rounded-lg font-medium transition-all duration-150 cursor-pointer ${
-                    isActive
-                      ? isLight
-                        ? 'bg-[#07966D] text-white font-bold shadow-sm'
-                        : 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/30'
-                      : 'text-slate-300 hover:text-white hover:bg-white/[0.04]'
-                  }`}
-                >
-                  {mode}
-                </button>
-              );
-            })}
-          </div>
+      {/* Floating Vertical Tool Dock on Left Edge (Draft A Section 3) */}
+      <div
+        className={`absolute top-4 left-4 z-30 flex flex-col gap-1 p-1 rounded-xl shadow-lg backdrop-blur-md border ${
+          isLight
+            ? 'bg-white/95 border-slate-200 shadow-slate-200/50'
+            : 'bg-[#101726]/90 border-white/10 shadow-black/50'
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTool('select');
+            if (onActiveToolChange) onActiveToolChange('select');
+          }}
+          className={`p-2 rounded-lg transition-all cursor-pointer ${
+            activeTool === 'select'
+              ? isLight
+                ? 'bg-[#07966D] text-white shadow-sm'
+                : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+              : isLight
+              ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              : 'text-slate-400 hover:text-white hover:bg-white/5'
+          }`}
+          title="Select / Pointer Tool"
+        >
+          <MousePointer className="w-4 h-4" />
+        </button>
 
-          {/* Activity Dropdown - Strictly individual activities, no ALL option */}
-          <div className="relative">
-            <select
-              value={internalActivity}
-              onChange={e => handleActivityChange(e.target.value)}
-              className="bg-[#181B22] text-slate-200 text-xs rounded-xl px-3 py-1.5 border border-white/[0.1] hover:border-cyan-500/40 focus:outline-none focus:border-cyan-500 cursor-pointer font-semibold"
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTool('orbit');
+            if (onActiveToolChange) onActiveToolChange('orbit');
+          }}
+          className={`p-2 rounded-lg transition-all cursor-pointer ${
+            activeTool === 'orbit'
+              ? isLight
+                ? 'bg-[#07966D] text-white shadow-sm'
+                : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+              : isLight
+              ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              : 'text-slate-400 hover:text-white hover:bg-white/5'
+          }`}
+          title="Orbit / Pan Tool"
+        >
+          <Compass className="w-4 h-4" />
+        </button>
+
+        <div className={`h-px my-0.5 ${isLight ? 'bg-slate-200' : 'bg-white/10'}`} />
+
+        <button
+          type="button"
+          onClick={handleZoomIn}
+          className={`p-2 rounded-lg transition-all cursor-pointer ${
+            isLight
+              ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              : 'text-slate-400 hover:text-white hover:bg-white/5'
+          }`}
+          title="Zoom In"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+
+        <button
+          type="button"
+          onClick={handleZoomOut}
+          className={`p-2 rounded-lg transition-all cursor-pointer ${
+            isLight
+              ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              : 'text-slate-400 hover:text-white hover:bg-white/5'
+          }`}
+          title="Zoom Out"
+        >
+          <Minus className="w-4 h-4" />
+        </button>
+
+        <button
+          type="button"
+          onClick={handleResetCamera}
+          className={`p-2 rounded-lg transition-all cursor-pointer ${
+            isLight
+              ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              : 'text-slate-400 hover:text-white hover:bg-white/5'
+          }`}
+          title="Reset View"
+        >
+          <RotateCcw className="w-4 h-4" />
+        </button>
+
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          className={`p-2 rounded-lg transition-all cursor-pointer ${
+            isLight
+              ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              : 'text-slate-400 hover:text-white hover:bg-white/5'
+          }`}
+          title="Toggle Fullscreen"
+        >
+          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+        </button>
+      </div>
+
+      {/* Exclusive Construction Sequence Legend (Draft A Section 4) */}
+      <div
+        className={`absolute bottom-4 left-4 z-20 flex items-center gap-3.5 px-3 py-1.5 rounded-xl shadow-lg backdrop-blur-md border text-xs font-mono select-none flex-wrap max-w-[80vw] ${
+          isLight
+            ? 'bg-white/95 border-slate-200 text-[#17212B] shadow-slate-200/50'
+            : 'bg-[#101726]/90 border-white/10 text-slate-300 shadow-black/50'
+        }`}
+      >
+        <span className="text-slate-400 font-bold uppercase text-[10px]">Legend:</span>
+        <div className="flex items-center gap-1.5" title="Milling (#64748B)">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#64748B' }} />
+          <span>Milling</span>
+        </div>
+        <div className="flex items-center gap-1.5" title="Tack Coat (DBM) (#F59E0B)">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#F59E0B' }} />
+          <span>Tack Coat (DBM)</span>
+        </div>
+        <div className="flex items-center gap-1.5" title="DBM (#2563EB)">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#2563EB' }} />
+          <span>DBM</span>
+        </div>
+        <div className="flex items-center gap-1.5" title="Tack Coat (BC) (#8B5CF6)">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#8B5CF6' }} />
+          <span>Tack Coat (BC)</span>
+        </div>
+        <div className="flex items-center gap-1.5" title="BC (#16A34A)">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#16A34A' }} />
+          <span>BC</span>
+        </div>
+        <span className="text-slate-500">|</span>
+        <div className="flex items-center gap-1.5" title="Sequence Deviation (#EF4444) - Solid Red">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#EF4444' }} />
+          <span className="text-rose-500 font-semibold">Sequence Deviation</span>
+        </div>
+        <div className="flex items-center gap-1.5" title="Planned (#CBD5E1) - Silver Grey">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#CBD5E1' }} />
+          <span>Planned</span>
+        </div>
+      </div>
+
+      {/* Screen-Space Projected Markers */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {projectedMarkers.map(m => {
+          const isSelected = m.type === 'selected';
+          return (
+            <div
+              key={m.id}
+              style={{
+                position: 'absolute',
+                left: `${m.x}px`,
+                top: `${m.y}px`,
+                transform: 'translate(-50%, -100%)',
+                zIndex: isSelected ? 40 : 20
+              }}
+              className="pointer-events-auto cursor-pointer transition-transform duration-150 hover:scale-110"
+              onClick={() => {
+                smoothFlyToChainage(m.chainage);
+              }}
             >
-              {STRIP_ACTIVITIES.map(act => (
-                <option key={act.id} value={act.id}>
-                  {act.name}
-                </option>
-              ))}
-            </select>
-          </div>
+              {/* Pin Leader Line down to road */}
+              <div
+                className={`w-0.5 h-4 mx-auto ${
+                  isSelected
+                    ? isLight ? 'bg-[#07966D] shadow-[0_0_8px_#07966D]' : 'bg-cyan-400 shadow-[0_0_8px_#00e5ff]'
+                    : 'bg-amber-400/80'
+                }`}
+              />
 
-          {/* Side Selector (Both, LHS, RHS) */}
-          <div className="flex items-center bg-[#181B22] p-1 rounded-xl border border-white/[0.06]">
-            {(['Both', 'LHS', 'RHS'] as HighwaySide[]).map(side => (
-              <button
-                key={side}
-                onClick={() => {
-                  if (onSideChange) onSideChange(side);
-                }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  sideFilter === side
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                    : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+              {/* Marker Board */}
+              <div
+                className={`flex flex-col items-center rounded-lg border shadow-xl backdrop-blur-md px-2.5 py-1 ${
+                  isSelected
+                    ? isLight
+                      ? 'bg-white/95 border-[#07966D] text-[#07966D] ring-2 ring-[#07966D]/30'
+                      : 'bg-cyan-950/95 border-cyan-400 text-cyan-200 ring-2 ring-cyan-400/50 glow-cyan'
+                    : isLight
+                    ? 'bg-white/95 border-amber-500/50 text-amber-800'
+                    : 'bg-[#12141A]/95 border-amber-500/50 text-amber-300'
                 }`}
               >
-                {side === 'Both' ? 'Both (BHS)' : side}
-              </button>
-            ))}
-          </div>
-
-          {/* Chainage Search Box with Go Button */}
-          <form onSubmit={handleSearchGo} className="flex items-center gap-1.5">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                placeholder="Chainage (e.g. 193+000)"
-                className="w-44 sm:w-52 bg-[#181B22] text-slate-200 text-xs rounded-xl px-3 py-1.5 pl-7 border border-white/[0.1] focus:outline-none focus:border-cyan-400 font-mono"
-              />
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-            </div>
-            <button
-              type="submit"
-              className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/30 px-3 py-1.5 rounded-xl font-medium transition-all text-xs cursor-pointer flex items-center gap-1"
-            >
-              <span>Go</span>
-              <span>→</span>
-            </button>
-          </form>
-
-          {/* Search Error Toast */}
-          {searchError && (
-            <span className="text-[11px] text-rose-400 font-medium flex items-center gap-1 bg-rose-950/40 border border-rose-500/30 px-2 py-1 rounded-lg">
-              <AlertTriangle className="w-3 h-3 text-rose-400" />
-              {searchError}
-            </span>
-          )}
-        </div>
-
-        {/* Row 2: Camera Controls, Driver Mode, Flyover Tour & Fullscreen */}
-        <div className="flex items-center gap-2">
-          {/* 3D View Toggle */}
-          <button
-            onClick={() => setCameraViewMode('3D')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium border flex items-center gap-1.5 transition-all cursor-pointer ${
-              cameraMode === '3D' && !isFlyoverActive
-                ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 glow-cyan'
-                : 'bg-[#181B22] text-slate-300 border-white/[0.08] hover:bg-[#20242D]'
-            }`}
-          >
-            <Compass className="w-3.5 h-3.5" />
-            <span>3D View</span>
-          </button>
-
-          {/* Plan View (Top-Down GIS strip) */}
-          <button
-            onClick={() => setCameraViewMode('Plan')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium border flex items-center gap-1.5 transition-all cursor-pointer ${
-              cameraMode === 'Plan'
-                ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 glow-cyan'
-                : 'bg-[#181B22] text-slate-300 border-white/[0.08] hover:bg-[#20242D]'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Plan</span>
-          </button>
-
-          {/* Driver (TPP View) Mode */}
-          <button
-            onClick={() => setCameraViewMode('Driver')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium border flex items-center gap-1.5 transition-all cursor-pointer ${
-              cameraMode === 'Driver'
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 glow-emerald'
-                : 'bg-[#181B22] text-slate-300 border-white/[0.08] hover:bg-[#20242D]'
-            }`}
-          >
-            <Truck className="w-3.5 h-3.5" />
-            <span>Driver (TPP)</span>
-          </button>
-
-          {/* Reset Camera */}
-          <button
-            onClick={handleResetCamera}
-            title="Reset to default highway overview"
-            className="px-2.5 py-1.5 rounded-xl text-xs font-medium bg-[#181B22] text-slate-300 border border-white/[0.08] hover:bg-[#20242D] hover:text-white transition-all cursor-pointer flex items-center gap-1"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset</span>
-          </button>
-
-          {/* Cinematic Flyover Tour */}
-          <button
-            onClick={() => {
-              setIsFlyoverActive(prev => !prev);
-              if (!isFlyoverActive) setCameraMode('3D');
-            }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium border flex items-center gap-1.5 transition-all cursor-pointer ${
-              isFlyoverActive
-                ? 'bg-emerald-500/30 text-emerald-300 border-emerald-400 glow-emerald animate-pulse'
-                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
-            }`}
-          >
-            <Rocket className="w-3.5 h-3.5" />
-            <span>{isFlyoverActive ? 'Stop Tour' : 'Flyover Tour'}</span>
-          </button>
-
-          {/* Fullscreen Toggle */}
-          <button
-            onClick={toggleFullscreen}
-            title="Toggle Fullscreen"
-            className="p-1.5 rounded-xl text-slate-300 hover:text-white bg-[#181B22] border border-white/[0.08] hover:bg-[#20242D] cursor-pointer"
-          >
-            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-          </button>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          MAIN 3D HIGHWAY VIEWPORT & SECTION INSPECTOR WORKSPACE
-      ========================================================================= */}
-      <div className="flex-1 relative flex flex-col lg:flex-row overflow-hidden">
-        {/* LEFT / CENTER: Interactive 3D WebGL Canvas */}
-        <div className="flex-1 relative overflow-hidden bg-gradient-to-b from-[#090A0D] to-[#0F1116]">
-          <canvas
-            ref={canvasRef}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            className="w-full h-full block focus:outline-none"
-          />
-
-          {/* ---------------------------------------------------------------------
-              CRITICAL: LARGE, ULTRA-CLEAR, DYNAMIC SCREEN-SPACE CHAINAGE LABELS
-              (Projected directly from 3D coordinates into pixel-perfect HTML badges)
-          --------------------------------------------------------------------- */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {projectedMarkers.map(m => {
-              const isSelected = m.type === 'selected';
-              return (
-                <div
-                  key={m.id}
-                  style={{
-                    position: 'absolute',
-                    left: `${m.x}px`,
-                    top: `${m.y}px`,
-                    transform: 'translate(-50%, -100%)',
-                    zIndex: isSelected ? 40 : 20
-                  }}
-                  className="pointer-events-auto cursor-pointer transition-transform duration-150 hover:scale-110"
-                  onClick={() => {
-                    smoothFlyToChainage(m.chainage);
-                  }}
-                >
-                  {/* Pin Leader Line down to road */}
-                  <div className={`w-0.5 h-4 mx-auto ${isSelected ? 'bg-cyan-400 shadow-[0_0_8px_#00e5ff]' : 'bg-amber-400/80'}`} />
-
-                  {/* Marker Board */}
-                  <div
-                    className={`flex flex-col items-center rounded-lg border shadow-xl backdrop-blur-md px-2.5 py-1 ${
+                <div className="flex items-center gap-1.5">
+                  <MapPin
+                    className={`w-3 h-3 ${
                       isSelected
-                        ? 'bg-cyan-950/95 border-cyan-400 text-cyan-200 ring-2 ring-cyan-400/50 glow-cyan'
-                        : 'bg-[#12141A]/95 border-amber-500/50 text-amber-300'
+                        ? isLight ? 'text-[#07966D] animate-bounce' : 'text-cyan-400 animate-bounce'
+                        : 'text-amber-500'
+                    }`}
+                  />
+                  <span className="text-[12px] font-mono font-bold tracking-wider">
+                    {m.label}
+                  </span>
+                </div>
+                {isSelected && (
+                  <span
+                    className={`text-[9px] font-mono font-semibold uppercase tracking-wider ${
+                      isLight ? 'text-[#07966D]' : 'text-cyan-300'
                     }`}
                   >
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className={`w-3 h-3 ${isSelected ? 'text-cyan-400 animate-bounce' : 'text-amber-400'}`} />
-                      <span className="text-[12px] font-mono font-bold tracking-wider">
-                        {m.label}
-                      </span>
-                    </div>
-                    {isSelected && (
-                      <span className="text-[9px] font-mono font-semibold text-cyan-300 uppercase tracking-wider">
-                        Selected Station
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Floating Hover Indicator Tooltip */}
-          {hoveredSegment && (
-            <div className="absolute top-4 left-4 z-20 pointer-events-none bg-[#12141A]/95 border border-cyan-500/40 rounded-xl p-3 shadow-2xl backdrop-blur-md text-xs font-mono text-slate-200 max-w-xs">
-              <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-1 mb-1.5">
-                <span className="font-bold text-cyan-300">
-                  {formatChainagePlus(hoveredSegment.fromChainage)} → {formatChainagePlus(hoveredSegment.toChainage)}
-                </span>
-                <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded bg-white/5">
-                  {hoveredSegment.lengthM}m
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-300">
-                <div>Activity: <span className="text-white font-semibold">{hoveredSegment.activity}</span></div>
-                <div>Lane: <span className="text-white">{hoveredSegment.lane}</span></div>
-                <div>Date: <span className="text-white">{hoveredSegment.date}</span></div>
-                <div>Progress: <span className="text-emerald-400 font-bold">{hoveredSegment.progressPercent}%</span></div>
-              </div>
-              {hoveredSegment.isAnomaly && (
-                <div className="mt-1.5 text-rose-400 text-[10px] flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3 shrink-0" />
-                  <span>{hoveredSegment.anomalyDescription}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Driver Cockpit HUD Overlay */}
-          {cameraMode === 'Driver' && (
-            <div className="absolute bottom-16 left-6 z-20 bg-[#12141A]/90 backdrop-blur-md border border-emerald-500/30 rounded-2xl p-3.5 shadow-2xl flex items-center gap-4 text-xs font-mono">
-              <div className="flex items-center gap-2">
-                <Gauge className="w-5 h-5 text-emerald-400 animate-spin-slow" />
-                <div>
-                  <div className="text-[10px] text-slate-400">HIGHWAY STATION (TPP)</div>
-                  <div className="text-sm font-bold text-emerald-300">
-                    {formatChainagePlus(driverChainage)}
-                  </div>
-                </div>
-              </div>
-              <div className="h-8 w-px bg-white/10" />
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    const nextKm = Math.max(minChainage, driverChainage - 0.2);
-                    setDriverChainage(nextKm);
-                    const wx = kmToWorldX(nextKm);
-                    driverPositionRef.current = wx;
-                    if (cameraRef.current && controlsRef.current) {
-                      controlsRef.current.target.set(wx + 38, 1.2, -3.8);
-                      cameraRef.current.position.set(wx - 22, 6.8, -3.8);
-                    }
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer"
-                >
-                  ◀ -200m
-                </button>
-                <button
-                  onClick={() => {
-                    const nextKm = Math.min(maxChainage, driverChainage + 0.2);
-                    setDriverChainage(nextKm);
-                    const wx = kmToWorldX(nextKm);
-                    driverPositionRef.current = wx;
-                    if (cameraRef.current && controlsRef.current) {
-                      controlsRef.current.target.set(wx + 38, 1.2, -3.8);
-                      cameraRef.current.position.set(wx - 22, 6.8, -3.8);
-                    }
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer"
-                >
-                  +200m ▶
-                </button>
+                    Selected Station
+                  </span>
+                )}
               </div>
             </div>
-          )}
-
-          {/* View Mode Legend Overlay - Strictly 4 Statuses: Completed, In Progress, Planned, Delayed */}
-          <div className="absolute bottom-4 left-4 z-10 bg-[#12141A]/85 backdrop-blur-md border border-white/[0.08] rounded-xl px-3 py-2 text-[11px] text-slate-300 flex items-center gap-3 font-mono">
-            <span className="text-slate-400 text-[10px] uppercase font-bold">Legend:</span>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-[#10B981] shadow-sm shadow-[#10B981]/50" />
-              <span className="text-emerald-300 font-medium">Completed</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-[#06B6D4] shadow-sm shadow-[#06B6D4]/50" />
-              <span className="text-cyan-300 font-medium">In Progress</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-[#3B82F6] shadow-sm shadow-[#3B82F6]/50" />
-              <span className="text-blue-300 font-medium">Planned</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-[#EF4444] shadow-sm shadow-[#EF4444]/50" />
-              <span className="text-rose-300 font-medium">Delayed</span>
-            </div>
-          </div>
-        </div>
-
-        {/* =========================================================================
-            RIGHT SIDE PANEL: HIGHWAY SECTION INSPECTOR
-            (Matching the user's design reference exactly)
-        ========================================================================= */}
-        <div className="w-full lg:w-96 xl:w-[410px] shrink-0 bg-[#121418] border-t lg:border-t-0 lg:border-l border-white/[0.08] flex flex-col overflow-y-auto">
-          {/* Header */}
-          <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-lg">
-                <Truck className="w-5 h-5 text-cyan-400" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-100 tracking-tight">
-                  Highway Section Inspector
-                </h3>
-                <p className="text-[11px] text-slate-400">
-                  Physical parameters &amp; execution audit
-                </p>
-              </div>
-            </div>
-            {selectedSegment && (
-              <button
-                onClick={() => {
-                  setSelectedSegment(null);
-                  if (onSelectRow) onSelectRow(null);
-                }}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer"
-                title="Clear Selection"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-
-          {/* Inspector Body Content */}
-          <div className="p-4 flex-1 space-y-4">
-            {!selectedSegment ? (
-              /* Empty State matching the user prompt screenshot */
-              <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4 my-auto">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-b from-cyan-500/10 to-transparent border border-white/10 flex items-center justify-center shadow-inner">
-                  <span className="text-3xl">🛣️</span>
-                </div>
-                <div className="space-y-1.5">
-                  <h4 className="text-sm font-semibold text-slate-200">
-                    No Highway Section Selected
-                  </h4>
-                  <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
-                    Click any road segment in the 3D scene, search a chainage above, or select a row from the DPR table to inspect its physical parameters and audit history.
-                  </p>
-                </div>
-
-                {/* Quick Jump Suggestions */}
-                <div className="w-full pt-4 border-t border-white/[0.06] text-left space-y-2">
-                  <span className="text-[10px] font-mono uppercase text-slate-500">Quick Corridor Jumps:</span>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <button
-                      onClick={() => { setSearchInput('131+000'); searchToChainage('131+000'); }}
-                      className="p-2 rounded-xl bg-[#181B22] border border-white/[0.06] hover:border-cyan-500/40 text-left hover:bg-white/5 cursor-pointer"
-                    >
-                      <div className="text-cyan-300 font-mono font-bold">Ch. 131+000</div>
-                      <div className="text-[10px] text-slate-400">Muzaffarnagar Start</div>
-                    </button>
-                    <button
-                      onClick={() => { setSearchInput('168+000'); searchToChainage('168+000'); }}
-                      className="p-2 rounded-xl bg-[#181B22] border border-white/[0.06] hover:border-cyan-500/40 text-left hover:bg-white/5 cursor-pointer"
-                    >
-                      <div className="text-emerald-300 font-mono font-bold">Ch. 168+000</div>
-                      <div className="text-[10px] text-slate-400">Manglaur Toll</div>
-                    </button>
-                    <button
-                      onClick={() => { setSearchInput('189+230'); searchToChainage('189+230'); }}
-                      className="p-2 rounded-xl bg-[#181B22] border border-white/[0.06] hover:border-cyan-500/40 text-left hover:bg-white/5 cursor-pointer"
-                    >
-                      <div className="text-cyan-300 font-mono font-bold">Ch. 189+230</div>
-                      <div className="text-[10px] text-slate-400">Roorkee Bypass</div>
-                    </button>
-                    <button
-                      onClick={() => { setSearchInput('204+000'); searchToChainage('204+000'); }}
-                      className="p-2 rounded-xl bg-[#181B22] border border-white/[0.06] hover:border-cyan-500/40 text-left hover:bg-white/5 cursor-pointer"
-                    >
-                      <div className="text-cyan-300 font-mono font-bold">Ch. 204+000</div>
-                      <div className="text-[10px] text-slate-400">Haridwar Approach</div>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Selected Highway Section Details */
-              <div className="space-y-4">
-                {/* 1. Main Chainage Badge with Execution Status Badge */}
-                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-[#181B22] to-blue-950/30 border border-cyan-500/30 shadow-lg space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-[10px] font-mono uppercase text-cyan-400 font-bold tracking-wider">
-                      Selected Section
-                    </span>
-                    {/* Execution Status Badge */}
-                    <div className={`px-2 py-0.5 rounded-md text-[11px] font-bold font-mono border flex items-center gap-1.5 ${
-                      selectedSegment.isOutOfScope || selectedSegment.status === 'dps' || selectedSegment.status === 'under_construction' || selectedSegment.status === 'himalayan'
-                        ? 'bg-slate-800/80 text-slate-300 border-white/10'
-                        : selectedSegment.status === 'completed'
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/20'
-                        : selectedSegment.status === 'in_progress'
-                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/20'
-                        : selectedSegment.status === 'delayed'
-                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm shadow-rose-500/20'
-                        : 'bg-blue-500/20 text-blue-300 border-blue-500/40 shadow-sm shadow-blue-500/20'
-                    }`}>
-                      <span className={`w-2 h-2 rounded-full ${
-                        selectedSegment.isOutOfScope || selectedSegment.status === 'dps' || selectedSegment.status === 'under_construction' || selectedSegment.status === 'himalayan'
-                          ? 'bg-slate-400'
-                          : selectedSegment.status === 'completed' ? 'bg-emerald-400' :
-                        selectedSegment.status === 'in_progress' ? 'bg-cyan-400 animate-pulse' :
-                        selectedSegment.status === 'delayed' ? 'bg-rose-400' : 'bg-blue-400'
-                      }`} />
-                      <span>
-                        {selectedSegment.isOutOfScope || selectedSegment.status === 'dps' || selectedSegment.status === 'under_construction' || selectedSegment.status === 'himalayan'
-                          ? (selectedSegment.statusLabel || 'Out of Scope')
-                          : selectedSegment.status === 'completed' ? 'Completed' :
-                         selectedSegment.status === 'in_progress' ? 'In Progress' :
-                         selectedSegment.status === 'delayed' ? 'Delayed' : 'Planned'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-base font-bold text-white font-mono flex items-center gap-2">
-                    <span className="text-cyan-300">{formatChainagePlus(selectedSegment.fromChainage)}</span>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
-                    <span className="text-cyan-300">{formatChainagePlus(selectedSegment.toChainage)}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-300 pt-1 flex-wrap">
-                    <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-semibold text-[11px]">
-                      {selectedSegment.side}
-                    </span>
-                    <span className="text-slate-400">•</span>
-                    <span>Span: <strong className="text-white">{selectedSegment.lengthM} m</strong></span>
-                    <span className="text-slate-400">•</span>
-                    <span>Activity: <strong className="text-cyan-300 font-semibold">{selectedSegment.activity}</strong></span>
-                  </div>
-                </div>
-
-                {/* 2. Activity Layer Selector */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-400 font-medium">Activity Layer:</span>
-                    <span className="text-[11px] text-cyan-400 font-mono">
-                      {selectedSegment.activity}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-1 p-1 bg-[#181B22] rounded-xl border border-white/[0.06]">
-                    {STRIP_ACTIVITIES.map(act => {
-                      const isTabActive = internalActivity === act.id;
-                      return (
-                        <button
-                          key={act.id}
-                          onClick={() => handleActivityChange(act.id)}
-                          data-on-accent={isLight && isTabActive ? 'true' : undefined}
-                          className={`px-2 py-1 text-[11px] font-medium rounded-lg transition-all cursor-pointer ${
-                            isTabActive
-                              ? isLight
-                                ? 'bg-[#07966D] text-white font-bold shadow-sm'
-                                : 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
-                              : 'text-slate-300 hover:text-white hover:bg-white/5'
-                          }`}
-                        >
-                          {act.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 3. Physical Parameters & Execution Metrics */}
-                {selectedSegment.isOutOfScope || selectedSegment.status === 'dps' || selectedSegment.status === 'under_construction' || selectedSegment.status === 'himalayan' ? (
-                  <div className="space-y-3">
-                    <div className="p-3.5 rounded-xl bg-[#14171E] border border-white/[0.08] space-y-2">
-                      <div className="flex items-center gap-2 text-slate-300 font-semibold text-xs">
-                        <Info className="w-4 h-4 text-cyan-400" />
-                        <span className="text-white font-mono uppercase tracking-wider text-[11px]">Out of Contract Scope</span>
-                      </div>
-                      <p className="text-xs text-slate-400 leading-relaxed font-mono">
-                        This chainage stretch is categorized in the Strip Chart as{' '}
-                        <strong className="text-cyan-300">{selectedSegment.statusLabel || 'Out of Scope'}</strong>.
-                        It is rendered in <strong className="text-white font-semibold">no fill (blank road)</strong> format as no execution is scheduled for this chainage under the active DPR package.
-                      </p>
-                      <div className="pt-1 text-[11px] font-mono text-slate-500">
-                        Status: <span className="text-slate-300 font-medium">Excluded / Blank Road</span>
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-[#16181F] border border-white/[0.06] text-xs space-y-2">
-                      <span className="text-[10px] font-mono uppercase text-slate-400 font-bold">
-                        Section Geometry
-                      </span>
-                      <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
-                        <div>Length: <strong className="text-white">{selectedSegment.lengthM}m</strong></div>
-                        <div>Carriageway: <strong className="text-white">{selectedSegment.side}</strong></div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (() => {
-                  const activeRow = selectedSegment.allRowsAtChainage?.find(
-                    r => r.activity === inspectorActiveActivity
-                  ) || selectedSegment.primaryRow;
-
-                  const planned = selectedSegment.plannedQty || activeRow?.plannedToday || 0;
-                  const achieved = selectedSegment.achievedQty || activeRow?.achievedToday || 0;
-                  const remaining = selectedSegment.remainingQty ?? Math.max(0, planned - achieved);
-                  const pct = selectedSegment.progressPercent ?? (planned > 0 ? Math.min(100, Math.round((achieved / planned) * 100)) : 100);
-                  const unit = selectedSegment.unit || activeRow?.unit || 'm';
-
-                  return (
-                    <div className="space-y-3">
-                      {/* Metric 4-Grid */}
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="p-3 rounded-xl bg-[#181B22] border border-white/[0.06] space-y-1">
-                          <span className="text-[10px] font-mono text-slate-400 uppercase">Planned Span</span>
-                          <div className="text-sm font-bold text-white font-mono">
-                            {planned > 0 ? `${planned} ${unit}` : 'Per Program'}
-                          </div>
-                        </div>
-
-                        <div className="p-3 rounded-xl bg-[#181B22] border border-white/[0.06] space-y-1">
-                          <span className="text-[10px] font-mono text-emerald-400 uppercase">Achieved</span>
-                          <div className="text-sm font-bold text-emerald-300 font-mono">
-                            {achieved} {unit}
-                          </div>
-                        </div>
-
-                        <div className="p-3 rounded-xl bg-[#181B22] border border-white/[0.06] space-y-1">
-                          <span className="text-[10px] font-mono text-amber-400 uppercase">Remaining Span</span>
-                          <div className="text-sm font-bold text-amber-300 font-mono">
-                            {remaining} {unit}
-                          </div>
-                        </div>
-
-                        <div className="p-3 rounded-xl bg-[#181B22] border border-white/[0.06] space-y-1">
-                          <span className="text-[10px] font-mono text-cyan-400 uppercase">Completion</span>
-                          <div className="text-sm font-bold text-cyan-300 font-mono">
-                            {pct}%
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="space-y-1 pt-1">
-                        <div className="flex justify-between text-[11px] font-mono text-slate-400">
-                          <span>Execution Progress</span>
-                          <span className="text-white font-bold">{pct}%</span>
-                        </div>
-                        <div className="h-2 w-full bg-[#181B22] rounded-full overflow-hidden border border-white/10">
-                          <div
-                            style={{ width: `${pct}%` }}
-                            className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 rounded-full transition-all duration-300"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Engineering Dimensions */}
-                      <div className="p-3 rounded-xl bg-[#16181F] border border-white/[0.06] text-xs space-y-2">
-                        <span className="text-[10px] font-mono uppercase text-slate-400 font-bold">
-                          Cross-Section Dimensions
-                        </span>
-                        <div className="grid grid-cols-3 gap-2 font-mono text-[11px]">
-                          <div>Length: <strong className="text-white">{selectedSegment.lengthM}m</strong></div>
-                          <div>Width: <strong className="text-white">{selectedSegment.widthM}m</strong></div>
-                          <div>
-                            Depth:{' '}
-                            <strong className={activeRow?.depthM && activeRow.depthM > 0.055 ? 'text-rose-400 font-bold' : 'text-white'}>
-                              {activeRow?.depthM ? `${Math.round(activeRow.depthM * 1000)}mm` : 'Standard'}
-                            </strong>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Anomaly & QC Alert */}
-                      {activeRow?.isAnomaly && (
-                        <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-xs space-y-1.5 glow-crimson">
-                          <div className="flex items-center gap-1.5 text-rose-300 font-bold font-mono">
-                            <AlertTriangle className="w-4 h-4 text-rose-400" />
-                            <span>Quality / Geometric Anomaly</span>
-                          </div>
-                          <p className="text-[11px] text-rose-200 leading-relaxed">
-                            {activeRow.remarks || activeRow.anomalyDescription}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Quality Register Cross-reference */}
-                      <div className="p-3 rounded-xl bg-[#16181F] border border-white/[0.06] text-xs space-y-1">
-                        <div className="flex items-center gap-1.5 text-emerald-400 font-mono text-[11px]">
-                          <ShieldCheck className="w-3.5 h-3.5" />
-                          <span>Quality Control &amp; Test Register</span>
-                        </div>
-                        <p className="text-[11px] text-slate-300 font-mono">
-                          MORTH Table 900-4 standards verified. Bitumen Extraction: 4.53% | GMM: 2.469 | Gradation: PASS
-                        </p>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="pt-2 flex items-center gap-2">
-                        <button
-                          onClick={() => smoothFlyToChainage((selectedSegment.fromChainage + selectedSegment.toChainage) / 2)}
-                          className="flex-1 py-2 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 text-xs font-medium transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>Zoom in 3D</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-          </div>
-        </div>
+          );
+        })}
       </div>
 
-      {/* =========================================================================
-          CHAINAGE CORRIDOR PLAYBACK BAR (Travels smoothly from Start to End)
-      ========================================================================= */}
-      <div className="z-20 bg-[#121418] border-t border-white/[0.08] p-2.5 px-4 flex flex-wrap items-center justify-between gap-3 text-xs">
-        {/* Play/Pause & Step Controls */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={handleStepBackChainage}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white cursor-pointer transition-colors"
-              title="Step Back -500m"
-            >
-              <SkipBack className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleToggleChainagePlay}
-              className={`p-1.5 px-3.5 rounded-xl flex items-center gap-1.5 font-medium transition-all cursor-pointer ${
-                isPlayingChainageTour
-                  ? 'bg-amber-500 text-black font-bold shadow-md shadow-amber-500/30'
-                  : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/30 glow-cyan'
-              }`}
-              title={isPlayingChainageTour ? 'Pause Chainage Tour (Clicking road also pauses)' : 'Play Chainage Tour'}
-            >
-              {isPlayingChainageTour ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              <span>{isPlayingChainageTour ? 'Pause' : 'Play'}</span>
-            </button>
-            <button
-              onClick={handleStepForwardChainage}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white cursor-pointer transition-colors"
-              title="Step Forward +500m"
-            >
-              <SkipForward className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Speed Selectors: 1x, 1.5x, 2x, 2.5x, 3x */}
-          <div className="flex items-center gap-1 bg-[#181B22] p-1 rounded-xl border border-white/[0.08]">
-            {[1, 1.5, 2, 2.5, 3].map(speed => {
-              const isActive = chainageTourSpeed === speed;
-              return (
-                <button
-                  key={speed}
-                  onClick={() => {
-                    setChainageTourSpeed(speed);
-                    chainageTourSpeedRef.current = speed;
-                  }}
-                  className={`px-2 py-0.5 rounded-lg text-[11px] font-mono font-medium transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/30'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
-                  title={`Set speed to ${speed}x`}
-                >
-                  {speed}x
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Current Chainage Position Badge */}
-          <div className="flex items-center gap-1.5 font-mono">
-            <span className="text-slate-400 text-[11px]">Chainage:</span>
-            <span className="px-2.5 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-bold text-xs border border-cyan-500/30">
-              {formatChainagePlus(currentTourChainage)}
+      {/* Floating Hover Indicator Tooltip */}
+      {hoveredSegment && (
+        <div
+          className={`absolute top-4 right-4 z-20 pointer-events-none rounded-xl p-3 shadow-2xl backdrop-blur-md text-xs font-mono max-w-xs border ${
+            isLight
+              ? 'bg-white/95 border-slate-200 text-[#17212B]'
+              : 'bg-[#12141A]/95 border-cyan-500/40 text-slate-200'
+          }`}
+        >
+          <div className="flex items-center justify-between gap-2 border-b border-slate-200 dark:border-white/10 pb-1 mb-1.5">
+            <span className={`font-bold ${isLight ? 'text-[#07966D]' : 'text-cyan-300'}`}>
+              {formatChainagePlus(hoveredSegment.fromChainage)} → {formatChainagePlus(hoveredSegment.toChainage)}
+            </span>
+            <span className="text-[10px] text-slate-500 px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5">
+              {hoveredSegment.lengthM}m
             </span>
           </div>
+          <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-600 dark:text-slate-300">
+            <div>Stage: <span className="font-semibold text-slate-900 dark:text-white">{hoveredSegment.latestStageName || hoveredSegment.activity}</span></div>
+            <div>Lane: <span className="text-slate-900 dark:text-white">{hoveredSegment.lane}</span></div>
+            <div>Status: <span className={`font-semibold ${hoveredSegment.isDeviation ? 'text-rose-500' : hoveredSegment.isInProgress ? 'text-cyan-400' : 'text-emerald-500'}`}>
+              {hoveredSegment.isDeviation ? 'Sequence Deviation' : hoveredSegment.isInProgress ? 'In Progress' : 'Compliant'}
+            </span></div>
+            <div>Progress: <span className="text-emerald-500 dark:text-emerald-400 font-bold">{hoveredSegment.progressPercent}%</span></div>
+            {hoveredSegment.isDeviation && hoveredSegment.missingPredecessors && hoveredSegment.missingPredecessors.length > 0 && (
+              <div className="col-span-2 text-[10px] text-rose-500 font-bold">
+                Missing: {hoveredSegment.missingPredecessors.join(', ')}
+              </div>
+            )}
+          </div>
         </div>
+      )}
 
-        {/* Chainage Corridor Scrubber Slider */}
-        <div className="flex-1 max-w-lg flex items-center gap-3 mx-2">
-          <span className="text-[10px] font-mono text-slate-400 font-bold whitespace-nowrap">
-            {formatChainagePlus(minChainage)}
-          </span>
-          <input
-            type="range"
-            min={minChainage}
-            max={maxChainage}
-            step={0.01}
-            value={currentTourChainage}
-            onChange={handleChainageSliderChange}
-            className="flex-1 accent-cyan-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer hover:accent-cyan-300"
-          />
-          <span className="text-[10px] font-mono text-slate-400 font-bold whitespace-nowrap">
-            {formatChainagePlus(maxChainage)}
-          </span>
+      {/* Driver Cockpit HUD Overlay */}
+      {cameraMode === 'Driver' && (
+        <div
+          className={`absolute bottom-16 left-6 z-20 backdrop-blur-md border rounded-2xl p-3.5 shadow-2xl flex items-center gap-4 text-xs font-mono ${
+            isLight
+              ? 'bg-white/90 border-slate-200 text-[#17212B]'
+              : 'bg-[#12141A]/90 border-emerald-500/30 text-white'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <Gauge className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">HIGHWAY STATION (TPP)</div>
+              <div className="text-sm font-bold text-emerald-600 dark:text-emerald-300">
+                {formatChainagePlus(driverChainage)}
+              </div>
+            </div>
+          </div>
+          <div className="h-8 w-px bg-slate-200 dark:bg-white/10" />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const nextKm = Math.max(minChainage, driverChainage - 0.2);
+                setDriverChainage(nextKm);
+                const wx = kmToWorldX(nextKm);
+                driverPositionRef.current = wx;
+                if (cameraRef.current && controlsRef.current) {
+                  controlsRef.current.target.set(wx + 38, 1.2, -3.8);
+                  cameraRef.current.position.set(wx - 22, 6.8, -3.8);
+                }
+              }}
+              className="px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 cursor-pointer"
+            >
+              ◀ -200m
+            </button>
+            <button
+              onClick={() => {
+                const nextKm = Math.min(maxChainage, driverChainage + 0.2);
+                setDriverChainage(nextKm);
+                const wx = kmToWorldX(nextKm);
+                driverPositionRef.current = wx;
+                if (cameraRef.current && controlsRef.current) {
+                  controlsRef.current.target.set(wx + 38, 1.2, -3.8);
+                  cameraRef.current.position.set(wx - 22, 6.8, -3.8);
+                }
+              }}
+              className="px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 cursor-pointer"
+            >
+              +200m ▶
+            </button>
+          </div>
         </div>
-
-        {/* Real-time Status Badge */}
-        <div className="hidden sm:flex items-center gap-3 text-[11px] font-mono text-slate-400">
-          <span>Corridor: Muzaffarnagar–Haridwar (Ch. 130+560 to 206+220)</span>
-          <span>•</span>
-          <span className="text-emerald-400 font-bold">
-            {isPlayingChainageTour ? 'Tour Running' : 'Tour Paused'}
-          </span>
-        </div>
-      </div>
+      )}
     </div>
   );
-};
+});
+
+Highway3DDigitalTwin.displayName = 'Highway3DDigitalTwin';

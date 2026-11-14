@@ -74,6 +74,7 @@ export interface CompletedWorkSubInterval {
   side: 'LHS' | 'RHS' | 'BHS';
   lane: string;
   achievedQty?: number;
+  cumulativeQty?: number;
   unit?: string;
   hasConflict?: boolean;
   conflictType?: 'dps' | 'under_construction' | 'himalayan';

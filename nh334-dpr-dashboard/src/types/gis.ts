@@ -70,6 +70,17 @@ export interface RoadSegmentGeo {
   sourceWorkbook?: string;
   actualRow?: ActualDPRRow;
   plannedRecord?: PlannedRecord;
+  // Unified Construction Sequence Fields:
+  latestStage?: number; // 0: Not Started, 1: Milling, 2: Tack Coat (DBM), 3: DBM, 4: Tack Coat (BC), 5: BC
+  latestStageName?: string;
+  inProgressStage?: number;
+  inProgressStageName?: string;
+  isInProgress?: boolean;
+  isDeviation?: boolean;
+  missingPredecessors?: string[];
+  deviationDescription?: string;
+  completedStages?: number[];
+  isNotStarted?: boolean;
 }
 
 export interface InspectionDetails {
